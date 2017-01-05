@@ -56,6 +56,34 @@ public class Preferences {
         return area;
     }
 
+    public Double getLatitude() {
+        return getDouble(latitudeKey);
+    }
+
+    public Double getLongitude() {
+        return getDouble(longitudeKey);
+    }
+
+    public Double getRadius() {
+        return getDouble(radiusKey, getDefaultRadius());
+    }
+
+    private Double getDouble(String key) {
+        return getDouble(key, null);
+    }
+
+    private Double getDouble(String key, Double defaultValue) {
+        Double d = defaultValue;
+        String s = sharedPrefs.getString(key, "");
+        try {
+            d = Double.parseDouble(s);
+        }
+        catch(NumberFormatException e) {
+        }
+
+        return d;
+    }
+
     public double getDefaultRadius() {
         return 50.0;
     }

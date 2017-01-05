@@ -6,17 +6,11 @@ import android.content.Intent;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
-import android.os.Messenger;
 import android.util.Log;
-
-import java.sql.SQLOutput;
 
 import ua.pp.rudiki.geoswitch.trigger.AreaTrigger;
 import ua.pp.rudiki.geoswitch.trigger.GeoArea;
-import ua.pp.rudiki.geoswitch.trigger.GeoPoint;
 
 public class GeoSwitchGpsService extends Service implements android.location.LocationListener
 {
@@ -31,7 +25,7 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
 
     @Override
     public void onCreate() {
-//        Log.i(TAG, "Service starting");
+//        Log.i(TAG, "onCreate");
 
         gpsLog = new GpsLog(this);
 
@@ -61,9 +55,11 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
         lastLocation = location;
         gpsLog.log(location);
 
-        areaTrigger.changeLocation(location.getLatitude(), location.getLongitude());
-        if(areaTrigger.entered()) {
-            sendNotification();
+        if(areaTrigger != null) {
+            areaTrigger.changeLocation(location.getLatitude(), location.getLongitude());
+            if (areaTrigger.entered()) {
+                sendNotification();
+            }
         }
     }
 
@@ -99,19 +95,10 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-//        super.onStartCommand(intent, flags, startId);
-
-        double latitude = intent.getDoubleExtra(Preferences.latitudeKey, 0);
-        double longitude = intent.getDoubleExtra(Preferences.longitudeKey, 0);
-        double radius = intent.getDoubleExtra(Preferences.radiusKey, 0);
-
-        GeoArea newArea = new GeoArea(latitude, longitude, radius);
-
-        Log.i(TAG, "onStartCommand: new area "+newArea);
-        Log.i(TAG, "onStartCommand: previous area "+((areaTrigger != null) ? areaTrigger.getArea() : "null"));
-
-        areaTrigger = new AreaTrigger(newArea);
-
+        GeoArea area = GeoSwitchApp.getPreferences().loadArea();
+        if(area != null) {
+            areaTrigger = new AreaTrigger(area);
+        }
         return START_STICKY;
     }
 

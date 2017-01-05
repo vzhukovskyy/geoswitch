@@ -1,25 +1,16 @@
 package ua.pp.rudiki.geoswitch;
 
 import android.app.Activity;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
-import android.net.Uri;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 
-import com.google.android.gms.appindexing.Action;
-import com.google.android.gms.appindexing.AppIndex;
-import com.google.android.gms.appindexing.Thing;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -58,7 +49,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             area.setLongitude(point.longitude);
         }
         else {
-            area = new GeoArea(point.latitude, point.longitude, GeoSwitchApp.getPreferences().getDefaultRadius());
+            area = new GeoArea(point.latitude, point.longitude, GeoSwitchApp.getPreferences().getRadius());
         }
 
         updateMarkerPos(area);
@@ -75,7 +66,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Log.e(TAG, "Prepared as a result ("+latitude+","+longitude+")");
         }
         setResult(Activity.RESULT_OK, resultData);
-        //finish();
     }
 
     private void updateMarkerPos(GeoArea area) {
@@ -113,6 +103,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
+
         map.setOnMapLongClickListener(this);
         map.setMyLocationEnabled(true);
 
@@ -120,11 +111,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         GeoArea area = GeoSwitchApp.getPreferences().loadArea();
         if(area != null) {
-            Log.i(TAG, "Map is jumping to area "+area);
+//            Log.i(TAG, "Map is jumping to area "+area);
+
+            updateMarkerPos(area);
 
             LatLng ll = new LatLng(area.getLatitude(), area.getLongitude());
-            updateMarkerPos(area);
-            map.animateCamera(CameraUpdateFactory.newLatLngZoom(ll, zoomLevel));
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(ll, zoomLevel));
         }
         else {
             LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -132,11 +124,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Location location = locationManager.getLastKnownLocation(locationManager.getBestProvider(criteria, false));
             if (location != null) {
                 LatLng ll = new LatLng(location.getLatitude(), location.getLongitude());
-                Log.i(TAG, "Map is jumping to current location "+ll);
-                map.animateCamera(CameraUpdateFactory.newLatLngZoom(ll, zoomLevel));
+//                Log.i(TAG, "Map is jumping to current location "+ll);
+                map.moveCamera(CameraUpdateFactory.newLatLngZoom(ll, zoomLevel));
             }
             else {
-                Log.i(TAG, "Current location unknown. Map is not jumping ");
+//                Log.i(TAG, "Current location unknown. Map is not jumping ");
             }
         }
 
@@ -147,12 +139,4 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
     }
-
-//    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-//        @Override
-//        public void onReceive(Context context, Intent intent) {
-//            double latitude = intent.getDoubleExtra(ConfigActivity.latitudeKey, 0);
-//            double longitude = intent.getDoubleExtra(ConfigActivity.longitudeKey, 0);
-//        }
-//    };
 }

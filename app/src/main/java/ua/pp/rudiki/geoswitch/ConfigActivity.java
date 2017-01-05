@@ -1,14 +1,8 @@
 package ua.pp.rudiki.geoswitch;
 
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
-import android.content.SharedPreferences;
-import android.os.IBinder;
-import android.os.Messenger;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -21,7 +15,7 @@ import ua.pp.rudiki.geoswitch.trigger.GeoArea;
 public class ConfigActivity extends AppCompatActivity {
 
     final String TAG = getClass().getSimpleName();
-    final int COORDINATES_REQUEST_ID = 9001;
+    final int SELECT_COORDINATES_REQUEST_ID = 9001;
 
     EditText latitudeEdit, longitudeEdit, radiusEdit;
     TextView draftAlertLabel;
@@ -37,16 +31,14 @@ public class ConfigActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_config);
 
-        registerTextWatcher();
-
         latitudeEdit = (EditText) findViewById(R.id.latitudeEdit);
-        latitudeEdit.setKeyListener(null);
+        latitudeEdit.setKeyListener(null); // read-only
         longitudeEdit = (EditText) findViewById(R.id.longitudeEdit);
-        longitudeEdit.setKeyListener(null);
+        longitudeEdit.setKeyListener(null); // read-only
         radiusEdit = (EditText) findViewById(R.id.radiusEdit);
+        registerRadiusEditWatcher();
         radiusEdit.addTextChangedListener(textWatcher);
         draftAlertLabel = (TextView) findViewById(R.id.draftAlertLabel);
-        draftAlertLabel.setVisibility(View.GONE);
 
         loadValuesToUi();
         restartService();
@@ -57,17 +49,14 @@ public class ConfigActivity extends AppCompatActivity {
         super.onResume();
 
         Log.e(TAG, "onResume");
-        //loadValuesToUi();
     }
 
-    private void registerTextWatcher() {
+    private void registerRadiusEditWatcher() {
         textWatcher = new TextWatcher() {
             public void afterTextChanged(Editable s) {
-                GeoArea area = GeoSwitchApp.getPreferences().loadArea();
-                double storedRadius = (area != null) ? area.getRadius() : GeoSwitchApp.getPreferences().getDefaultRadius();
-                String currentText = radiusEdit.getText().toString();
-                radiusChanged = !String.valueOf(storedRadius).equals(currentText);
-                setDraftState(coordinatesChanged || radiusChanged);
+                boolean changed = !getCurrentRadius().equals(getStoredRadius());
+                setRadiusChanged(changed);
+                updateUiDraftState();
             }
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             }
@@ -77,43 +66,13 @@ public class ConfigActivity extends AppCompatActivity {
     }
 
     private void restartService() {
+        Log.e(TAG, "starting service");
         Intent intent = new Intent(this, GeoSwitchGpsService.class);
-        GeoArea area = GeoSwitchApp.getPreferences().loadArea();
-        if(area != null) {
-            intent.putExtra(Preferences.latitudeKey, area.getLatitude());
-            intent.putExtra(Preferences.longitudeKey, area.getLongitude());
-            intent.putExtra(Preferences.radiusKey, area.getRadius());
-        }
         startService(intent);
     }
 
-    private void passValuesService() {
+    private void passValuesToService() {
         restartService(); // not really restart, it just passes parameters if service already started
-    }
-
-    private void storeValues() {
-        GeoSwitchApp.getPreferences().storeArea(
-            latitudeEdit.getText().toString(),
-            longitudeEdit.getText().toString(),
-            radiusEdit.getText().toString()
-        );
-    }
-
-    private void loadValuesToUi() {
-        GeoArea area = GeoSwitchApp.getPreferences().loadArea();
-        latitudeEdit.setText(area != null ? String.valueOf(area.getLatitude()) : "");
-        longitudeEdit.setText(area != null ? String.valueOf(area.getLongitude()) : "");
-        radiusEdit.setText(area != null ? String.valueOf(area.getRadius()) : "");
-
-        setDraftState(false);
-    }
-
-    private void setDraftState(boolean isDraft) {
-        draftAlertLabel.setVisibility(isDraft ? View.VISIBLE : View.GONE);
-    }
-
-    private boolean getDraftState() {
-        return (draftAlertLabel.getVisibility() == View.VISIBLE);
     }
 
     // UI handlers
@@ -121,7 +80,7 @@ public class ConfigActivity extends AppCompatActivity {
     public void onApplyClick(View view) {
         storeValues();
         loadValuesToUi();
-        passValuesService();
+        passValuesToService();
     }
 
     public void onRevertClick(View view) {
@@ -130,36 +89,117 @@ public class ConfigActivity extends AppCompatActivity {
 
     public void onMapClick(View view) {
         Intent intent = new Intent(this, MapsActivity.class);
-        GeoArea area = GeoSwitchApp.getPreferences().loadArea();
-        if(area != null) {
-            intent.putExtra(Preferences.latitudeKey, area.getLatitude());
-            intent.putExtra(Preferences.longitudeKey, area.getLongitude());
-            intent.putExtra(Preferences.radiusKey, area.getRadius());
+
+        if(!getCurrentLatitude().isEmpty() && !getCurrentLongitude().isEmpty() && !getCurrentRadius().isEmpty()) {
+            intent.putExtra(Preferences.latitudeKey, getCurrentLatitude());
+            intent.putExtra(Preferences.longitudeKey, getCurrentLongitude());
+            intent.putExtra(Preferences.radiusKey, getCurrentRadius());
         }
-        startActivityForResult(intent, COORDINATES_REQUEST_ID);
+
+        startActivityForResult(intent, SELECT_COORDINATES_REQUEST_ID);
     }
 
     // return value from the map activity
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.e(TAG, "onActivityResult");
-        if (requestCode == COORDINATES_REQUEST_ID) {
+        if (requestCode == SELECT_COORDINATES_REQUEST_ID) {
             if (resultCode == RESULT_OK) {
                 final double latitude = data.getDoubleExtra(Preferences.latitudeKey, Double.NaN);
                 final double longitude = data.getDoubleExtra(Preferences.longitudeKey, Double.NaN);
                 Log.e(TAG, "Received from map ("+latitude+","+longitude+")");
 
-                final String latitudeString = String.valueOf(latitude);
-                final String longitudeString = String.valueOf(longitude);
-                coordinatesChanged = !latitudeEdit.getText().toString().equals(latitudeString) ||
-                                     !longitudeEdit.getText().toString().equals(longitudeString);
-                setDraftState(coordinatesChanged || radiusChanged);
+                if(latitude != Double.NaN && longitude != Double.NaN) {
+                    setCurrentLatitude(latitude);
+                    setCurrentLongitude(longitude);
 
-//                if(latitude != Double.NaN && longitude != Double.NaN) {
-                    latitudeEdit.setText(String.valueOf(latitude));
-                    longitudeEdit.setText(String.valueOf(longitude));
-//                }
+                    boolean coordinatesChanged = !getCurrentLatitude().equals(getStoredLatitude()) ||
+                                                 !getCurrentLongitude().equals(getStoredLongitude());
+                    setCoordinatesChanged(coordinatesChanged);
+                    updateUiDraftState();
+                }
             }
         }
     }
+
+    // data accessors
+
+    private String getStoredLatitude() {
+        Double latitude = GeoSwitchApp.getPreferences().getLatitude();
+        return (latitude != null) ? latitude.toString() : "";
+    }
+
+    private String getStoredLongitude() {
+        Double longitude = GeoSwitchApp.getPreferences().getLongitude();
+        return (longitude != null) ? longitude.toString() : "";
+    }
+
+    private String getStoredRadius() {
+        Double radius = GeoSwitchApp.getPreferences().getRadius();
+        return (radius != null) ? radius.toString() : "";
+    }
+
+    private String getCurrentLatitude() {
+        return latitudeEdit.getText().toString();
+    }
+
+    private void setCurrentLatitude(double latitude) {
+        latitudeEdit.setText(String.valueOf(latitude));
+    }
+
+    private String getCurrentLongitude() {
+        return longitudeEdit.getText().toString();
+    }
+
+    private void setCurrentLongitude(double longitude) {
+        longitudeEdit.setText(String.valueOf(longitude));
+    }
+
+    private String getCurrentRadius() {
+        return radiusEdit.getText().toString();
+    }
+
+    // data persistence
+
+    private void storeValues() {
+        GeoSwitchApp.getPreferences().storeArea(
+            getCurrentLatitude(),
+            getCurrentLongitude(),
+            getCurrentRadius()
+        );
+    }
+
+    private void loadValuesToUi() {
+        latitudeEdit.setText(getStoredLatitude());
+        longitudeEdit.setText(getStoredLongitude());
+        radiusEdit.setText(getStoredRadius());
+
+        setCoordinatesChanged(false);
+        setRadiusChanged(false);
+        updateUiDraftState();
+    }
+
+    // draft state
+
+    private void setCoordinatesChanged(boolean changed) {
+        coordinatesChanged = changed;
+    }
+
+    private boolean isCoordinatesChanged() {
+        return coordinatesChanged;
+    }
+
+    private void setRadiusChanged(boolean changed) {
+        radiusChanged = changed;
+    }
+
+    private boolean isRadiusChanged() {
+        return radiusChanged;
+    }
+
+    private void updateUiDraftState() {
+        boolean draft = isCoordinatesChanged() || isRadiusChanged();
+        draftAlertLabel.setVisibility(draft ? View.VISIBLE : View.GONE);
+    }
+
 }

@@ -23,4 +23,22 @@ public class GeoPoint {
         float distanceInMeters = results[0];
         return distanceInMeters;
     }
+
+    public boolean equals(GeoPoint point) {
+        if(point == null)
+            return false;
+
+        return latitude == point.latitude && longitude == point.longitude;
+    }
+
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("(");
+        sb.append(latitude);
+        sb.append(",");
+        sb.append(longitude);
+        sb.append(")");
+        return sb.toString();
+    }
+
 }

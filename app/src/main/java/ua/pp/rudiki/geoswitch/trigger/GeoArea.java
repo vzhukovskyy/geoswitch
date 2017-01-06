@@ -51,13 +51,17 @@ public class GeoArea {
         this.radius = radius;
     }
 
+    public boolean equals(GeoArea area) {
+        if(area == null)
+            return false;
+
+        return center.equals(area.center) && radius == area.radius;
+    }
+
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("(");
-        sb.append(center.latitude);
-        sb.append(",");
-        sb.append(center.longitude);
-        sb.append(") R=");
+        sb.append(center.toString());
+        sb.append(" R=");
         sb.append(radius);
         return sb.toString();
     }

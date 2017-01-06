@@ -25,7 +25,7 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
 
     @Override
     public void onCreate() {
-//        Log.i(TAG, "onCreate");
+        Log.e(TAG, "onCreate");
 
         gpsLog = new GpsLog(this);
 
@@ -59,6 +59,7 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
             areaTrigger.changeLocation(location.getLatitude(), location.getLongitude());
             if (areaTrigger.entered()) {
                 sendNotification();
+                gpsLog.log("Area entered. Notification displayed");
             }
         }
     }
@@ -67,7 +68,7 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
         Intent intent = new Intent(this, ConfigActivity.class);
         int notificationId = 1;
         NotificationUtils.displayNotification(this, notificationId, "Ticker", "GeoSwitch", "You've entered trigger area", intent);
-        Log.i(TAG, "notification displayed");
+        //Log.i(TAG, "notification displayed");
     }
 
     // ***********************************************
@@ -95,10 +96,30 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.e(TAG, "onStartCommand, intent=" + intent);
         GeoArea area = GeoSwitchApp.getPreferences().loadArea();
-        if(area != null) {
-            areaTrigger = new AreaTrigger(area);
+
+        boolean switchToNewArea = false;
+        if (areaTrigger != null) {
+            // there is already configured areaTrigger
+            if(area != null && !areaTrigger.getArea().equals(area)) {
+                // there is different area to monitor
+                switchToNewArea = true;
+            }
         }
+        else {
+            // no areaTrigger being monitored yet
+            if(area != null) {
+                // and there is area to monitor
+                switchToNewArea = true;
+            }
+        }
+
+        if(switchToNewArea) {
+            areaTrigger = new AreaTrigger(area);
+            gpsLog.log("Starting monitoring "+area);
+        }
+
         return START_STICKY;
     }
 

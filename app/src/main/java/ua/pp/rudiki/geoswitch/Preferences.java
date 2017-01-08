@@ -13,6 +13,7 @@ public class Preferences {
     public final static String latitudeKey = "latitude";
     public final static String longitudeKey = "longitude";
     public final static String radiusKey = "radius";
+    public final static String urlKey = "url";
 
     SharedPreferences sharedPrefs;
 
@@ -20,20 +21,21 @@ public class Preferences {
         this.sharedPrefs = context.getSharedPreferences("Preferences", Context.MODE_PRIVATE);
     }
 
-    public void storeArea(GeoArea area) {
-        storeArea(area.getLatitude(), area.getLongitude(), area.getRadius());
-    }
+//    public void storeValues(GeoArea area, String url) {
+//        storeValues(area.getLatitude(), area.getLongitude(), area.getRadius(), url);
+//    }
+//
+//    public void storeValues(Double latitude, Double longitude, Double radius, String url) {
+//        storeValues(Double.toString(latitude), Double.toString(longitude), Double.toString(radius), url);
+//    }
 
-    public void storeArea(Double latitude, Double longitude, Double radius) {
-        storeArea(Double.toString(latitude), Double.toString(longitude), Double.toString(radius));
-    }
-
-    public void storeArea(String latitude, String longitude, String radius) {
+    public void storeValues(String latitude, String longitude, String radius, String url) {
         Log.i(TAG, "storeAre ENTER");
         SharedPreferences.Editor editor = sharedPrefs.edit();
         editor.putString(latitudeKey, latitude);
         editor.putString(longitudeKey, longitude);
         editor.putString(radiusKey, radius);
+        editor.putString(urlKey, url);
         editor.commit();
         Log.i(TAG, "storeArea EXIT");
     }
@@ -84,12 +86,26 @@ public class Preferences {
         return d;
     }
 
+    public String getUrl() {
+        return sharedPrefs.getString(urlKey, getDefaultUrl());
+    }
+
+    // Default values
+
     public double getDefaultRadius() {
         return 50.0;
     }
 
+    public String getDefaultUrl() {
+        return "";
+    }
+
     public float getDefaultMapZoomLevel() {
         return 17; // 2..21
+    }
+
+    public int getMaxLogFileSize() {
+        return 200*1024;
     }
 
 }

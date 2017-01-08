@@ -2,6 +2,7 @@ package ua.pp.rudiki.geoswitch;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -10,24 +11,32 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import ua.pp.rudiki.geoswitch.trigger.GeoArea;
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
 
-public class ConfigActivity extends AppCompatActivity {
+import ua.pp.rudiki.geoswitch.trigger.GeoArea;
+import ua.pp.rudiki.geoswitch.trigger.HttpUtils;
+
+public class ConfigActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
     final String TAG = getClass().getSimpleName();
     final int SELECT_COORDINATES_REQUEST_ID = 9001;
+    final int RC_SIGN_IN = 9002;
 
-    EditText latitudeEdit, longitudeEdit, radiusEdit;
+    EditText latitudeEdit, longitudeEdit, radiusEdit, urlEdit;
     TextView draftAlertLabel;
-    TextWatcher textWatcher;
 
-    boolean coordinatesChanged, radiusChanged;
+    boolean coordinatesChanged, radiusChanged, urlChanged;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Log.e(TAG, "onCreate");
+        Log.d(TAG, "onCreate");
 
         setContentView(R.layout.activity_config);
 
@@ -36,37 +45,56 @@ public class ConfigActivity extends AppCompatActivity {
         longitudeEdit = (EditText) findViewById(R.id.longitudeEdit);
         longitudeEdit.setKeyListener(null); // read-only
         radiusEdit = (EditText) findViewById(R.id.radiusEdit);
-        registerRadiusEditWatcher();
-        radiusEdit.addTextChangedListener(textWatcher);
+        radiusEdit.addTextChangedListener(new RadiusEditWatcher());
+        urlEdit = (EditText) findViewById(R.id.urlEdit);
+        urlEdit.addTextChangedListener(new UrlEditWatcher());
         draftAlertLabel = (TextView) findViewById(R.id.draftAlertLabel);
 
         loadValuesToUi();
         restartService();
+
+        signIn();
+    }
+
+    private void handleSignInResult(GoogleSignInResult result) {
+        Log.d(TAG, "handleSignInResult:" + result.isSuccess());
+        if (result.isSuccess()) {
+            GoogleSignInAccount account = result.getSignInAccount();
+            Log.i(TAG, "Signed in for foreground activity as "+account.getEmail());
+        } else {
+            Log.e(TAG, "Sign-in failed");
+        }
+    }
+
+    void signIn() {
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .build();
+        GoogleApiClient googleApiClient = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .build();
+        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(googleApiClient);
+        startActivityForResult(signInIntent, RC_SIGN_IN);
+
+        Log.d(TAG, "Sign-in for foreground activity initiated");
+    }
+
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        Log.e(TAG, "Connection to google sign-in service failed");
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        Log.e(TAG, "onResume");
-    }
-
-    private void registerRadiusEditWatcher() {
-        textWatcher = new TextWatcher() {
-            public void afterTextChanged(Editable s) {
-                boolean changed = !getCurrentRadius().equals(getStoredRadius());
-                setRadiusChanged(changed);
-                updateUiDraftState();
-            }
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-        };
+        Log.d(TAG, "onResume");
     }
 
     private void restartService() {
-        Log.e(TAG, "starting service");
+        Log.d(TAG, "Starting service");
         Intent intent = new Intent(this, GeoSwitchGpsService.class);
         startService(intent);
     }
@@ -99,10 +127,38 @@ public class ConfigActivity extends AppCompatActivity {
         startActivityForResult(intent, SELECT_COORDINATES_REQUEST_ID);
     }
 
+    public void onLaunchActionClick(View view) {
+        GeoSwitchApp.getHttpUtils().sendPostAsync(getCurrentUrl());
+    }
+
+    class RadiusEditWatcher implements TextWatcher {
+        public void afterTextChanged(Editable s) {
+            boolean changed = !getCurrentRadius().equals(getStoredRadius());
+            setRadiusChanged(changed);
+            updateUiDraftState();
+        }
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        }
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+        }
+    }
+
+    class UrlEditWatcher implements TextWatcher {
+        public void afterTextChanged(Editable s) {
+            boolean changed = !getCurrentUrl().equals(getStoredUrl());
+            setUrlChanged(changed);
+            updateUiDraftState();
+        }
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        }
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+        }
+    }
+
     // return value from the map activity
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.e(TAG, "onActivityResult");
+        Log.d(TAG, "onActivityResult requestCode="+requestCode);
         if (requestCode == SELECT_COORDINATES_REQUEST_ID) {
             if (resultCode == RESULT_OK) {
                 final double latitude = data.getDoubleExtra(Preferences.latitudeKey, Double.NaN);
@@ -119,6 +175,10 @@ public class ConfigActivity extends AppCompatActivity {
                     updateUiDraftState();
                 }
             }
+        }
+        else if (requestCode == RC_SIGN_IN) {
+            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            handleSignInResult(result);
         }
     }
 
@@ -137,6 +197,10 @@ public class ConfigActivity extends AppCompatActivity {
     private String getStoredRadius() {
         Double radius = GeoSwitchApp.getPreferences().getRadius();
         return (radius != null) ? radius.toString() : "";
+    }
+
+    private String getStoredUrl() {
+        return GeoSwitchApp.getPreferences().getUrl();
     }
 
     private String getCurrentLatitude() {
@@ -159,13 +223,17 @@ public class ConfigActivity extends AppCompatActivity {
         return radiusEdit.getText().toString();
     }
 
+    private String getCurrentUrl() {
+        return urlEdit.getText().toString();
+    }
     // data persistence
 
     private void storeValues() {
-        GeoSwitchApp.getPreferences().storeArea(
+        GeoSwitchApp.getPreferences().storeValues(
             getCurrentLatitude(),
             getCurrentLongitude(),
-            getCurrentRadius()
+            getCurrentRadius(),
+            getCurrentUrl()
         );
     }
 
@@ -173,9 +241,11 @@ public class ConfigActivity extends AppCompatActivity {
         latitudeEdit.setText(getStoredLatitude());
         longitudeEdit.setText(getStoredLongitude());
         radiusEdit.setText(getStoredRadius());
+        urlEdit.setText(getStoredUrl());
 
         setCoordinatesChanged(false);
         setRadiusChanged(false);
+        setUrlChanged(false);
         updateUiDraftState();
     }
 
@@ -197,8 +267,16 @@ public class ConfigActivity extends AppCompatActivity {
         return radiusChanged;
     }
 
+    private void setUrlChanged(boolean changed) {
+        urlChanged = changed;
+    }
+
+    private boolean isUrlChanged() {
+        return urlChanged;
+    }
+
     private void updateUiDraftState() {
-        boolean draft = isCoordinatesChanged() || isRadiusChanged();
+        boolean draft = isCoordinatesChanged() || isRadiusChanged() || isUrlChanged();
         draftAlertLabel.setVisibility(draft ? View.VISIBLE : View.GONE);
     }
 

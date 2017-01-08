@@ -1,0 +1,79 @@
+{
+  "project_info": {
+    "project_number": "699660638323",
+    "project_id": "geoswitch-154618"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:699660638323:android:b987ae0cf94f67ea",
+        "android_client_info": {
+          "package_name": "ua.pp.rudiki"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "699660638323-lhgvgt7u09hv2d0599pmm1hgmnlopn0c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDEnC2LaT0iMSUkK-ydLotjElC3T1PUCLo"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:699660638323:android:921514dbde34fbad",
+        "android_client_info": {
+          "package_name": "ua.pp.rudiki.geoswitch"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "699660638323-kppui58ed1uvt97hffqkfc21svj5fm36.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "ua.pp.rudiki.geoswitch",
+            "certificate_hash": "E858B2051803188A9756F50773EE2A9A617F79B4"
+          }
+        },
+        {
+          "client_id": "699660638323-lhgvgt7u09hv2d0599pmm1hgmnlopn0c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDEnC2LaT0iMSUkK-ydLotjElC3T1PUCLo"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

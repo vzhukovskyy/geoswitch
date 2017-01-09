@@ -65,6 +65,7 @@ public class ActivityMain extends AppCompatActivity implements GoogleApiClient.O
 //                Log.i(TAG, "Configured trigger ("+latitude+","+longitude+") R="+radius);
 
                 loadAreaToUi();
+                passValuesToService();
             }
         }
         else if (requestCode == CONFIGURE_ACTION_ID) {

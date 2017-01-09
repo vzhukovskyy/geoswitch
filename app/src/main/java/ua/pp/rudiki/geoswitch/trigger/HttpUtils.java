@@ -2,9 +2,12 @@ package ua.pp.rudiki.geoswitch.trigger;
 
 
 import android.os.AsyncTask;
+import android.renderscript.ScriptGroup;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -12,6 +15,7 @@ import java.net.URL;
 import javax.net.ssl.HttpsURLConnection;
 
 import ua.pp.rudiki.geoswitch.GeoSwitchApp;
+import ua.pp.rudiki.geoswitch.Preferences;
 
 public class HttpUtils {
 
@@ -43,14 +47,18 @@ public class HttpUtils {
     }
 
     public void sendPostAsync(String url) {
+        String newUrl = url;
         PostJob job = new PostJob();
-        Character separator = (url.indexOf('?') != -1) ? '&' : '?';
 
-        job.execute(url + separator + "access_token=" + GeoSwitchApp.getGoogleSignIn().getToken());
+        if(GeoSwitchApp.getPreferences().getAppendSignin()) {
+            Character separator = (url.indexOf('?') != -1) ? '&' : '?';
+            newUrl = url + separator + "access_token=" + GeoSwitchApp.getGoogleSignIn().getToken();
+        }
+
+        job.execute(newUrl);
     }
 
     private class PostJob extends AsyncTask<String, Void, String> {
-
 
         @Override
         protected String doInBackground(String[] params) {
@@ -84,20 +92,27 @@ public class HttpUtils {
             wr.flush();
             wr.close();
 
-            int responseCode = con.getResponseCode();
-            //        System.out.println("\nSending 'POST' request to URL : " + url);
-            //        System.out.println("Post parameters : " + urlParameters);
-
-            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-            String inputLine;
-            StringBuffer response = new StringBuffer();
-
-            while ((inputLine = in.readLine()) != null) {
-                response.append(inputLine);
+            StringBuffer response = null;
+            InputStream inputStream = null;
+            try {
+                inputStream = con.getInputStream();
+            } catch(FileNotFoundException e1) {
             }
-            in.close();
 
-            GeoSwitchApp.getGpsLog().log("Response: "+responseCode+", body: "+response.toString());
+            if(inputStream != null) {
+                BufferedReader in = new BufferedReader(new InputStreamReader(inputStream));
+                String inputLine;
+                response = new StringBuffer();
+
+                while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine);
+                }
+                in.close();
+            }
+
+            int responseCode = con.getResponseCode();
+            String responseBody = (response != null) ? response.toString() : "<null>";
+            GeoSwitchApp.getGpsLog().log("Response code: "+responseCode+", body: "+responseBody);
         }
         catch(Exception ex) {
             ex.printStackTrace();

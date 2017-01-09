@@ -64,9 +64,14 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
         if(areaTrigger != null) {
             areaTrigger.changeLocation(location.getLatitude(), location.getLongitude());
             if (areaTrigger.entered()) {
-                sendNotification("You've entered the trigger area");
-                executeAction();
                 GeoSwitchApp.getGpsLog().log("Area entered.");
+                String notificationMessage = "You've entered the trigger area.";
+                if(GeoSwitchApp.getPreferences().getActionEnabled()) {
+                    executeAction();
+                    notificationMessage += " Action started.";
+                }
+
+                sendNotification(notificationMessage);
             }
             else if(areaTrigger.exited()){
                 sendNotification("You've left the trigger area");

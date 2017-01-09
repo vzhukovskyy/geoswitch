@@ -13,6 +13,8 @@ public class Preferences {
     public final static String latitudeKey = "latitude";
     public final static String longitudeKey = "longitude";
     public final static String radiusKey = "radius";
+    public final static String actionEnabledKey = "actionEnabled";
+    public final static String appendSigninKey = "appendSignin";
     public final static String urlKey = "url";
 
     SharedPreferences sharedPrefs;
@@ -29,15 +31,12 @@ public class Preferences {
 //        storeValues(Double.toString(latitude), Double.toString(longitude), Double.toString(radius), url);
 //    }
 
-    public void storeValues(String latitude, String longitude, String radius, String url) {
-        Log.i(TAG, "storeAre ENTER");
+    public void storeArea(String latitude, String longitude, String radius) {
         SharedPreferences.Editor editor = sharedPrefs.edit();
         editor.putString(latitudeKey, latitude);
         editor.putString(longitudeKey, longitude);
         editor.putString(radiusKey, radius);
-        editor.putString(urlKey, url);
         editor.commit();
-        Log.i(TAG, "storeArea EXIT");
     }
 
     public GeoArea loadArea() {
@@ -58,16 +57,36 @@ public class Preferences {
         return area;
     }
 
+    public void storeAction(boolean enabled, boolean appendSignin, String url) {
+        SharedPreferences.Editor editor = sharedPrefs.edit();
+        editor.putBoolean(actionEnabledKey, enabled);
+        editor.putBoolean(appendSigninKey, appendSignin);
+        editor.putString(urlKey, url);
+        editor.commit();
+    }
+
+    public String getLatitudeAsString() {
+        return sharedPrefs.getString(latitudeKey, "");
+    }
+
     public Double getLatitude() {
-        return getDouble(latitudeKey);
+        return getDouble(getLatitudeAsString());
+    }
+
+    public String getLongitudeAsString() {
+        return sharedPrefs.getString(longitudeKey, "");
     }
 
     public Double getLongitude() {
-        return getDouble(longitudeKey);
+        return getDouble(getLongitudeAsString());
+    }
+
+    public String getRadiusAsString() {
+        return sharedPrefs.getString(radiusKey, "");
     }
 
     public Double getRadius() {
-        return getDouble(radiusKey, getDefaultRadius());
+        return getDouble(getRadiusAsString(), getDefaultRadius());
     }
 
     private Double getDouble(String key) {
@@ -84,6 +103,14 @@ public class Preferences {
         }
 
         return d;
+    }
+
+    public boolean getActionEnabled() {
+        return sharedPrefs.getBoolean(actionEnabledKey, true);
+    }
+
+    public boolean getAppendSignin() {
+        return sharedPrefs.getBoolean(appendSigninKey, true);
     }
 
     public String getUrl() {

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/activity_config"
+    android:id="@+id/activity_trigger"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="rudiki.pp.ua.geoswitch.ConfigActivity">
+    tools:context="ua.pp.rudiki.geoswitch.ActivityTrigger">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -21,7 +21,7 @@
             android:id="@+id/latitudeLabel"
             android:layout_alignBottom="@+id/latitudeEdit"
             android:layout_alignParentTop="true"
-            android:textSize="18sp"
+            android:textSize="14sp"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:gravity="left|center"
@@ -38,14 +38,15 @@
             android:hint="Latitude"
             android:layout_toRightOf="@+id/latitudeLabel"
             android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"/>
+            android:layout_alignParentEnd="true"
+            android:textSize="14sp" />
 
         <TextView
             android:text="Longitude"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/longitudeLabel"
-            android:textSize="18sp"
+            android:textSize="14sp"
             android:layout_below="@+id/latitudeLabel"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
@@ -62,7 +63,8 @@
             android:id="@+id/longitudeEdit"
             android:hint="Longitude"
             android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true" />
+            android:layout_alignParentEnd="true"
+            android:textSize="14sp" />
 
         <Button
             android:text="Select on Map"
@@ -74,20 +76,6 @@
             android:layout_toRightOf="@+id/longitudeLabel"
             android:layout_toEndOf="@+id/longitudeLabel" />
 
-        <TextView
-            android:text="Radius"
-            android:layout_height="wrap_content"
-            android:id="@+id/radiusLabel"
-            android:textSize="18sp"
-            android:gravity="left|center_vertical"
-            android:layout_width="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_toLeftOf="@+id/mapButton"
-            android:layout_toStartOf="@+id/mapButton"
-            android:layout_below="@+id/mapButton"
-            android:layout_above="@+id/urlEdit" />
-
         <EditText
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -96,80 +84,34 @@
             android:id="@+id/radiusEdit"
             android:hint="Radius in meters"
             android:layout_below="@+id/mapButton"
-            android:layout_toRightOf="@+id/radiusLabel"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true" />
-
-        <TextView
-            android:text="Action"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/urlLabel"
-            android:textSize="18sp"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_toLeftOf="@+id/radiusEdit"
-            android:layout_toStartOf="@+id/radiusEdit"
-            android:layout_alignBottom="@+id/urlEdit"
-            android:layout_below="@+id/radiusLabel"
-            android:gravity="left|center_vertical" />
-
-        <EditText
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:id="@+id/urlEdit"
-            android:inputType="textUri"
-            android:layout_below="@+id/radiusEdit"
-            android:layout_toRightOf="@+id/radiusLabel"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
-            android:hint="url" />
-
-        <TextView
-            android:text="Values have changed. Press Apply to accept."
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/draftAlertLabel"
-            android:textColor="?attr/colorControlActivated"
-            android:layout_below="@+id/launchButton"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_marginTop="3dp"
-            android:layout_marginBottom="3dp" />
-
-        <Button
-            android:text="Launch action"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/launchButton"
-            android:layout_below="@+id/urlEdit"
-            android:layout_toRightOf="@+id/urlLabel"
-            android:layout_toEndOf="@+id/urlLabel"
-            android:onClick="onLaunchActionClick" />
+            android:layout_alignLeft="@+id/mapButton"
+            android:layout_alignStart="@+id/mapButton"
+            android:textSize="14sp" />
 
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"
-            android:layout_below="@+id/draftAlertLabel"
-            android:layout_marginTop="18dp">
+            android:layout_below="@+id/radiusEdit"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="10dp">
 
             <Button
-                android:text="Apply"
+                android:text="OK"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/okButton"
                 android:layout_weight="1"
-                android:onClick="onApplyClick"
                 android:layout_below="@+id/draftAlertLabel"
                 android:layout_alignLeft="@+id/launchButton"
-                android:layout_alignStart="@+id/launchButton" />
+                android:layout_alignStart="@+id/launchButton"
+                android:onClick="onOkClick" />
 
             <Button
-                android:text="Revert"
+                android:text="Cancel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/cancelButton"
@@ -178,9 +120,24 @@
                 android:layout_alignBottom="@+id/okButton"
                 android:layout_toRightOf="@+id/okButton"
                 android:layout_toEndOf="@+id/okButton"
-                android:onClick="onRevertClick" />
+                android:onClick="onCancelClick" />
 
         </LinearLayout>
+
+        <TextView
+            android:text="Radius"
+            android:layout_height="wrap_content"
+            android:id="@+id/radiusLabel"
+            android:textSize="14sp"
+            android:gravity="left|center_vertical"
+            android:layout_width="wrap_content"
+            android:layout_alignBottom="@+id/radiusEdit"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_toLeftOf="@+id/radiusEdit"
+            android:layout_toStartOf="@+id/radiusEdit"
+            android:layout_below="@+id/mapButton" />
+
     </RelativeLayout>
 
 </ScrollView>

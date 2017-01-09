@@ -19,7 +19,7 @@ import com.google.android.gms.common.api.Scope;
 
 public class GoogleSignIn {
     private final String TAG = getClass().getSimpleName();
-    private static final String SERVER_CLIENT_ID = "699660638323-lhgvgt7u09hv2d0599pmm1hgmnlopn0c.apps.googleusercontent.com";
+    private static final String SERVER_CLIENT_ID = "815763108077-nb9vs1kk1d7g7k153496c6bajj32nq27.apps.googleusercontent.com";
 
     private GoogleApiClient mGoogleApiClient;
     private Context mContext;

@@ -10,6 +10,7 @@ public class GeoSwitchApp extends Application {
     private static Preferences preferences;
     private static HttpUtils httpUtils;
     private static GoogleSignIn googleSignIn;
+    private static GpsLog gpsLog;
 
     public void onCreate() {
         super.onCreate();
@@ -17,6 +18,7 @@ public class GeoSwitchApp extends Application {
         preferences = new Preferences(context);
         httpUtils = new HttpUtils();
         googleSignIn = new GoogleSignIn(context);
+        gpsLog = new GpsLog(context);
     }
 
     public static Context getAppContext() {
@@ -33,5 +35,9 @@ public class GeoSwitchApp extends Application {
 
     public static GoogleSignIn getGoogleSignIn() {
         return googleSignIn;
+    }
+
+    public static GpsLog getGpsLog() {
+        return gpsLog;
     }
 }

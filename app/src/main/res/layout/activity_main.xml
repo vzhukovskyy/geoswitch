@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="ua.pp.rudiki.geoswitch.ActivityMain">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:id="@+id/triggerDescriptionEdit"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_height="100dp"
+            android:text="Trigger not configured"
+            android:singleLine="false"
+            android:gravity="top|left"
+            android:textSize="14sp" />
+
+        <Button
+            android:text="Configure Action"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/configureActionButton"
+            android:layout_below="@+id/actionDescriptionEdit"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:onClick="onConfigureActionClick" />
+
+        <Button
+            android:text="Configure Trigger"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/configureTriggerButton"
+            android:layout_below="@+id/triggerDescriptionEdit"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:onClick="onConfigureTriggerClick" />
+
+        <EditText
+            android:text="Action not configured"
+            android:layout_width="wrap_content"
+            android:layout_height="100dp"
+            android:id="@+id/actionDescriptionEdit"
+            android:layout_below="@+id/configureTriggerButton"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:singleLine="false"
+            android:gravity="top|left"
+            android:textSize="14sp" />
+    </RelativeLayout>
+</ScrollView>

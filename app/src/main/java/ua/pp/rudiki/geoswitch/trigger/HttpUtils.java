@@ -66,6 +66,8 @@ public class HttpUtils {
 
     public void sendPost(String url) {
         try {
+            GeoSwitchApp.getGpsLog().log("Sending POST");
+
             URL obj = new URL(url);
             HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
 
@@ -85,7 +87,6 @@ public class HttpUtils {
             int responseCode = con.getResponseCode();
             //        System.out.println("\nSending 'POST' request to URL : " + url);
             //        System.out.println("Post parameters : " + urlParameters);
-            System.out.println("Response Code : " + responseCode);
 
             BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
             String inputLine;
@@ -96,10 +97,11 @@ public class HttpUtils {
             }
             in.close();
 
-            System.out.println(response.toString());
+            GeoSwitchApp.getGpsLog().log("Response: "+responseCode+", body: "+response.toString());
         }
         catch(Exception ex) {
             ex.printStackTrace();
+            GeoSwitchApp.getGpsLog().log("Exception "+ex);
         }
     }
 

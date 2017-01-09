@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">GeoSwitch</string>
     <string name="title_activity_maps">Map</string>
+    <string name="title_activity_trigger">GeoSwitch/Trigger</string>
+    <string name="title_activity_main">GeoSwitch</string>
+    <string name="title_activity_action">GeoSwitch/Action</string>
 </resources>

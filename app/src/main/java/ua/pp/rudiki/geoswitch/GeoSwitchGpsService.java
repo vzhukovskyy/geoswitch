@@ -9,16 +9,8 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 
-import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.OptionalPendingResult;
-import com.google.android.gms.common.api.ResultCallback;
-
 import ua.pp.rudiki.geoswitch.trigger.AreaTrigger;
 import ua.pp.rudiki.geoswitch.trigger.GeoArea;
-import ua.pp.rudiki.geoswitch.trigger.HttpUtils;
 
 public class GeoSwitchGpsService extends Service implements android.location.LocationListener
 {
@@ -29,14 +21,11 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
 
     AreaTrigger areaTrigger;
 
-    private GpsLog gpsLog;
-
     @Override
     public void onCreate() {
         Log.d(TAG, "onCreate");
 
-        gpsLog = new GpsLog(this);
-        gpsLog.log("Service started");
+        GeoSwitchApp.getGpsLog().log("Service started");
 
         registerLocationManagerListener();
     }
@@ -44,7 +33,7 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
     @Override
     public void onDestroy() {
         Log.d(TAG, "onDestroy");
-        gpsLog.log("Service destroyed");
+        GeoSwitchApp.getGpsLog().log("Service destroyed");
 
         super.onDestroy();
     }
@@ -70,24 +59,24 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
     public void onLocationChanged(Location location) {
 //        Log.i(TAG, "onLocationChanged: " + location);
         lastLocation = location;
-        gpsLog.log(location);
+        GeoSwitchApp.getGpsLog().log(location);
 
         if(areaTrigger != null) {
             areaTrigger.changeLocation(location.getLatitude(), location.getLongitude());
             if (areaTrigger.entered()) {
                 sendNotification("You've entered the trigger area");
                 executeAction();
-                gpsLog.log("Area entered.");
+                GeoSwitchApp.getGpsLog().log("Area entered.");
             }
             else if(areaTrigger.exited()){
                 sendNotification("You've left the trigger area");
-                gpsLog.log("Area exited.");
+                GeoSwitchApp.getGpsLog().log("Area exited.");
             }
         }
     }
 
     void sendNotification(String message) {
-        Intent intent = new Intent(this, ConfigActivity.class);
+        Intent intent = new Intent(this, ActivityTrigger.class);
         int notificationId = 1;
         NotificationUtils.displayNotification(this, notificationId, "Ticker", "GeoSwitch", message, intent);
         //Log.i(TAG, "notification displayed");
@@ -144,7 +133,7 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
 
         if(switchToNewArea) {
             areaTrigger = new AreaTrigger(area);
-            gpsLog.log("Starting monitoring "+area);
+            GeoSwitchApp.getGpsLog().log("Starting monitoring "+area);
         }
 
         GeoSwitchApp.getGoogleSignIn().silentLogin();

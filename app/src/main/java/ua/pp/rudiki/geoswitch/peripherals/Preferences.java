@@ -1,4 +1,4 @@
-package ua.pp.rudiki.geoswitch;
+package ua.pp.rudiki.geoswitch.peripherals;
 
 
 import android.content.Context;

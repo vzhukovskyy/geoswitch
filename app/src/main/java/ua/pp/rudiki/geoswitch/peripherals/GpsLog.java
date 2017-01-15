@@ -1,4 +1,4 @@
-package ua.pp.rudiki.geoswitch;
+package ua.pp.rudiki.geoswitch.peripherals;
 
 import android.content.Context;
 import android.location.Location;
@@ -10,27 +10,47 @@ import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import ua.pp.rudiki.geoswitch.GeoSwitchApp;
+
 public class GpsLog {
     final String TAG = getClass().getSimpleName();
 
-    private final String LOG_FILENAME = "geoswitch-gps-log.txt";
-    private final String ARCHIVE_FILENAME = "geoswitch-gps-log.01.txt";
+    private final static String LOG_FILENAME = "geoswitch-gps-log.txt";
+    private final static String ARCHIVE_FILENAME = "geoswitch-gps-log.01.txt";
 
     private File file;
+    private GpsLogListener listener;
 
     public GpsLog(Context context) {
-        String root = Environment.getExternalStorageDirectory().toString();
-        file = new File(root, LOG_FILENAME);
+        //String root = Environment.getExternalStorageDirectory().toString();
+        //file = new File(root, LOG_FILENAME);
+
+        File dir = context.getExternalFilesDir(null);
+        file = new File(dir, LOG_FILENAME);
 
         Log.i(TAG, "Saving GPS data to file "+file.getAbsolutePath());
     }
 
     public void log(Location location) {
         String message = location.getLatitude() + " " + location.getLongitude();
-        log(message);
+        doLog(message);
+
+        if(listener != null)
+            listener.onGpsCoordinatesLog(location.getLatitude(), location.getLongitude());
     }
 
     public void log(String message) {
+        doLog(message);
+
+        if(listener != null)
+            listener.onLog(message);
+    }
+
+    public String getAbsolutePath() {
+        return file.getAbsolutePath();
+    }
+
+    private void doLog(String message) {
         rotateFileIfNeeded();
 
         FileOutputStream stream = null;
@@ -54,6 +74,10 @@ public class GpsLog {
                 t.printStackTrace();
             }
         }
+    }
+
+    public void addListener(GpsLogListener listener) {
+        this.listener = listener;
     }
 
     private void rotateFileIfNeeded() {

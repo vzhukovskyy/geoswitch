@@ -1,4 +1,4 @@
-package ua.pp.rudiki.geoswitch;
+package ua.pp.rudiki.geoswitch.peripherals;
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -8,6 +8,8 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
+
+import ua.pp.rudiki.geoswitch.R;
 
 public class NotificationUtils {
     final String TAG = getClass().getSimpleName();

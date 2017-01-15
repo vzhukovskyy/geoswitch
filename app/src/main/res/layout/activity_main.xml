@@ -14,19 +14,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <EditText
-            android:layout_width="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:id="@+id/triggerDescriptionEdit"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"
-            android:layout_height="100dp"
-            android:text="Trigger not configured"
-            android:singleLine="false"
-            android:gravity="top|left"
-            android:textSize="14sp" />
-
         <Button
             android:text="Configure Action"
             android:layout_width="wrap_content"
@@ -35,7 +22,9 @@
             android:layout_below="@+id/actionDescriptionEdit"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
-            android:onClick="onConfigureActionClick" />
+            android:onClick="onConfigureActionClick"
+            android:layout_alignLeft="@+id/configureTriggerButton"
+            android:layout_alignStart="@+id/configureTriggerButton" />
 
         <Button
             android:text="Configure Trigger"
@@ -60,5 +49,62 @@
             android:singleLine="false"
             android:gravity="top|left"
             android:textSize="14sp" />
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:id="@+id/logEdit"
+            android:singleLine="false"
+            android:gravity="top|left"
+            android:textSize="8sp"
+            android:scrollIndicators="bottom|right"
+            android:scrollbars="horizontal|vertical"
+            android:fontFamily="sans-serif-condensed"
+            android:layout_below="@+id/coordinatesEdit"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_height="80dp"
+            android:inputType="textMultiLine" />
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:id="@+id/triggerDescriptionEdit"
+            android:layout_height="100dp"
+            android:text="Trigger not configured"
+            android:singleLine="false"
+            android:gravity="top|left"
+            android:textSize="14sp"
+            android:layout_below="@+id/gpsLogEdit"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true" />
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:ems="10"
+            android:id="@+id/gpsLogEdit"
+            android:textSize="8sp"
+            android:layout_below="@+id/logEdit"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_toLeftOf="@+id/openLogButton"
+            android:layout_toStartOf="@+id/openLogButton"
+            android:layout_height="80dp"
+            android:fontFamily="sans-serif-condensed"
+            android:inputType="textMultiLine"
+            android:gravity="top|left" />
+
+        <Button
+            android:text="Open Log"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/openLogButton"
+            android:layout_above="@+id/triggerDescriptionEdit"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:onClick="onOpenLogButtonClick" />
+
     </RelativeLayout>
 </ScrollView>

@@ -1,6 +1,7 @@
 package ua.pp.rudiki.geoswitch;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -16,6 +17,11 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import ua.pp.rudiki.geoswitch.peripherals.GpsLogListener;
+
 
 public class ActivityMain extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
     final String TAG = getClass().getSimpleName();
@@ -24,7 +30,7 @@ public class ActivityMain extends AppCompatActivity implements GoogleApiClient.O
     private final static int CONFIGURE_TRIGGER_ID = 9011;
     private final static int CONFIGURE_ACTION_ID = 9012;
 
-    EditText triggerEdit, actionEdit;
+    EditText triggerEdit, actionEdit, logEdit, gpsLogEdit;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,9 +43,14 @@ public class ActivityMain extends AppCompatActivity implements GoogleApiClient.O
         triggerEdit.setKeyListener(null);
         actionEdit = (EditText)findViewById(R.id.actionDescriptionEdit);
         actionEdit.setKeyListener(null);
+        gpsLogEdit = (EditText)findViewById(R.id.gpsLogEdit);
+        gpsLogEdit.setKeyListener(null);
+        logEdit = (EditText)findViewById(R.id.logEdit);
+        logEdit.setKeyListener(null);
 
         loadAreaToUi();
         loadActionToUi();
+        registerLogListener();
 
         signIn();
         restartService();
@@ -53,6 +64,13 @@ public class ActivityMain extends AppCompatActivity implements GoogleApiClient.O
     public void onConfigureActionClick(View view) {
         Intent intent = new Intent(this, ActivityAction.class);
         startActivityForResult(intent, CONFIGURE_ACTION_ID);
+    }
+
+    public void onOpenLogButtonClick(View view) {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        Uri uri = Uri.parse("file://"+GeoSwitchApp.getGpsLog().getAbsolutePath());
+        intent.setDataAndType(uri, "text/plain");
+        startActivity(intent);
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -122,6 +140,54 @@ public class ActivityMain extends AppCompatActivity implements GoogleApiClient.O
         }
 
         actionEdit.setText(desc);
+    }
+
+    private void registerLogListener() {
+        GeoSwitchApp.getGpsLog().addListener(new GpsLogListener() {
+            @Override
+            public void onLog(String message) {
+                String text = logEdit.getText().toString() + "\n" + now() + " " + message;
+                String truncatedText = truncateLog(text, 6);
+                logEdit.setText(truncatedText);
+            }
+
+            @Override
+            public void onGpsCoordinatesLog(double latitude, double longitude) {
+                String text = gpsLogEdit.getText().toString() + "\n" + now() + " " + latitude + "," + longitude;
+                String truncatedText = truncateLog(text, 6);
+                gpsLogEdit.setText(truncatedText);
+            }
+
+            private String now() {
+                Date date = new Date();
+                SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+                return dateFormat.format(date);
+            }
+
+            private String truncateLog(String text, int maxLines) {
+                int lines = countLines(text);
+                for(int i=0; i<lines-maxLines; i++) {
+                    int lineEnd = text.indexOf('\n');
+                    if(lineEnd > 0) {
+                        text = text.substring(lineEnd+1);
+                    }
+                }
+                return text;
+            }
+
+            private int countLines(String text) {
+                int lines = 0;
+
+                int pos;
+                while((pos = text.indexOf('\n')) > 0) {
+                    text = text.substring(pos+1);
+                    lines++;
+                }
+                lines++;
+
+                return lines;
+            }
+        });
     }
 
     // Google sign-in

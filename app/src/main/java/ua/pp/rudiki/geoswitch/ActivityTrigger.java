@@ -8,6 +8,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 
+import ua.pp.rudiki.geoswitch.peripherals.Preferences;
+
 
 public class ActivityTrigger extends AppCompatActivity {
 

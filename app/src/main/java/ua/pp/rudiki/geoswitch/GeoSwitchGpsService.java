@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 
+import ua.pp.rudiki.geoswitch.peripherals.NotificationUtils;
 import ua.pp.rudiki.geoswitch.trigger.AreaTrigger;
 import ua.pp.rudiki.geoswitch.trigger.GeoArea;
 
@@ -25,7 +26,7 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
     public void onCreate() {
         Log.d(TAG, "onCreate");
 
-        GeoSwitchApp.getGpsLog().log("Service started");
+        GeoSwitchApp.getGpsLog().log("Service created");
 
         registerLocationManagerListener();
     }
@@ -139,6 +140,9 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
         if(switchToNewArea) {
             areaTrigger = new AreaTrigger(area);
             GeoSwitchApp.getGpsLog().log("Starting monitoring "+area);
+        } else {
+            // commented out to reduce logging when screen orientation changed
+            //GeoSwitchApp.getGpsLog().log("Continue monitoring "+area);
         }
 
         GeoSwitchApp.getGoogleSignIn().silentLogin();

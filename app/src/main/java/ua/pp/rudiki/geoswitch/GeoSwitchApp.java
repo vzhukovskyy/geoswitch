@@ -3,7 +3,9 @@ package ua.pp.rudiki.geoswitch;
 import android.app.Application;
 import android.content.Context;
 
-import ua.pp.rudiki.geoswitch.trigger.HttpUtils;
+import ua.pp.rudiki.geoswitch.peripherals.GpsLog;
+import ua.pp.rudiki.geoswitch.peripherals.HttpUtils;
+import ua.pp.rudiki.geoswitch.peripherals.Preferences;
 
 public class GeoSwitchApp extends Application {
     private static Context context;

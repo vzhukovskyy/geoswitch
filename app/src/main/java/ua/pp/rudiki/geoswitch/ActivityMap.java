@@ -22,6 +22,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import ua.pp.rudiki.geoswitch.peripherals.Preferences;
 import ua.pp.rudiki.geoswitch.trigger.GeoArea;
 
 public class ActivityMap extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMapLongClickListener {

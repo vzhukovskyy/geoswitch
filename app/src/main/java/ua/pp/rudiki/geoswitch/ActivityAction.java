@@ -44,7 +44,7 @@ public class ActivityAction extends AppCompatActivity {
     }
 
     public void onLaunchActionClick(View view) {
-        GeoSwitchApp.getHttpUtils().sendPostAsync(urlEdit.getText().toString());
+        GeoSwitchApp.getHttpUtils().sendPostAsync(urlEdit.getText().toString(), null);
     }
 
     // data persistence

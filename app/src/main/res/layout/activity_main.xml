@@ -52,7 +52,7 @@
 
         <EditText
             android:layout_width="wrap_content"
-            android:id="@+id/logEdit"
+            android:id="@+id/appLogEdit"
             android:singleLine="false"
             android:gravity="top|left"
             android:textSize="8sp"
@@ -86,7 +86,7 @@
             android:ems="10"
             android:id="@+id/gpsLogEdit"
             android:textSize="8sp"
-            android:layout_below="@+id/logEdit"
+            android:layout_below="@+id/appLogEdit"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_toLeftOf="@+id/openLogButton"

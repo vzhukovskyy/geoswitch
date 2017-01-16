@@ -43,9 +43,9 @@ public class HttpUtils {
         }
     }
 
-    public void sendPostAsync(String url) {
+    public void sendPostAsync(String url, AsyncResultListener callback) {
         String newUrl = url;
-        PostJob job = new PostJob();
+        PostJob job = new PostJob(callback);
 
         if(GeoSwitchApp.getPreferences().getAppendSignin()) {
             Character separator = (url.indexOf('?') != -1) ? '&' : '?';
@@ -57,6 +57,12 @@ public class HttpUtils {
 
     private class PostJob extends AsyncTask<String, Void, String> {
 
+        AsyncResultListener listener;
+
+        public PostJob(AsyncResultListener listener) {
+            this.listener = listener;
+        }
+
         @Override
         protected String doInBackground(String[] params) {
             String url = params[0];
@@ -67,53 +73,59 @@ public class HttpUtils {
         @Override
         protected void onPostExecute(String message) {
         }
-    }
 
-    public void sendPost(String url) {
-        try {
-            GeoSwitchApp.getGpsLog().log("Sending POST");
+        public void sendPost(String url) {
+            int responseCode = 0;
+            String responseBody = null;
 
-            URL obj = new URL(url);
-            HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
-
-            con.setRequestMethod("POST");
-            //        con.setRequestProperty("User-Agent", USER_AGENT);
-            //        con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
-
-            //String urlParameters = "sn=C02G8416DRJM&cn=&locale=&caller=&num=12345";
-
-            // Send post request
-            con.setDoOutput(true);
-            DataOutputStream wr = new DataOutputStream(con.getOutputStream());
-            //wr.writeBytes(urlParameters);
-            wr.flush();
-            wr.close();
-
-            StringBuffer response = null;
-            InputStream inputStream = null;
             try {
-                inputStream = con.getInputStream();
-            } catch(FileNotFoundException e1) {
-            }
+                GeoSwitchApp.getGpsLog().log("Sending POST");
 
-            if(inputStream != null) {
-                BufferedReader in = new BufferedReader(new InputStreamReader(inputStream));
-                String inputLine;
-                response = new StringBuffer();
+                URL obj = new URL(url);
+                HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
 
-                while ((inputLine = in.readLine()) != null) {
-                    response.append(inputLine);
+                con.setRequestMethod("POST");
+                //        con.setRequestProperty("User-Agent", USER_AGENT);
+                //        con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
+
+                //String urlParameters = "sn=C02G8416DRJM&cn=&locale=&caller=&num=12345";
+
+                // Send post request
+                con.setDoOutput(true);
+                DataOutputStream wr = new DataOutputStream(con.getOutputStream());
+                //wr.writeBytes(urlParameters);
+                wr.flush();
+                wr.close();
+
+                StringBuffer response = null;
+                InputStream inputStream = null;
+                try {
+                    inputStream = con.getInputStream();
+                } catch (FileNotFoundException e1) {
                 }
-                in.close();
+
+                if (inputStream != null) {
+                    BufferedReader in = new BufferedReader(new InputStreamReader(inputStream));
+                    String inputLine;
+                    response = new StringBuffer();
+
+                    while ((inputLine = in.readLine()) != null) {
+                        response.append(inputLine);
+                    }
+                    in.close();
+                }
+
+                responseCode = con.getResponseCode();
+                responseBody = (response != null) ? response.toString() : "<null>";
+                GeoSwitchApp.getGpsLog().log("Response code: " + responseCode + ", body: " + responseBody);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                GeoSwitchApp.getGpsLog().log("Exception " + ex);
             }
 
-            int responseCode = con.getResponseCode();
-            String responseBody = (response != null) ? response.toString() : "<null>";
-            GeoSwitchApp.getGpsLog().log("Response code: "+responseCode+", body: "+responseBody);
-        }
-        catch(Exception ex) {
-            ex.printStackTrace();
-            GeoSwitchApp.getGpsLog().log("Exception "+ex);
+            if(listener != null) {
+                listener.onResult(responseCode == 200);
+            }
         }
     }
 

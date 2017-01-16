@@ -30,7 +30,7 @@ public class ActivityMain extends AppCompatActivity implements GoogleApiClient.O
     private final static int CONFIGURE_TRIGGER_ID = 9011;
     private final static int CONFIGURE_ACTION_ID = 9012;
 
-    EditText triggerEdit, actionEdit, logEdit, gpsLogEdit;
+    EditText triggerEdit, actionEdit, appLogEdit, gpsLogEdit;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,11 +45,12 @@ public class ActivityMain extends AppCompatActivity implements GoogleApiClient.O
         actionEdit.setKeyListener(null);
         gpsLogEdit = (EditText)findViewById(R.id.gpsLogEdit);
         gpsLogEdit.setKeyListener(null);
-        logEdit = (EditText)findViewById(R.id.logEdit);
-        logEdit.setKeyListener(null);
+        appLogEdit = (EditText)findViewById(R.id.appLogEdit);
+        appLogEdit.setKeyListener(null);
 
         loadAreaToUi();
         loadActionToUi();
+        loadLogsToUi();
         registerLogListener();
 
         signIn();
@@ -142,50 +143,29 @@ public class ActivityMain extends AppCompatActivity implements GoogleApiClient.O
         actionEdit.setText(desc);
     }
 
+    private void loadLogsToUi() {
+        gpsLogEdit.setText(GeoSwitchApp.getGpsLog().getShortGpsLog());
+        appLogEdit.setText(GeoSwitchApp.getGpsLog().getShortAppLog());
+    }
+
     private void registerLogListener() {
         GeoSwitchApp.getGpsLog().addListener(new GpsLogListener() {
             @Override
             public void onLog(String message) {
-                String text = logEdit.getText().toString() + "\n" + now() + " " + message;
-                String truncatedText = truncateLog(text, 6);
-                logEdit.setText(truncatedText);
+                runOnUiThread(new Runnable(){
+                    public void run() {
+                        appLogEdit.setText(GeoSwitchApp.getGpsLog().getShortAppLog());
+                    }
+                });
             }
 
             @Override
             public void onGpsCoordinatesLog(double latitude, double longitude) {
-                String text = gpsLogEdit.getText().toString() + "\n" + now() + " " + latitude + "," + longitude;
-                String truncatedText = truncateLog(text, 6);
-                gpsLogEdit.setText(truncatedText);
-            }
-
-            private String now() {
-                Date date = new Date();
-                SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
-                return dateFormat.format(date);
-            }
-
-            private String truncateLog(String text, int maxLines) {
-                int lines = countLines(text);
-                for(int i=0; i<lines-maxLines; i++) {
-                    int lineEnd = text.indexOf('\n');
-                    if(lineEnd > 0) {
-                        text = text.substring(lineEnd+1);
+                runOnUiThread(new Runnable(){
+                    public void run() {
+                        gpsLogEdit.setText(GeoSwitchApp.getGpsLog().getShortGpsLog());
                     }
-                }
-                return text;
-            }
-
-            private int countLines(String text) {
-                int lines = 0;
-
-                int pos;
-                while((pos = text.indexOf('\n')) > 0) {
-                    text = text.substring(pos+1);
-                    lines++;
-                }
-                lines++;
-
-                return lines;
+                });
             }
         });
     }

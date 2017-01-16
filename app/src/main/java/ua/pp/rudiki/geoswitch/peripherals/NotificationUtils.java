@@ -9,17 +9,24 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 
+import ua.pp.rudiki.geoswitch.ActivityTrigger;
+import ua.pp.rudiki.geoswitch.GeoSwitchApp;
 import ua.pp.rudiki.geoswitch.R;
 
 public class NotificationUtils {
     final String TAG = getClass().getSimpleName();
 
-    public static void displayNotification(Context context, int notificationId, String tickerText, String contentTitle, String contentText, Intent intent) {
+    public void displayNotification(String text) {
+        Context context = GeoSwitchApp.getAppContext();
+
+        Intent intent = new Intent(context, ActivityTrigger.class);
+        int notificationId = 1;
+
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context)
                 .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentTitle(contentTitle)
-                .setContentText(contentText)
-                .setTicker(tickerText);
+                .setContentTitle("GeoSwitch")
+                .setContentText(text)
+                .setTicker("Ticker");
 
         PendingIntent resultPendingIntent = PendingIntent.getActivity(context, notificationId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         mBuilder.setContentIntent(resultPendingIntent);

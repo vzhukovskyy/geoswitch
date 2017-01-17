@@ -9,7 +9,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 
-import ua.pp.rudiki.geoswitch.peripherals.AsyncResultListener;
+import ua.pp.rudiki.geoswitch.action.ActionExecutor;
 import ua.pp.rudiki.geoswitch.trigger.AreaTrigger;
 import ua.pp.rudiki.geoswitch.trigger.GeoArea;
 
@@ -83,14 +83,7 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
 
     void executeAction() {
         String url = GeoSwitchApp.getPreferences().getUrl();
-        GeoSwitchApp.getHttpUtils().sendPostAsync(url, new AsyncResultListener() {
-            @Override
-            public void onResult(boolean success) {
-                String message = getString(success ? R.string.notification_action_succeeded : R.string.notification_action_failed);
-                GeoSwitchApp.getGpsLog().log(message);
-                GeoSwitchApp.getNotificationUtils().displayNotification(message);
-            }
-        });
+        ActionExecutor.execute(url);
     }
 
     // ***********************************************
@@ -144,8 +137,6 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
             // commented out to reduce logging when screen orientation changed
             //GeoSwitchApp.getShortGpsLog().log("Continue monitoring "+area);
         }
-
-        GeoSwitchApp.getGoogleSignIn().silentLogin();
 
         return START_STICKY;
     }

@@ -17,9 +17,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 import ua.pp.rudiki.geoswitch.peripherals.GpsLogListener;
 
 
@@ -119,7 +116,7 @@ public class ActivityMain extends AppCompatActivity implements GoogleApiClient.O
 
     private void loadActionToUi() {
         boolean actionEnabled = GeoSwitchApp.getPreferences().getActionEnabled();
-        boolean appendSignin = GeoSwitchApp.getPreferences().getAppendSignin();
+        boolean appendSignin = GeoSwitchApp.getPreferences().getAppendToken();
         String url = GeoSwitchApp.getPreferences().getUrl();
 
         String desc;

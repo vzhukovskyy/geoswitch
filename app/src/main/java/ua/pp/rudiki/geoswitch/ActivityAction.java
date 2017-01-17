@@ -4,11 +4,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.app.Activity;
 import android.support.v7.app.AppCompatActivity;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
+
+import ua.pp.rudiki.geoswitch.action.ActionExecutor;
 
 public class ActivityAction extends AppCompatActivity {
 
@@ -44,7 +44,8 @@ public class ActivityAction extends AppCompatActivity {
     }
 
     public void onLaunchActionClick(View view) {
-        GeoSwitchApp.getHttpUtils().sendPostAsync(urlEdit.getText().toString(), null);
+        String url = urlEdit.getText().toString();
+        ActionExecutor.execute(url);
     }
 
     // data persistence
@@ -59,7 +60,7 @@ public class ActivityAction extends AppCompatActivity {
 
     private void loadValuesToUi() {
         boolean actionEnabled = GeoSwitchApp.getPreferences().getActionEnabled();
-        boolean appendSignin = GeoSwitchApp.getPreferences().getAppendSignin();
+        boolean appendSignin = GeoSwitchApp.getPreferences().getAppendToken();
         String url = GeoSwitchApp.getPreferences().getUrl();
 
         actionEnabledCheckbox.setChecked(actionEnabled);

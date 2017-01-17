@@ -13,7 +13,7 @@ public class Preferences {
     public final static String longitudeKey = "longitude";
     public final static String radiusKey = "radius";
     public final static String actionEnabledKey = "actionEnabled";
-    public final static String appendSigninKey = "appendSignin";
+    public final static String appendTokenKey = "appendToken";
     public final static String urlKey = "url";
     public final static String applicationKey = "log";
     public final static String gpsLogKey = "gpsLog";
@@ -58,10 +58,10 @@ public class Preferences {
         return area;
     }
 
-    public void storeAction(boolean enabled, boolean appendSignin, String url) {
+    public void storeAction(boolean enabled, boolean appendToken, String url) {
         SharedPreferences.Editor editor = sharedPrefs.edit();
         editor.putBoolean(actionEnabledKey, enabled);
-        editor.putBoolean(appendSigninKey, appendSignin);
+        editor.putBoolean(appendTokenKey, appendToken);
         editor.putString(urlKey, url);
         editor.commit();
     }
@@ -110,8 +110,8 @@ public class Preferences {
         return sharedPrefs.getBoolean(actionEnabledKey, true);
     }
 
-    public boolean getAppendSignin() {
-        return sharedPrefs.getBoolean(appendSigninKey, true);
+    public boolean getAppendToken() {
+        return sharedPrefs.getBoolean(appendTokenKey, true);
     }
 
     public String getUrl() {

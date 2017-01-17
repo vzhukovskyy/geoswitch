@@ -1,9 +1,9 @@
 package ua.pp.rudiki.geoswitch;
 
 import android.app.Application;
-import android.app.Notification;
 import android.content.Context;
 
+import ua.pp.rudiki.geoswitch.peripherals.GoogleSignIn;
 import ua.pp.rudiki.geoswitch.peripherals.GpsLog;
 import ua.pp.rudiki.geoswitch.peripherals.HttpUtils;
 import ua.pp.rudiki.geoswitch.peripherals.NotificationUtils;

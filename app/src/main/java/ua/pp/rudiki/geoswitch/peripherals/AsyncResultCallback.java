@@ -1,5 +1,5 @@
 package ua.pp.rudiki.geoswitch.peripherals;
 
-public interface AsyncResultListener {
+public interface AsyncResultCallback {
     void onResult(boolean success);
 }

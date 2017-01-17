@@ -43,11 +43,11 @@ public class HttpUtils {
         }
     }
 
-    public void sendPostAsync(String url, AsyncResultListener callback) {
+    public void sendPostAsync(String url, AsyncResultCallback callback) {
         String newUrl = url;
         PostJob job = new PostJob(callback);
 
-        if(GeoSwitchApp.getPreferences().getAppendSignin()) {
+        if(GeoSwitchApp.getPreferences().getAppendToken()) {
             Character separator = (url.indexOf('?') != -1) ? '&' : '?';
             newUrl = url + separator + "access_token=" + GeoSwitchApp.getGoogleSignIn().getToken();
         }
@@ -57,9 +57,9 @@ public class HttpUtils {
 
     private class PostJob extends AsyncTask<String, Void, String> {
 
-        AsyncResultListener listener;
+        AsyncResultCallback listener;
 
-        public PostJob(AsyncResultListener listener) {
+        public PostJob(AsyncResultCallback listener) {
             this.listener = listener;
         }
 

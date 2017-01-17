@@ -15,7 +15,8 @@ public class ActionExecutor {
                         public void onResult(boolean success) {
                             String message = success ? "Action succeeded" : "Action failed";
                             GeoSwitchApp.getGpsLog().log(message);
-                            GeoSwitchApp.getNotificationUtils().displayNotification(message);
+                            GeoSwitchApp.getNotificationUtils().displayNotification(message, false);
+                            GeoSwitchApp.getSpeachUtils().speak(message);
                         }
                     });
                 }

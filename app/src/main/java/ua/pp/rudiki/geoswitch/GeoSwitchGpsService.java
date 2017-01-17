@@ -72,7 +72,8 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
                     notificationMessage += " Action started.";
                 }
 
-                GeoSwitchApp.getNotificationUtils().displayNotification(notificationMessage);
+                GeoSwitchApp.getNotificationUtils().displayNotification(notificationMessage, false);
+                GeoSwitchApp.getSpeachUtils().speak(notificationMessage);
             }
             else if(areaTrigger.exited()){
 //                GeoSwitchApp.getNotificationUtils().displayNotification("You've left the trigger area");

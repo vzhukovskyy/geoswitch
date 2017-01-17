@@ -16,7 +16,7 @@ import ua.pp.rudiki.geoswitch.R;
 public class NotificationUtils {
     final String TAG = getClass().getSimpleName();
 
-    public void displayNotification(String text) {
+    public void displayNotification(String text, boolean playRingtone) {
         Context context = GeoSwitchApp.getAppContext();
 
         Intent intent = new Intent(context, ActivityTrigger.class);
@@ -37,12 +37,14 @@ public class NotificationUtils {
 
         notifyMgr.notify(notificationId, mBuilder.build());
 
-        try {
-            Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-            Ringtone r = RingtoneManager.getRingtone(context, notification);
-            r.play();
-        } catch (Exception e) {
-            e.printStackTrace();
+        if(playRingtone) {
+            try {
+                Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+                Ringtone r = RingtoneManager.getRingtone(context, notification);
+                r.play();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 }

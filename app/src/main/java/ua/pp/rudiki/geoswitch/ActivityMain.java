@@ -34,7 +34,7 @@ public class ActivityMain extends AppCompatActivity implements GoogleApiClient.O
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Log.d(TAG, "OnCreate");
+        Log.d(TAG, "onCreate");
 
         triggerEdit = (EditText)findViewById(R.id.triggerDescriptionEdit);
         triggerEdit.setKeyListener(null);
@@ -45,13 +45,45 @@ public class ActivityMain extends AppCompatActivity implements GoogleApiClient.O
         appLogEdit = (EditText)findViewById(R.id.appLogEdit);
         appLogEdit.setKeyListener(null);
 
-        loadAreaToUi();
-        loadActionToUi();
-        loadLogsToUi();
         registerLogListener();
 
         signIn();
         restartService();
+    }
+
+    @Override
+    public void onStart() {
+        super.onResume();
+
+        Log.d(TAG, "onStart");
+
+        loadAreaToUi();
+        loadActionToUi();
+        loadLogsToUi();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume");
+    }
+
+    @Override
+    public void onPause() {
+        super.onResume();
+        Log.d(TAG, "onPause");
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        Log.d(TAG, "onStop");
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "onDestroy");
     }
 
     public void onConfigureTriggerClick(View view) {

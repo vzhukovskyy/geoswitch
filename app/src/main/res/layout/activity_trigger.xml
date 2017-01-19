@@ -14,90 +14,12 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <TextView
-            android:text="Latitude"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/latitudeLabel"
-            android:layout_alignBottom="@+id/latitudeEdit"
-            android:layout_alignParentTop="true"
-            android:textSize="14sp"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:gravity="left|center"
-            android:layout_toLeftOf="@+id/longitudeEdit"
-            android:layout_toStartOf="@+id/longitudeEdit" />
-
-        <EditText
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:inputType="none"
-            android:ems="10"
-            android:layout_alignParentTop="true"
-            android:id="@+id/latitudeEdit"
-            android:hint="Latitude"
-            android:layout_toRightOf="@+id/latitudeLabel"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"
-            android:textSize="14sp" />
-
-        <TextView
-            android:text="Longitude"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/longitudeLabel"
-            android:textSize="14sp"
-            android:layout_below="@+id/latitudeLabel"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_alignBottom="@+id/longitudeEdit"
-            android:gravity="left|center" />
-
-        <EditText
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:inputType="none"
-            android:ems="10"
-            android:layout_below="@+id/latitudeEdit"
-            android:layout_toRightOf="@+id/longitudeLabel"
-            android:id="@+id/longitudeEdit"
-            android:hint="Longitude"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"
-            android:textSize="14sp" />
-
-        <Button
-            android:text="Select on Map"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/mapButton"
-            android:onClick="onMapClick"
-            android:layout_below="@+id/longitudeEdit"
-            android:layout_toRightOf="@+id/longitudeLabel"
-            android:layout_toEndOf="@+id/longitudeLabel" />
-
-        <EditText
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:inputType="numberDecimal"
-            android:ems="10"
-            android:id="@+id/radiusEdit"
-            android:hint="Radius in meters"
-            android:layout_below="@+id/mapButton"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"
-            android:layout_alignLeft="@+id/mapButton"
-            android:layout_alignStart="@+id/mapButton"
-            android:textSize="14sp" />
 
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@+id/radiusEdit"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_marginTop="10dp">
+            android:layout_below="@+id/unidirectionalGroup">
 
             <Button
                 android:text="OK"
@@ -105,9 +27,9 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/okButton"
                 android:layout_weight="1"
-                android:layout_below="@+id/draftAlertLabel"
-                android:layout_alignLeft="@+id/launchButton"
-                android:layout_alignStart="@+id/launchButton"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
                 android:onClick="onOkClick" />
 
             <Button
@@ -125,18 +47,303 @@
         </LinearLayout>
 
         <TextView
-            android:text="Radius"
+            android:text="Type"
             android:layout_height="wrap_content"
-            android:id="@+id/radiusLabel"
-            android:textSize="14sp"
-            android:gravity="left|center_vertical"
-            android:layout_width="wrap_content"
-            android:layout_alignBottom="@+id/radiusEdit"
+            android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:layout_toLeftOf="@+id/radiusEdit"
-            android:layout_toStartOf="@+id/radiusEdit"
-            android:layout_below="@+id/mapButton" />
+            android:id="@+id/triggerTypeLabel"
+            android:layout_alignBottom="@+id/triggerTypeSpinner"
+            android:layout_width="62dp"
+            android:gravity="center_vertical" />
+
+        <Spinner
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_toRightOf="@+id/triggerTypeLabel"
+            android:layout_toEndOf="@+id/triggerTypeLabel"
+            android:id="@+id/triggerTypeSpinner"
+            android:entries="@array/trigger_types" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/bidirectionalGroup"
+            android:layout_below="@+id/triggerTypeLabel"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true">
+
+            <TextView
+                android:text="Latitude"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/latitudeLabelBi"
+                android:layout_alignBottom="@+id/latitudeEditBi"
+                android:textSize="14sp"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:gravity="left|center"
+                android:layout_toStartOf="@+id/longitudeEditBi"
+                android:layout_alignParentTop="true"
+                android:layout_toLeftOf="@+id/longitudeEditBi" />
+
+            <TextView
+                android:text="Longitude"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/longitudeLabelBi"
+                android:textSize="14sp"
+                android:layout_below="@+id/latitudeLabelBi"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_alignBottom="@+id/longitudeEditBi"
+                android:gravity="left|center" />
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="none"
+                android:ems="10"
+                android:layout_below="@+id/latitudeEditBi"
+                android:layout_toRightOf="@+id/longitudeLabelBi"
+                android:id="@+id/longitudeEditBi"
+                android:hint="Longitude"
+                android:textSize="14sp"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true" />
+
+            <Button
+                android:text="Select on Map"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/mapButtonBi"
+                android:onClick="onMapClick"
+                android:layout_below="@+id/longitudeEditBi"
+                android:layout_toRightOf="@+id/longitudeLabelBi"
+                android:layout_toEndOf="@+id/longitudeLabelBi" />
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal"
+                android:ems="10"
+                android:id="@+id/radiusEditBi"
+                android:hint="Radius in meters"
+                android:layout_below="@+id/mapButtonBi"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:layout_alignLeft="@+id/mapButtonBi"
+                android:layout_alignStart="@+id/mapButtonBi"
+                android:textSize="14sp" />
+
+            <TextView
+                android:text="Radius"
+                android:layout_height="wrap_content"
+                android:id="@+id/radiusLabelBi"
+                android:textSize="14sp"
+                android:gravity="left|center_vertical"
+                android:layout_width="wrap_content"
+                android:layout_alignBottom="@+id/radiusEditBi"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_toLeftOf="@+id/radiusEditBi"
+                android:layout_toStartOf="@+id/radiusEditBi"
+                android:layout_below="@+id/mapButtonBi" />
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="none"
+                android:ems="10"
+                android:id="@+id/latitudeEditBi"
+                android:hint="Latitude"
+                android:textSize="14sp"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:layout_toRightOf="@+id/latitudeLabelBi"
+                android:layout_toEndOf="@+id/latitudeLabelBi"/>
+
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/unidirectionalGroup"
+            android:layout_weight="1"
+            android:layout_below="@+id/bidirectionalGroup"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true">
+
+            <TextView
+                android:text="From"
+                android:layout_width="wrap_content"
+                android:id="@+id/fromLabelUni"
+                android:gravity="center_vertical|center_horizontal"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_height="30dp"
+                android:background="@color/colorPrimaryDark"
+                android:layout_marginTop="12dp" />
+
+            <TextView
+                android:text="Latitude"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/latitudeFromLabel"
+                android:layout_alignTop="@+id/latitudeFromEdit"
+                android:layout_alignBottom="@+id/latitudeFromEdit"
+                android:layout_alignRight="@+id/longitudeFromLabel"
+                android:layout_alignParentLeft="true"
+                android:gravity="center_vertical"/>
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:hint="Latitude"
+                android:ems="10"
+                android:layout_below="@+id/fromLabelUni"
+                android:id="@+id/latitudeFromEdit"
+                android:textSize="14sp"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:layout_toRightOf="@+id/latitudeFromLabel"
+                android:layout_toEndOf="@+id/latitudeFromLabel"
+                android:inputType="none" />
+
+            <TextView
+                android:text="Longitude"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/longitudeFromLabel"
+                android:gravity="center_vertical"
+                android:layout_below="@+id/latitudeFromLabel"
+                android:layout_alignParentLeft="true"
+                android:layout_alignBottom="@+id/longitudeFromEdit"
+                />
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:hint="Longitude"
+                android:ems="10"
+                android:layout_below="@+id/latitudeFromEdit"
+                android:id="@+id/longitudeFromEdit"
+                android:textSize="14sp"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:layout_toEndOf="@+id/longitudeFromLabel"
+                android:layout_toRightOf="@+id/longitudeFromLabel"
+                android:inputType="none" />
+
+            <TextView
+                android:text="To"
+                android:layout_width="wrap_content"
+                android:id="@+id/toLabelUni"
+                android:layout_below="@+id/longitudeFromEdit"
+                android:gravity="center_vertical|center_horizontal"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_height="25dp"
+                android:background="@color/colorPrimaryDark"
+                android:layout_marginTop="8dp" />
+
+            <TextView
+                android:text="Latitude"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/latitudeToLabel"
+                android:layout_alignTop="@+id/latitudeToEdit"
+                android:layout_alignBottom="@+id/latitudeToEdit"
+                android:layout_alignRight="@+id/longitudeFromLabel"
+                android:layout_alignParentLeft="true"
+                android:gravity="center_vertical"/>
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:hint="Latitude"
+                android:ems="10"
+                android:layout_below="@+id/toLabelUni"
+                android:id="@+id/latitudeToEdit"
+                android:textSize="14sp"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:layout_toRightOf="@+id/latitudeFromLabel"
+                android:layout_toEndOf="@+id/latitudeFromLabel"
+                android:inputType="none" />
+
+            <TextView
+                android:text="Longitude"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/longitudeToLabel"
+                android:gravity="center_vertical"
+                android:layout_below="@+id/latitudeToLabel"
+                android:layout_alignParentLeft="true"
+                android:layout_alignBottom="@+id/longitudeToEdit"
+                />
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:hint="Longitude"
+                android:ems="10"
+                android:layout_below="@+id/latitudeToEdit"
+                android:id="@+id/longitudeToEdit"
+                android:textSize="14sp"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:layout_toEndOf="@+id/longitudeToLabel"
+                android:layout_toRightOf="@+id/longitudeToLabel"
+                android:inputType="none" />
+
+            <Button
+                android:text="Select on Map"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/mapButtonUni"
+                android:onClick="onMapClick"
+                android:layout_below="@+id/longitudeToEdit"
+                android:layout_toRightOf="@+id/longitudeToLabel"
+                android:layout_toEndOf="@+id/longitudeToLabel" />
+
+            <TextView
+                android:text="Radius"
+                android:layout_height="wrap_content"
+                android:id="@+id/radiusLabelUni"
+                android:textSize="14sp"
+                android:gravity="left|center_vertical"
+                android:layout_width="wrap_content"
+                android:layout_alignBottom="@+id/radiusEditUni"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_toLeftOf="@+id/radiusEditUni"
+                android:layout_toStartOf="@+id/radiusEditUni"
+                android:layout_below="@+id/mapButtonUni" />
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal"
+                android:ems="10"
+                android:id="@+id/radiusEditUni"
+                android:hint="Radius in meters"
+                android:layout_below="@+id/mapButtonUni"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:layout_alignLeft="@+id/mapButtonUni"
+                android:layout_alignStart="@+id/mapButtonUni"
+                android:textSize="14sp" />
+
+
+        </RelativeLayout>
+
 
     </RelativeLayout>
 

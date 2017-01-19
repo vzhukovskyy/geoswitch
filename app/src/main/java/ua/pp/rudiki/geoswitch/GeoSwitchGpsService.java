@@ -12,23 +12,76 @@ import android.util.Log;
 import ua.pp.rudiki.geoswitch.action.ActionExecutor;
 import ua.pp.rudiki.geoswitch.trigger.AreaTrigger;
 import ua.pp.rudiki.geoswitch.trigger.GeoArea;
+import ua.pp.rudiki.geoswitch.trigger.GeoPoint;
 
 public class GeoSwitchGpsService extends Service implements android.location.LocationListener
 {
     final String TAG = getClass().getSimpleName();
 
     private LocationManager locationManager;
-    Location lastLocation;
 
     AreaTrigger areaTrigger;
+
+    // ***********************************************
+    // ***** Android Service overrides
+    // ***********************************************
 
     @Override
     public void onCreate() {
         Log.d(TAG, "onCreate");
 
-        GeoSwitchApp.getGpsLog().log("Service created");
+        GeoArea area = GeoSwitchApp.getPreferences().loadArea();
+        if(area != null) {
+            areaTrigger = new AreaTrigger(area);
+        }
+
+        // if service restarted, continue tracking from last known position
+        GeoPoint lastLocation = GeoSwitchApp.getPreferences().loadLastLocation();
+        if(lastLocation != null) {
+            areaTrigger.changeLocation(lastLocation);
+            GeoSwitchApp.getGpsLog().log("Service created. Continue from "+lastLocation);
+        } else {
+            GeoSwitchApp.getGpsLog().log("Service created. No last position known, start from scratch");
+        }
 
         registerLocationManagerListener();
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d(TAG, "onStartCommand, intent=" + intent);
+        GeoArea area = GeoSwitchApp.getPreferences().loadArea();
+
+        boolean switchToNewArea = false;
+        if (areaTrigger != null) {
+            // there is already configured areaTrigger
+            if(area != null && !areaTrigger.getArea().equals(area)) {
+                // there is different area to monitor
+                switchToNewArea = true;
+            }
+        }
+        else {
+            // no areaTrigger being monitored yet
+            if(area != null) {
+                // and there is area to monitor
+                switchToNewArea = true;
+            }
+        }
+
+        if(switchToNewArea) {
+            areaTrigger = new AreaTrigger(area);
+            GeoSwitchApp.getGpsLog().log("Started monitoring "+area);
+        } else {
+            // commented out to reduce logging when screen orientation changed
+            //GeoSwitchApp.getShortGpsLog().log("Continue monitoring "+area);
+        }
+
+        return START_STICKY;
+    }
+
+    @Override
+    public IBinder onBind(Intent arg0) {
+        return null;
     }
 
     @Override
@@ -38,6 +91,10 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
 
         super.onDestroy();
     }
+
+    // ***********************************************
+    // ***** GPS location tracking
+    // ***********************************************
 
     private void registerLocationManagerListener() {
 
@@ -59,7 +116,7 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
     @Override
     public void onLocationChanged(Location location) {
 //        Log.i(TAG, "onLocationChanged: " + location);
-        lastLocation = location;
+        GeoSwitchApp.getPreferences().storeLastLocation(location.getLatitude(), location.getLongitude());
         GeoSwitchApp.getGpsLog().log(location);
 
         if(areaTrigger != null) {
@@ -106,44 +163,5 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
 //        Log.i(TAG, "onStatusChanged: " + provider);
     }
 
-    // ***********************************************
-    // ***** Service overrides
-    // ***********************************************
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(TAG, "onStartCommand, intent=" + intent);
-        GeoArea area = GeoSwitchApp.getPreferences().loadArea();
-
-        boolean switchToNewArea = false;
-        if (areaTrigger != null) {
-            // there is already configured areaTrigger
-            if(area != null && !areaTrigger.getArea().equals(area)) {
-                // there is different area to monitor
-                switchToNewArea = true;
-            }
-        }
-        else {
-            // no areaTrigger being monitored yet
-            if(area != null) {
-                // and there is area to monitor
-                switchToNewArea = true;
-            }
-        }
-
-        if(switchToNewArea) {
-            areaTrigger = new AreaTrigger(area);
-            GeoSwitchApp.getGpsLog().log("Started monitoring "+area);
-        } else {
-            // commented out to reduce logging when screen orientation changed
-            //GeoSwitchApp.getShortGpsLog().log("Continue monitoring "+area);
-        }
-
-        return START_STICKY;
-    }
-
-    @Override
-    public IBinder onBind(Intent arg0) {
-        return null;
-    }
 }

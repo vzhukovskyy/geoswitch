@@ -6,33 +6,54 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
+import android.widget.Spinner;
 
 import ua.pp.rudiki.geoswitch.peripherals.Preferences;
 
 
-public class ActivityTrigger extends AppCompatActivity {
+public class ActivityTrigger extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
     final String TAG = getClass().getSimpleName();
     final int SELECT_COORDINATES_REQUEST_ID = 9001;
 
     EditText latitudeEdit, longitudeEdit, radiusEdit;
+    Spinner triggerTypeSpinner;
+    RelativeLayout bidirectionalLayout, unidirectionalLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_trigger);
 
-        latitudeEdit = (EditText) findViewById(R.id.latitudeEdit);
+        latitudeEdit = (EditText) findViewById(R.id.latitudeEditBi);
         latitudeEdit.setKeyListener(null); // read-only
-        longitudeEdit = (EditText) findViewById(R.id.longitudeEdit);
+        longitudeEdit = (EditText) findViewById(R.id.longitudeEditBi);
         longitudeEdit.setKeyListener(null); // read-only
-        radiusEdit = (EditText) findViewById(R.id.radiusEdit);
+        radiusEdit = (EditText) findViewById(R.id.radiusEditBi);
+        triggerTypeSpinner = (Spinner) findViewById(R.id.triggerTypeSpinner);
+        triggerTypeSpinner.setOnItemSelectedListener(this);
+        bidirectionalLayout = (RelativeLayout) findViewById(R.id.bidirectionalGroup);
+        unidirectionalLayout = (RelativeLayout) findViewById(R.id.unidirectionalGroup);
 
         loadValuesToUi();
     }
 
     // UI handlers
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        String type = (String)triggerTypeSpinner.getSelectedItem();
+        boolean bidirectional = ("Bidirectional".equals(type));
+        bidirectionalLayout.setVisibility(bidirectional ? View.VISIBLE : View.GONE);
+        unidirectionalLayout.setVisibility(bidirectional ? View.GONE : View.VISIBLE);
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+    }
 
     public void onOkClick(View view) {
         storeValues();
@@ -91,4 +112,5 @@ public class ActivityTrigger extends AppCompatActivity {
         longitudeEdit.setText(GeoSwitchApp.getPreferences().getLongitudeAsString());
         radiusEdit.setText(GeoSwitchApp.getPreferences().getRadiusAsString());
     }
+
 }

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import ua.pp.rudiki.geoswitch.trigger.GeoArea;
+import ua.pp.rudiki.geoswitch.trigger.GeoPoint;
 
 public class Preferences {
     final String TAG = getClass().getSimpleName();
@@ -17,6 +18,9 @@ public class Preferences {
     public final static String urlKey = "url";
     public final static String applicationKey = "log";
     public final static String gpsLogKey = "gpsLog";
+    public final static String lastLatitudeKey = "lastLatitude";
+    public final static String lastLongitudeKey = "lastLongitude";
+
 
     SharedPreferences sharedPrefs;
 
@@ -56,6 +60,31 @@ public class Preferences {
         }
 
         return area;
+    }
+
+    public void storeLastLocation(double latitude, double longitude) {
+        SharedPreferences.Editor editor = sharedPrefs.edit();
+        editor.putString(lastLatitudeKey, String.valueOf(latitude));
+        editor.putString(lastLongitudeKey, String.valueOf(longitude));
+        editor.commit();
+    }
+
+    public GeoPoint loadLastLocation() {
+        GeoPoint point = null;
+
+        String latitudeString = sharedPrefs.getString(lastLatitudeKey, "");
+        String longitudeString = sharedPrefs.getString(lastLongitudeKey, "");
+
+        try {
+            double latitude = Double.parseDouble(latitudeString);
+            double longitude = Double.parseDouble(longitudeString);
+
+            point = new GeoPoint(latitude, longitude);
+        }
+        catch(NumberFormatException e) {
+        }
+
+        return point;
     }
 
     public void storeAction(boolean enabled, boolean appendToken, String url) {

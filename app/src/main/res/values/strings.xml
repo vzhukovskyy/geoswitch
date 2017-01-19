@@ -4,4 +4,8 @@
     <string name="title_activity_trigger">GeoSwitch/Trigger</string>
     <string name="title_activity_main">GeoSwitch</string>
     <string name="title_activity_action">GeoSwitch/Action</string>
+    <string-array name="trigger_types">
+        <item>Bidirectional</item>
+        <item>Unidirectional</item>
+    </string-array>
 </resources>

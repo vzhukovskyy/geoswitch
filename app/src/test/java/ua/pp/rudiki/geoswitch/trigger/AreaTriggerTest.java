@@ -30,7 +30,7 @@ import static org.mockito.Mockito.when;
 public class AreaTriggerTest {
 
     private static GeoPoint mockedGeoPoint;
-    private AreaTrigger area;
+    private AreaTrigger areaTrigger;
 
     @BeforeClass
     public static void initMocks() {
@@ -52,65 +52,65 @@ public class AreaTriggerTest {
     public void setInitialPoint() {
         mockedGeoPoint.latitude = 10;
         mockedGeoPoint.longitude = 10;
-        area = new AreaTrigger(mockedGeoPoint, 1);
+        areaTrigger = new AreaTrigger(mockedGeoPoint, 1);
     }
 
     @Test
     public void testAreaEmpty() {
-        assertFalse(area.entered());
-        assertFalse(area.exited());
-        assertFalse(area.inside());
+        assertFalse(areaTrigger.entered());
+        assertFalse(areaTrigger.exited());
+        assertFalse(areaTrigger.inside());
     }
 
     @Test
     public void testAreaInitiallyOut() {
-        area.changeLocation(10, 7);
-        assertFalse(area.entered());
-        assertFalse(area.exited());
-        assertFalse(area.inside());
+        areaTrigger.changeLocation(10, 7);
+        assertFalse(areaTrigger.entered());
+        assertFalse(areaTrigger.exited());
+        assertFalse(areaTrigger.inside());
     }
 
     @Test
     public void testAreaInitiallyIn() {
-        area.changeLocation(10, 10);
-        assertTrue(area.entered());
-        assertFalse(area.exited());
-        assertTrue(area.inside());
+        areaTrigger.changeLocation(10, 10);
+        assertFalse(areaTrigger.entered());
+        assertFalse(areaTrigger.exited());
+        assertTrue(areaTrigger.inside());
     }
 
     @Test
     public void testAreaOutToOut() {
-        area.changeLocation(10,7);
-        area.changeLocation(10,6);
-        assertFalse(area.entered());
-        assertFalse(area.exited());
-        assertFalse(area.inside());
+        areaTrigger.changeLocation(10,7);
+        areaTrigger.changeLocation(10,6);
+        assertFalse(areaTrigger.entered());
+        assertFalse(areaTrigger.exited());
+        assertFalse(areaTrigger.inside());
     }
 
     @Test
     public void testAreaInToIn() {
-        area.changeLocation(10,10);
-        area.changeLocation(10,10.5);
-        assertFalse(area.entered());
-        assertFalse(area.exited());
-        assertTrue(area.inside());
+        areaTrigger.changeLocation(10,10);
+        areaTrigger.changeLocation(10,10.5);
+        assertFalse(areaTrigger.entered());
+        assertFalse(areaTrigger.exited());
+        assertTrue(areaTrigger.inside());
     }
 
     @Test
     public void testAreaInToOut() {
-        area.changeLocation(10,10);
-        area.changeLocation(10,12);
-        assertFalse(area.entered());
-        assertTrue(area.exited());
-        assertFalse(area.inside());
+        areaTrigger.changeLocation(10,10);
+        areaTrigger.changeLocation(10,12);
+        assertFalse(areaTrigger.entered());
+        assertTrue(areaTrigger.exited());
+        assertFalse(areaTrigger.inside());
     }
 
     @Test
     public void testAreaOutToIn() {
-        area.changeLocation(10,8);
-        area.changeLocation(10,10);
-        assertTrue(area.entered());
-        assertFalse(area.exited());
-        assertTrue(area.inside());
+        areaTrigger.changeLocation(10,8);
+        areaTrigger.changeLocation(10,10);
+        assertTrue(areaTrigger.entered());
+        assertFalse(areaTrigger.exited());
+        assertTrue(areaTrigger.inside());
     }
 }

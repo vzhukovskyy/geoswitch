@@ -2,9 +2,15 @@ package ua.pp.rudiki.geoswitch.trigger;
 
 public class AreaTrigger {
 
+    private enum Location {
+        INVALID,
+        INSIDE,
+        OUTSIDE
+    }
+
     private GeoArea area;
-    private boolean inAreaAtThisTick = false;
-    private boolean inAreaAtPreviousTick = false;
+    private Location locationAtThisTick = Location.INVALID;
+    private Location locationAtPreviousTick = Location.INVALID;
 
     public AreaTrigger(GeoArea area) {
         this.area = area;
@@ -27,20 +33,20 @@ public class AreaTrigger {
     }
 
     public void changeLocation(GeoPoint p) {
-        inAreaAtPreviousTick = inAreaAtThisTick;
-        inAreaAtThisTick = inTriggerArea(p);
+        locationAtPreviousTick = locationAtThisTick;
+        locationAtThisTick = inTriggerArea(p) ? Location.INSIDE : Location.OUTSIDE;
     }
 
     public boolean entered() {
-        return inAreaAtThisTick && !inAreaAtPreviousTick;
+        return locationAtThisTick == Location.INSIDE && locationAtPreviousTick == Location.OUTSIDE;
     }
 
     public boolean exited() {
-        return !inAreaAtThisTick && inAreaAtPreviousTick;
+        return locationAtThisTick == Location.OUTSIDE && locationAtPreviousTick == Location.INSIDE;
     }
 
     public boolean inside() {
-        return inAreaAtThisTick;
+        return locationAtThisTick == Location.INSIDE;
     }
 }
 

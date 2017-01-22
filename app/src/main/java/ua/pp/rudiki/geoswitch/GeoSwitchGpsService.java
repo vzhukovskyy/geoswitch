@@ -10,9 +10,12 @@ import android.os.IBinder;
 import android.util.Log;
 
 import ua.pp.rudiki.geoswitch.action.ActionExecutor;
+import ua.pp.rudiki.geoswitch.trigger.A2BTrigger;
 import ua.pp.rudiki.geoswitch.trigger.AreaTrigger;
 import ua.pp.rudiki.geoswitch.trigger.GeoArea;
 import ua.pp.rudiki.geoswitch.trigger.GeoPoint;
+import ua.pp.rudiki.geoswitch.trigger.GeoTrigger;
+import ua.pp.rudiki.geoswitch.trigger.TriggerType;
 
 public class GeoSwitchGpsService extends Service implements android.location.LocationListener
 {
@@ -20,7 +23,7 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
 
     private LocationManager locationManager;
 
-    AreaTrigger areaTrigger;
+    GeoTrigger trigger;
 
     // ***********************************************
     // ***** Android Service overrides
@@ -30,15 +33,12 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
     public void onCreate() {
         Log.d(TAG, "onCreate");
 
-        GeoArea area = GeoSwitchApp.getPreferences().loadArea();
-        if(area != null) {
-            areaTrigger = new AreaTrigger(area);
-        }
+        trigger = loadTrigger();
 
         // if service restarted, continue tracking from last known position
         GeoPoint lastLocation = GeoSwitchApp.getPreferences().loadLastLocation();
         if(lastLocation != null) {
-            areaTrigger.changeLocation(lastLocation);
+            trigger.changeLocation(lastLocation.latitude, lastLocation.longitude);
             GeoSwitchApp.getGpsLog().log("Service created. Continue from "+lastLocation);
         } else {
             GeoSwitchApp.getGpsLog().log("Service created. No last position known, start from scratch");
@@ -50,33 +50,44 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "onStartCommand, intent=" + intent);
-        GeoArea area = GeoSwitchApp.getPreferences().loadArea();
+        GeoTrigger newTrigger = loadTrigger();
 
         boolean switchToNewArea = false;
-        if (areaTrigger != null) {
-            // there is already configured areaTrigger
-            if(area != null && !areaTrigger.getArea().equals(area)) {
+        if (trigger != null) {
+            // there is already configured trigger
+             if(newTrigger != null && !trigger.equals(newTrigger)) {
                 // there is different area to monitor
                 switchToNewArea = true;
             }
         }
         else {
-            // no areaTrigger being monitored yet
-            if(area != null) {
+            // no trigger being monitored yet
+            if(newTrigger != null) {
                 // and there is area to monitor
                 switchToNewArea = true;
             }
         }
 
         if(switchToNewArea) {
-            areaTrigger = new AreaTrigger(area);
-            GeoSwitchApp.getGpsLog().log("Started monitoring "+area);
+            trigger = newTrigger;
+            GeoSwitchApp.getGpsLog().log("Started monitoring "+newTrigger);
         } else {
             // commented out to reduce logging when screen orientation changed
             //GeoSwitchApp.getShortGpsLog().log("Continue monitoring "+area);
         }
 
         return START_STICKY;
+    }
+
+    GeoTrigger loadTrigger() {
+        GeoTrigger trigger;
+        if(GeoSwitchApp.getPreferences().getTriggerType() == TriggerType.Bidirectional) {
+            trigger = GeoSwitchApp.getPreferences().loadAreaTrigger();
+        } else {
+            trigger = GeoSwitchApp.getPreferences().loadA2BTrigger();
+        }
+
+        return trigger;
     }
 
     @Override
@@ -119,9 +130,9 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
         GeoSwitchApp.getPreferences().storeLastLocation(location.getLatitude(), location.getLongitude());
         GeoSwitchApp.getGpsLog().log(location);
 
-        if(areaTrigger != null) {
-            areaTrigger.changeLocation(location.getLatitude(), location.getLongitude());
-            if (areaTrigger.entered()) {
+        if(trigger != null) {
+            trigger.changeLocation(location.getLatitude(), location.getLongitude());
+            if (trigger.isTriggered()) {
                 GeoSwitchApp.getGpsLog().log("Area entered.");
                 String notificationMessage = "You've entered the trigger area.";
                 if(GeoSwitchApp.getPreferences().getActionEnabled()) {
@@ -131,10 +142,6 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
 
                 GeoSwitchApp.getNotificationUtils().displayNotification(notificationMessage, false);
                 GeoSwitchApp.getSpeachUtils().speak(notificationMessage);
-            }
-            else if(areaTrigger.exited()){
-//                GeoSwitchApp.getNotificationUtils().displayNotification("You've left the trigger area");
-                GeoSwitchApp.getGpsLog().log("Area exited.");
             }
         }
     }

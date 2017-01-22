@@ -17,7 +17,10 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 
+import ua.pp.rudiki.geoswitch.peripherals.ConversionUtils;
 import ua.pp.rudiki.geoswitch.peripherals.GpsLogListener;
+import ua.pp.rudiki.geoswitch.trigger.GeoTrigger;
+import ua.pp.rudiki.geoswitch.trigger.TriggerType;
 
 
 public class ActivityMain extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
@@ -70,7 +73,7 @@ public class ActivityMain extends AppCompatActivity implements GoogleApiClient.O
 
     @Override
     public void onPause() {
-        super.onResume();
+        super.onPause();
         Log.d(TAG, "onPause");
     }
 
@@ -132,14 +135,28 @@ public class ActivityMain extends AppCompatActivity implements GoogleApiClient.O
     // data persistence
 
     private void loadAreaToUi() {
-        String latitude =  GeoSwitchApp.getPreferences().getLatitudeAsString();
+        TriggerType triggerType = GeoSwitchApp.getPreferences().getTriggerType();
+        String latitude = GeoSwitchApp.getPreferences().getLatitudeAsString();
         String longitude = GeoSwitchApp.getPreferences().getLongitudeAsString();
         String radius = GeoSwitchApp.getPreferences().getRadiusAsString();
+        String latitudeTo = GeoSwitchApp.getPreferences().getLatitudeToAsString();
+        String longitudeTo = GeoSwitchApp.getPreferences().getLongitudeToAsString();
 
         String desc;
-        if(!TextUtils.isEmpty(latitude) && !TextUtils.isEmpty(longitude) && !TextUtils.isEmpty(radius)) {
-            desc = "Triggers when entering " + radius + " meters radius area with center in (" + latitude + "," + longitude + ")";
-        } else {
+        if(triggerType != null) {
+            long roundedRadius = Math.round(ConversionUtils.toDouble(radius));
+
+            if (triggerType == TriggerType.Bidirectional) {
+                desc = "Triggers when entering " + roundedRadius + " meters radius circular area"+
+                       " with center in (" + latitude + "," + longitude + ")";
+            } else {
+                desc = "Triggers when moving from " + roundedRadius + "m radius circular area" +
+                        " with center in (" + latitude + "," + longitude + ") " +
+                        " to " + roundedRadius + "m radius circular area with center in " +
+                        "(" + latitudeTo + "," + longitudeTo + ")";
+            }
+        }
+        else {
             desc = "Trigger not configured";
         }
 

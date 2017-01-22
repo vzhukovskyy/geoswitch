@@ -31,6 +31,14 @@ public class GeoPoint {
         return latitude == point.latitude && longitude == point.longitude;
     }
 
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("(");

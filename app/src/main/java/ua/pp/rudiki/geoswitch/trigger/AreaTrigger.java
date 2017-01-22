@@ -1,6 +1,8 @@
 package ua.pp.rudiki.geoswitch.trigger;
 
-public class AreaTrigger {
+import java.util.Objects;
+
+public class AreaTrigger implements GeoTrigger {
 
     private enum Location {
         INVALID,
@@ -28,13 +30,17 @@ public class AreaTrigger {
         return area.getCenter().distanceTo(p) < area.getRadius();
     }
 
+    @Override
     public void changeLocation(double latitude, double longitude) {
-        changeLocation(new GeoPoint(latitude, longitude));
+        GeoPoint point = new GeoPoint(latitude, longitude);
+
+        locationAtPreviousTick = locationAtThisTick;
+        locationAtThisTick = inTriggerArea(point) ? Location.INSIDE : Location.OUTSIDE;
     }
 
-    public void changeLocation(GeoPoint p) {
-        locationAtPreviousTick = locationAtThisTick;
-        locationAtThisTick = inTriggerArea(p) ? Location.INSIDE : Location.OUTSIDE;
+    @Override
+    public boolean isTriggered() {
+        return entered();
     }
 
     public boolean entered() {
@@ -48,5 +54,23 @@ public class AreaTrigger {
     public boolean inside() {
         return locationAtThisTick == Location.INSIDE;
     }
+
+    // Java methods override
+
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null)
+            return false;
+        if (getClass() != o.getClass())
+            return false;
+        AreaTrigger areaTrigger = (AreaTrigger)o;
+        return Objects.equals(area, areaTrigger.getArea());
+    }
+
+    public String toString() {
+        return area.toString();
+    }
+
 }
 

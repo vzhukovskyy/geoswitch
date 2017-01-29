@@ -70,10 +70,10 @@ public class A2BTrigger implements GeoTrigger {
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("from ");
-        sb.append(aTrigger);
+        sb.append("Transition from ");
+        sb.append(aTrigger.getArea().toString());
         sb.append(" to ");
-        sb.append(bTrigger);
+        sb.append(bTrigger.getArea().toString());
         return sb.toString();
     }
 

@@ -1,5 +1,7 @@
 package ua.pp.rudiki.geoswitch;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -20,6 +22,7 @@ import ua.pp.rudiki.geoswitch.trigger.TriggerType;
 public class GeoSwitchGpsService extends Service implements android.location.LocationListener
 {
     final String TAG = getClass().getSimpleName();
+    private final int ONGOING_NOTIFICATION_ID = 9004;
 
     private LocationManager locationManager;
 
@@ -36,7 +39,7 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
         trigger = loadTrigger();
 
         // if service restarted, continue tracking from last known position
-        GeoPoint lastLocation = GeoSwitchApp.getPreferences().loadLastLocation();
+        GeoPoint lastLocation = getLastLocation();
         if(lastLocation != null) {
             trigger.changeLocation(lastLocation.latitude, lastLocation.longitude);
             GeoSwitchApp.getGpsLog().log("Service created. Continue from "+lastLocation);
@@ -45,6 +48,8 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
         }
 
         registerLocationManagerListener();
+
+        updateNotification();
     }
 
     @Override
@@ -79,17 +84,6 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
         return START_STICKY;
     }
 
-    GeoTrigger loadTrigger() {
-        GeoTrigger trigger;
-        if(GeoSwitchApp.getPreferences().getTriggerType() == TriggerType.Bidirectional) {
-            trigger = GeoSwitchApp.getPreferences().loadAreaTrigger();
-        } else {
-            trigger = GeoSwitchApp.getPreferences().loadA2BTrigger();
-        }
-
-        return trigger;
-    }
-
     @Override
     public IBinder onBind(Intent arg0) {
         return null;
@@ -102,6 +96,43 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
 
         super.onDestroy();
     }
+
+    // ***********************************************
+    // ***** Class-specific methods
+    // ***********************************************
+
+    GeoPoint getLastLocation() {
+        return GeoSwitchApp.getPreferences().loadLastLocation();
+    }
+
+    GeoTrigger loadTrigger() {
+        GeoTrigger trigger;
+        if(GeoSwitchApp.getPreferences().getTriggerType() == TriggerType.Bidirectional) {
+            trigger = GeoSwitchApp.getPreferences().loadAreaTrigger();
+        } else {
+            trigger = GeoSwitchApp.getPreferences().loadA2BTrigger();
+        }
+
+        return trigger;
+    }
+
+    private void updateNotification() {
+        Intent notificationIntent = new Intent(this, ActivityMain.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+
+        // make service a foreground service
+        Notification notification = new Notification.Builder(this)
+                .setContentTitle("GeoSwitch")
+                .setContentText("Monitoring location")
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentIntent(pendingIntent)
+                .setTicker("Ticket text")
+                .build();
+
+        startForeground(ONGOING_NOTIFICATION_ID, notification);
+    }
+
+
 
     // ***********************************************
     // ***** GPS location tracking
@@ -132,6 +163,7 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
 
         if(trigger != null) {
             trigger.changeLocation(location.getLatitude(), location.getLongitude());
+            updateNotification();
             if (trigger.isTriggered()) {
                 GeoSwitchApp.getGpsLog().log("Area entered.");
                 String notificationMessage = "You've entered the trigger area.";

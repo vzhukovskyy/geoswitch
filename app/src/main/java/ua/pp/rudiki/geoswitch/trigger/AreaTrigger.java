@@ -69,7 +69,7 @@ public class AreaTrigger implements GeoTrigger {
     }
 
     public String toString() {
-        return area.toString();
+        return "Entering " + area.toString();
     }
 
 }

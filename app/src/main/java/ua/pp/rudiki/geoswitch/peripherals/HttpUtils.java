@@ -43,7 +43,12 @@ public class HttpUtils {
         }
     }
 
-    public void sendPostAsync(String url, AsyncResultCallback callback) {
+    public class PostResult {
+        public int responseCode;
+        public String responseBody;
+    };
+
+    public void sendPostAsync(String url, AsyncResultCallback<PostResult> callback) {
         String newUrl = url;
         PostJob job = new PostJob(callback);
 
@@ -57,9 +62,9 @@ public class HttpUtils {
 
     private class PostJob extends AsyncTask<String, Void, String> {
 
-        AsyncResultCallback listener;
+        AsyncResultCallback<PostResult> listener;
 
-        public PostJob(AsyncResultCallback listener) {
+        public PostJob(AsyncResultCallback<PostResult> listener) {
             this.listener = listener;
         }
 
@@ -124,7 +129,10 @@ public class HttpUtils {
             }
 
             if(listener != null) {
-                listener.onResult(responseCode == 200);
+                PostResult postResult = new PostResult();
+                postResult.responseCode = responseCode;
+                postResult.responseBody = responseBody;
+                listener.onResult(postResult);
             }
         }
     }

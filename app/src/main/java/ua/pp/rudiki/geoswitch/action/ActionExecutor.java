@@ -2,33 +2,34 @@ package ua.pp.rudiki.geoswitch.action;
 
 import ua.pp.rudiki.geoswitch.GeoSwitchApp;
 import ua.pp.rudiki.geoswitch.peripherals.AsyncResultCallback;
+import ua.pp.rudiki.geoswitch.peripherals.HttpUtils;
 import ua.pp.rudiki.geoswitch.peripherals.NetworkUtils;
 
 public class ActionExecutor {
     public static void execute(String url) {
-        GeoSwitchApp.getGoogleSignIn().refreshToken(new AsyncResultCallback() {
+        GeoSwitchApp.getGoogleSignIn().refreshToken(new AsyncResultCallback<Boolean>() {
             @Override
-            public void onResult(boolean success) {
+            public void onResult(Boolean success) {
                 if(success) {
                     String url = GeoSwitchApp.getPreferences().getUrl();
-                    GeoSwitchApp.getHttpUtils().sendPostAsync(url, new AsyncResultCallback() {
+                    GeoSwitchApp.getHttpUtils().sendPostAsync(url, new AsyncResultCallback<HttpUtils.PostResult>() {
                         @Override
-                        public void onResult(boolean success) {
-                            actionFinished(success);
+                        public void onResult(HttpUtils.PostResult result) {
+                            actionFinished(result);
                         }
                     });
                 }
                 else {
-                    actionFinished(false);
+                    actionFinished(null);
                 }
             }
         });
     }
 
-    private static void actionFinished(boolean success) {
+    private static void actionFinished(HttpUtils.PostResult result) {
         String message;
-        if(success) {
-            message = "Action succeeded";
+        if(result != null && result.responseCode == 200) {
+            message = "Action succeeded. Server response: "+result.responseBody;
         }
         else {
             if(NetworkUtils.isConnectedToInternet()) {

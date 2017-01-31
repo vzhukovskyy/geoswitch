@@ -25,7 +25,7 @@ public class GoogleSignIn {
         createGoogleClient();
     }
 
-    public void refreshToken(final AsyncResultCallback callback) {
+    public void refreshToken(final AsyncResultCallback<Boolean> callback) {
         new Thread( new Runnable() { public void run() {
             doRefreshToken(callback);
         }}).start();

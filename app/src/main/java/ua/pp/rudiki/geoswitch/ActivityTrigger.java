@@ -3,15 +3,15 @@ package ua.pp.rudiki.geoswitch;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.IdRes;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
-
-import java.util.NoSuchElementException;
 
 import ua.pp.rudiki.geoswitch.peripherals.ConversionUtils;
 import ua.pp.rudiki.geoswitch.peripherals.Preferences;
@@ -22,12 +22,12 @@ import ua.pp.rudiki.geoswitch.trigger.GeoPoint;
 import ua.pp.rudiki.geoswitch.trigger.TriggerType;
 
 
-public class ActivityTrigger extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
+public class ActivityTrigger extends AppCompatActivity implements RadioGroup.OnCheckedChangeListener {
 
     final String TAG = getClass().getSimpleName();
     final int SELECT_COORDINATES_REQUEST_ID = 9001;
 
-    Spinner triggerTypeSpinner;
+    RadioGroup triggerTypeRadioGroup;
     RelativeLayout bidirectionalLayout, unidirectionalLayout;
     EditText latitudeEditBi, longitudeEditBi, radiusEditBi;
     EditText latitudeFromEditUni, longitudeFromEditUni, latitudeToEditUni, longitudeToEditUni, radiusEditUni;
@@ -37,8 +37,8 @@ public class ActivityTrigger extends AppCompatActivity implements AdapterView.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_trigger);
 
-        triggerTypeSpinner = (Spinner) findViewById(R.id.triggerTypeSpinner);
-        triggerTypeSpinner.setOnItemSelectedListener(this);
+        triggerTypeRadioGroup = (RadioGroup) findViewById(R.id.triggerTypeRadioGroup);
+        triggerTypeRadioGroup.setOnCheckedChangeListener(this);
         bidirectionalLayout = (RelativeLayout) findViewById(R.id.bidirectionalGroup);
         unidirectionalLayout = (RelativeLayout) findViewById(R.id.unidirectionalGroup);
 
@@ -65,15 +65,10 @@ public class ActivityTrigger extends AppCompatActivity implements AdapterView.On
     // UI handlers
 
     @Override
-    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        int type = triggerTypeSpinner.getSelectedItemPosition();
-        boolean bidirectional = (type == 0);
-        bidirectionalLayout.setVisibility(bidirectional ? View.VISIBLE : View.GONE);
-        unidirectionalLayout.setVisibility(bidirectional ? View.GONE : View.VISIBLE);
-    }
-
-    @Override
-    public void onNothingSelected(AdapterView<?> parent) {
+    public void onCheckedChanged(RadioGroup group, @IdRes int checkedId) {
+        boolean isArea = (triggerTypeRadioGroup.getCheckedRadioButtonId() == R.id.radioEnterArea);
+        bidirectionalLayout.setVisibility(isArea ? View.VISIBLE : View.GONE);
+        unidirectionalLayout.setVisibility(isArea ? View.GONE : View.VISIBLE);
     }
 
     public void onOkClick(View view) {
@@ -164,7 +159,10 @@ public class ActivityTrigger extends AppCompatActivity implements AdapterView.On
     }
 
     private void loadValuesToUi() {
-        triggerTypeSpinner.setSelection(GeoSwitchApp.getPreferences().getTriggerType().getValue());
+        boolean isArea = (GeoSwitchApp.getPreferences().getTriggerType() == TriggerType.Bidirectional);
+        int radioId = isArea ? R.id.radioEnterArea : R.id.radioFromTo;
+        triggerTypeRadioGroup.check(radioId);
+        onCheckedChanged(triggerTypeRadioGroup, radioId);
 
         latitudeEditBi.setText(GeoSwitchApp.getPreferences().getLatitudeAsString());
         longitudeEditBi.setText(GeoSwitchApp.getPreferences().getLongitudeAsString());
@@ -181,8 +179,8 @@ public class ActivityTrigger extends AppCompatActivity implements AdapterView.On
     // accessors
 
     TriggerType getSelectedTriggerType() {
-        int pos = triggerTypeSpinner.getSelectedItemPosition();
-        return TriggerType.valueOf(pos);
+        boolean isArea = (triggerTypeRadioGroup.getCheckedRadioButtonId() == R.id.radioEnterArea);
+        return isArea ? TriggerType.Bidirectional : TriggerType.Unidirectional;
     }
 
     String getLatitudeEditValueAsString() {

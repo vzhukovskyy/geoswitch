@@ -7,7 +7,7 @@ import ua.pp.rudiki.geoswitch.peripherals.NetworkUtils;
 
 public class ActionExecutor {
     public static void execute(String url) {
-        GeoSwitchApp.getGoogleSignIn().refreshToken(new AsyncResultCallback<Boolean>() {
+        GeoSwitchApp.getGeoSwitchGoogleApiClient().refreshToken(new AsyncResultCallback<Boolean>() {
             @Override
             public void onResult(Boolean success) {
                 if(success) {

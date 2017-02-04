@@ -3,13 +3,17 @@ package ua.pp.rudiki.geoswitch;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -21,6 +25,8 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.maps.android.ui.BubbleIconFactory;
+import com.google.maps.android.ui.IconGenerator;
 
 import ua.pp.rudiki.geoswitch.peripherals.Preferences;
 import ua.pp.rudiki.geoswitch.trigger.A2BTrigger;
@@ -36,11 +42,15 @@ public class ActivityMap extends FragmentActivity implements OnMapReadyCallback,
     AreaBuilder areaBuilder;
 
     private GoogleMap map;
+    private IconGenerator iconFactory;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
+
+        iconFactory = new IconGenerator(getApplicationContext());
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.activity_map);
@@ -122,8 +132,7 @@ public class ActivityMap extends FragmentActivity implements OnMapReadyCallback,
 
             marker = map.addMarker(new MarkerOptions()
                     .position(ll)
-                    .title("Area")
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW)));
+                    .icon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon("Area"))));
 
             int fillColor = Color.argb(50, 255, 255, 0);
             int strokeColor = Color.argb(255, 255, 255, 0);
@@ -209,9 +218,7 @@ public class ActivityMap extends FragmentActivity implements OnMapReadyCallback,
         }
 
         private void colorMarker(Marker marker, Circle circle, boolean isFrom) {
-            marker.setTitle(isFrom ? "From" : "To");
-            float iconColor = isFrom ? BitmapDescriptorFactory.HUE_YELLOW : BitmapDescriptorFactory.HUE_ORANGE;
-            marker.setIcon(BitmapDescriptorFactory.defaultMarker(iconColor));
+            marker.setIcon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon(isFrom ? "From" : "To")));
 
             int fillColor = isFrom ? Color.argb(50, 255, 255, 0) : Color.argb(50, 255, 127, 127);
             int strokeColor = isFrom ? Color.argb(255, 255, 255, 0) : Color.argb(255, 255, 127, 127);

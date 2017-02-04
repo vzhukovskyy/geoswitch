@@ -2,11 +2,16 @@ package ua.pp.rudiki.geoswitch.peripherals;
 
 import android.content.Context;
 import android.location.Location;
+import android.media.MediaScannerConnection;
 import android.os.Environment;
 import android.util.Log;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -18,17 +23,24 @@ public class GpsLog {
     private final static String LOG_FILENAME = "geoswitch-gps-log.txt";
     private final static String ARCHIVE_FILENAME = "geoswitch-gps-log.01.txt";
 
+    private Context context;
+
+    private File fileRoot;
     private File file;
+    private FileOutputStream fileStream;
+    private OutputStreamWriter fileStreamWriter;
+
     private GpsLogListener listener;
 
     private String shortAppLog, shortGpsLog;
 
     public GpsLog(Context context) {
-        //String root = Environment.getExternalStorageDirectory().toString();
-        //file = new File(root, LOG_FILENAME);
+        this.context = context;
+        fileRoot = Environment.getExternalStorageDirectory();
+        //fileRoot = context.getFilesDir(); - this location is not accessible from another app like
+        // text edit and sometimes not visible from computer over USB connection
 
-        File dir = context.getExternalFilesDir(null);
-        file = new File(dir, LOG_FILENAME);
+        openFile();
 
         Log.i(TAG, "Saving GPS data to file "+file.getAbsolutePath());
 
@@ -37,7 +49,12 @@ public class GpsLog {
     }
 
     public void log(Location location) {
-        String message = location.getLatitude() + " " + location.getLongitude();
+        String latitude = String.format("%.8f", location.getLatitude());
+        String longitude = String.format("%.8f", location.getLongitude());
+        String accuracy = String.valueOf(Math.round(location.getAccuracy()));
+
+        String message = latitude + " " + longitude + " "+(char)0xB1 + accuracy;
+
         doLog(message);
         appendToShortGpsLog(message);
 
@@ -57,29 +74,19 @@ public class GpsLog {
         return file.getAbsolutePath();
     }
 
-    private void doLog(String message) {
+    private synchronized void doLog(String message) {
         rotateFileIfNeeded();
 
-        FileOutputStream stream = null;
         try {
-            stream = new FileOutputStream(file, true);
-
             Date now = new Date();
             SimpleDateFormat dt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
             String s = dt.format(now) + " " + message + "\n";
 
-            stream.write(s.getBytes());
+            fileStreamWriter.write(s);
+            fileStreamWriter.flush();
         }
-        catch(Throwable t) {
-            t.printStackTrace();
-        }
-        finally {
-            try {
-                stream.close();
-            }
-            catch(Throwable t) {
-                t.printStackTrace();
-            }
+        catch(IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -87,19 +94,40 @@ public class GpsLog {
         this.listener = listener;
     }
 
+    private void openFile() {
+        file = new File(fileRoot, LOG_FILENAME);
+        try {
+            fileStream = new FileOutputStream(file, true);
+            fileStreamWriter = new OutputStreamWriter(fileStream, "ISO-8859-1");
+        } catch(Exception e) {
+            Log.e(TAG, "failed to create log file");
+            e.printStackTrace();
+        }
+    }
+
+
     private void rotateFileIfNeeded() {
         if(file.length() > GeoSwitchApp.getPreferences().getMaxLogFileSize()) {
-            String root = Environment.getExternalStorageDirectory().toString();
+            try {
+                fileStreamWriter.close();
+                fileStream.close();
+            }
+            catch(IOException e) {
+            }
 
-            File archiveFile = new File(root, ARCHIVE_FILENAME);
+            File archiveFile = new File(fileRoot, ARCHIVE_FILENAME);
 
             boolean success = archiveFile.delete();
             Log.i(TAG, "log file "+ARCHIVE_FILENAME+(success ? " successfully deleted" : " was not deleted"));
 
             success = file.renameTo(archiveFile);
-            Log.i(TAG, "log file "+(success ? " successfully renamed to"+ARCHIVE_FILENAME : " was not renamed"));
+            if(success) {
+                Log.i(TAG, "log file successfully renamed to "+ARCHIVE_FILENAME);
+            } else {
+                Log.i(TAG, "log file was not renamed");
+            }
 
-            file = new File(root, LOG_FILENAME);
+            openFile();
         }
     }
 

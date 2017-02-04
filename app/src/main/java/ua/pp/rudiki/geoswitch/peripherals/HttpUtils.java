@@ -54,7 +54,7 @@ public class HttpUtils {
 
         if(GeoSwitchApp.getPreferences().getAppendToken()) {
             Character separator = (url.indexOf('?') != -1) ? '&' : '?';
-            newUrl = url + separator + "access_token=" + GeoSwitchApp.getGoogleSignIn().getToken();
+            newUrl = url + separator + "access_token=" + GeoSwitchApp.getGeoSwitchGoogleApiClient().getToken();
         }
 
         job.execute(newUrl);

@@ -51,6 +51,13 @@
         <activity
             android:name=".ActivityAction"
             android:label="@string/title_activity_action"></activity>
+
+        <receiver android:name=".PowerReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.ACTION_POWER_CONNECTED"/>
+                <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED"/>
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

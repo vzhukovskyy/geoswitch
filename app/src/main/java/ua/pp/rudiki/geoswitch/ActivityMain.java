@@ -1,14 +1,19 @@
 package ua.pp.rudiki.geoswitch;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -17,9 +22,10 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import ua.pp.rudiki.geoswitch.peripherals.ConversionUtils;
-import ua.pp.rudiki.geoswitch.peripherals.GpsLogListener;
-import ua.pp.rudiki.geoswitch.trigger.GeoTrigger;
 import ua.pp.rudiki.geoswitch.trigger.TriggerType;
 
 
@@ -30,7 +36,10 @@ public class ActivityMain extends AppCompatActivity implements GoogleApiClient.O
     private final static int CONFIGURE_TRIGGER_ID = 9011;
     private final static int CONFIGURE_ACTION_ID = 9012;
 
-    EditText triggerEdit, actionEdit, appLogEdit, gpsLogEdit;
+    EditText triggerEdit, actionEdit;
+    TextView statusLabel, substatusLabel;
+
+    private SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,14 +52,11 @@ public class ActivityMain extends AppCompatActivity implements GoogleApiClient.O
         triggerEdit.setKeyListener(null);
         actionEdit = (EditText)findViewById(R.id.actionDescriptionEdit);
         actionEdit.setKeyListener(null);
-        gpsLogEdit = (EditText)findViewById(R.id.gpsLogEdit);
-        gpsLogEdit.setKeyListener(null);
-        appLogEdit = (EditText)findViewById(R.id.appLogEdit);
-        appLogEdit.setKeyListener(null);
-
-        registerLogListener();
+        statusLabel = (TextView)findViewById(R.id.statusLabel);
+        substatusLabel = (TextView)findViewById(R.id.substatusLabel);
 
         signIn();
+        registerServiceMessageReceiver();
         restartService();
     }
 
@@ -62,7 +68,6 @@ public class ActivityMain extends AppCompatActivity implements GoogleApiClient.O
 
         loadAreaToUi();
         loadActionToUi();
-        loadLogsToUi();
     }
 
     @Override
@@ -132,6 +137,24 @@ public class ActivityMain extends AppCompatActivity implements GoogleApiClient.O
         }
     }
 
+    private void updateUiStatus(boolean active, Date gpsFixTime) {
+        String status, substatus;
+        if(active) {
+            status = "Status: monitoring location";
+            if(gpsFixTime != null) {
+                substatus = "Last GPS fix received at "+dateFormat.format(gpsFixTime);
+            } else {
+                substatus = "Waiting for GPS fix";
+            }
+        } else {
+            status = "Status: inactive";
+            substatus = "Connect to charger to activate";
+        }
+
+        statusLabel.setText(status);
+        substatusLabel.setText(substatus);
+    }
+
     // data persistence
 
     private void loadAreaToUi() {
@@ -189,34 +212,11 @@ public class ActivityMain extends AppCompatActivity implements GoogleApiClient.O
         actionEdit.setText(desc);
     }
 
-    private void loadLogsToUi() {
-        gpsLogEdit.setText(GeoSwitchApp.getGpsLog().getShortGpsLog());
-        appLogEdit.setText(GeoSwitchApp.getGpsLog().getShortAppLog());
-    }
-
-    private void registerLogListener() {
-        GeoSwitchApp.getGpsLog().addListener(new GpsLogListener() {
-            @Override
-            public void onLog(String message) {
-                runOnUiThread(new Runnable(){
-                    public void run() {
-                        appLogEdit.setText(GeoSwitchApp.getGpsLog().getShortAppLog());
-                    }
-                });
-            }
-
-            @Override
-            public void onGpsCoordinatesLog(double latitude, double longitude) {
-                runOnUiThread(new Runnable(){
-                    public void run() {
-                        gpsLogEdit.setText(GeoSwitchApp.getGpsLog().getShortGpsLog());
-                    }
-                });
-            }
-        });
-    }
-
     // Google sign-in
+    // This is initial sign-in into application. After successful sign-in what is needed is refreshing token
+    // right before making POST request to the server
+    // Here I am using separate googleApiClient than GeoSwitchGoogleApiClient because sign-in includes user operations,
+    // Leveraging automanage facility is a clearly better choice than handling it by my own
 
     void signIn() {
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -251,6 +251,8 @@ public class ActivityMain extends AppCompatActivity implements GoogleApiClient.O
 
     private void restartService() {
         Log.d(TAG, "Starting service");
+        GeoSwitchApp.getGpsLog().log("Starting service");
+
         Intent intent = new Intent(this, GeoSwitchGpsService.class);
         startService(intent);
     }
@@ -259,4 +261,25 @@ public class ActivityMain extends AppCompatActivity implements GoogleApiClient.O
         restartService(); // not really restart, it just passes parameters if service already started
     }
 
+    private void registerServiceMessageReceiver() {
+        IntentFilter filter = new IntentFilter(GeoSwitchGpsService.SERVICE_BROADCAST_ACTION);
+        LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver, filter);
+    }
+
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(intent.getAction().equals(GeoSwitchGpsService.SERVICE_BROADCAST_ACTION)) {
+                boolean activeMode = intent.getBooleanExtra(GeoSwitchGpsService.SERVICE_BROADCAST_ISACTIVEMODE_KEY, false);
+                Date date = null;
+                if (activeMode) {
+                    long timestamp = intent.getLongExtra(GeoSwitchGpsService.SERVICE_BROADCAST_GPSFIXTIMESTAMP_KEY, 0);
+                    if(timestamp != 0) {
+                        date = new Date(timestamp);
+                    }
+                }
+                updateUiStatus(activeMode, date);
+            }
+        }
+    };
 }

@@ -3,7 +3,7 @@ package ua.pp.rudiki.geoswitch;
 import android.app.Application;
 import android.content.Context;
 
-import ua.pp.rudiki.geoswitch.peripherals.GoogleSignIn;
+import ua.pp.rudiki.geoswitch.peripherals.GeoSwitchGoogleApiClient;
 import ua.pp.rudiki.geoswitch.peripherals.GpsLog;
 import ua.pp.rudiki.geoswitch.peripherals.HttpUtils;
 import ua.pp.rudiki.geoswitch.peripherals.NotificationUtils;
@@ -14,7 +14,7 @@ public class GeoSwitchApp extends Application {
     private static Context context;
     private static Preferences preferences;
     private static HttpUtils httpUtils;
-    private static GoogleSignIn googleSignIn;
+    private static GeoSwitchGoogleApiClient geoSwitchGoogleApiClient;
     private static GpsLog gpsLog;
     private static NotificationUtils notificationUtils;
     private static SpeachUtils speachUtils;
@@ -24,7 +24,7 @@ public class GeoSwitchApp extends Application {
         context = getApplicationContext();
         preferences = new Preferences(context);
         httpUtils = new HttpUtils();
-        googleSignIn = new GoogleSignIn(context);
+        geoSwitchGoogleApiClient = new GeoSwitchGoogleApiClient(context);
         gpsLog = new GpsLog(context);
         notificationUtils = new NotificationUtils();
         speachUtils = new SpeachUtils(context);
@@ -42,8 +42,8 @@ public class GeoSwitchApp extends Application {
         return httpUtils;
     }
 
-    public static GoogleSignIn getGoogleSignIn() {
-        return googleSignIn;
+    public static GeoSwitchGoogleApiClient getGeoSwitchGoogleApiClient() {
+        return geoSwitchGoogleApiClient;
     }
 
     public static GpsLog getGpsLog() {

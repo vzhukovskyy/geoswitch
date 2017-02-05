@@ -12,6 +12,7 @@ import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import ua.pp.rudiki.geoswitch.peripherals.ConversionUtils;
 import ua.pp.rudiki.geoswitch.peripherals.Preferences;
@@ -72,11 +73,14 @@ public class ActivityTrigger extends AppCompatActivity implements RadioGroup.OnC
     }
 
     public void onOkClick(View view) {
-        storeValues();
-
-        Intent resultIndent = new Intent();
-        setResult(Activity.RESULT_OK, resultIndent);
-        finish();
+        boolean validatedOk = storeValues();
+        if (validatedOk) {
+            Intent resultIndent = new Intent();
+            setResult(Activity.RESULT_OK, resultIndent);
+            finish();
+        } else {
+            Toast.makeText(this, "Configuration is invalid or incomplete", Toast.LENGTH_SHORT).show();
+        }
     }
 
     public void onCancelClick(View view) {
@@ -102,7 +106,7 @@ public class ActivityTrigger extends AppCompatActivity implements RadioGroup.OnC
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.d(TAG, "onActivityResult requestCode="+requestCode);
-        if (requestCode == SELECT_COORDINATES_REQUEST_ID) {
+        if (requestCode == SELECT_COORDINATES_REQUEST_ID && data != null) {
             String latitude = data.getStringExtra(Preferences.latitudeKey);
             String longitude = data.getStringExtra(Preferences.longitudeKey);
             String radius = data.getStringExtra(Preferences.radiusKey);
@@ -128,15 +132,16 @@ public class ActivityTrigger extends AppCompatActivity implements RadioGroup.OnC
 
     // data persistence
 
-    private void storeValues() {
+    private boolean storeValues() {
         TriggerType triggerType = getSelectedTriggerType();
-
-        GeoSwitchApp.getPreferences().storeTriggerType(triggerType);
 
         if(triggerType == TriggerType.Bidirectional) {
             double latitude = ConversionUtils.toDouble(latitudeEditBi.getText().toString());
             double longitude = ConversionUtils.toDouble(longitudeEditBi.getText().toString());
             double radius = ConversionUtils.toDouble(radiusEditBi.getText().toString());
+            if(Double.isNaN(latitude) || Double.isNaN(longitude) || Double.isNaN(radius)) {
+                return false;
+            }
 
             GeoArea area = new GeoArea(latitude, longitude, radius);
             AreaTrigger areaTrigger = new AreaTrigger(area);
@@ -149,6 +154,11 @@ public class ActivityTrigger extends AppCompatActivity implements RadioGroup.OnC
             double latitudeTo = ConversionUtils.toDouble(latitudeToEditUni.getText().toString());
             double longitudeTo = ConversionUtils.toDouble(longitudeToEditUni.getText().toString());
             double radius = ConversionUtils.toDouble(radiusEditBi.getText().toString());
+            if(Double.isNaN(latitudeFrom) || Double.isNaN(longitudeFrom) ||
+                    Double.isNaN(latitudeTo) || Double.isNaN(longitudeTo) || Double.isNaN(radius))
+            {
+                return false;
+            }
 
             GeoPoint pointFrom = new GeoPoint(latitudeFrom, longitudeFrom);
             GeoPoint pointTo = new GeoPoint(latitudeTo, longitudeTo);
@@ -156,10 +166,15 @@ public class ActivityTrigger extends AppCompatActivity implements RadioGroup.OnC
 
             GeoSwitchApp.getPreferences().storeA2BTrigger(a2bTrigger);
         }
+
+        GeoSwitchApp.getPreferences().storeTriggerType(triggerType);
+
+        return true;
     }
 
     private void loadValuesToUi() {
-        boolean isArea = (GeoSwitchApp.getPreferences().getTriggerType() == TriggerType.Bidirectional);
+        TriggerType storedTriggerType = GeoSwitchApp.getPreferences().getTriggerType();
+        boolean isArea = (storedTriggerType != TriggerType.Unidirectional);;
         int radioId = isArea ? R.id.radioEnterArea : R.id.radioFromTo;
         triggerTypeRadioGroup.check(radioId);
         onCheckedChanged(triggerTypeRadioGroup, radioId);

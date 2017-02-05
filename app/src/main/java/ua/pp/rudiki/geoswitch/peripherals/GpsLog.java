@@ -53,7 +53,7 @@ public class GpsLog {
         String longitude = String.format("%.8f", location.getLongitude());
         String accuracy = String.valueOf(Math.round(location.getAccuracy()));
 
-        String message = latitude + " " + longitude + " "+(char)0xB1 + accuracy;
+        String message = latitude + " " + longitude + " acc " + accuracy;
 
         doLog(message);
         appendToShortGpsLog(message);

@@ -3,17 +3,13 @@ package ua.pp.rudiki.geoswitch;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
-import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -25,20 +21,18 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.maps.android.ui.BubbleIconFactory;
 import com.google.maps.android.ui.IconGenerator;
 
 import ua.pp.rudiki.geoswitch.peripherals.Preferences;
 import ua.pp.rudiki.geoswitch.trigger.A2BTrigger;
 import ua.pp.rudiki.geoswitch.trigger.GeoArea;
-import ua.pp.rudiki.geoswitch.trigger.GeoPoint;
 import ua.pp.rudiki.geoswitch.trigger.TriggerType;
 
 public class ActivityMap extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMapLongClickListener {
 
     private final String TAG = getClass().getSimpleName();
 
-    IntentParameters params = new IntentParameters();
+    MapIntentParameters params = new MapIntentParameters();
     AreaBuilder areaBuilder;
 
     private GoogleMap map;
@@ -72,17 +66,8 @@ public class ActivityMap extends FragmentActivity implements OnMapReadyCallback,
         float zoomLevel = GeoSwitchApp.getPreferences().getDefaultMapZoomLevel();
 
         GeoArea area = params.getArea();
-
         if (area != null) {
-//            Log.d(TAG, "Map is jumping to area "+area);
-
-            areaBuilder.newArea(area);
-            areaBuilder.updateActivityResult();
-            if (params.getTriggerType() == TriggerType.Unidirectional) {
-                area = params.getAreaTo();
-                areaBuilder.newArea(area);
-                areaBuilder.updateActivityResult();
-            }
+            areaBuilder.readIntentParameters(params);
 
             LatLng ll = new LatLng(area.getLatitude(), area.getLongitude());
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(ll, zoomLevel));
@@ -92,7 +77,6 @@ public class ActivityMap extends FragmentActivity implements OnMapReadyCallback,
             Location location = locationManager.getLastKnownLocation(locationManager.getBestProvider(criteria, false));
             if (location != null) {
                 LatLng ll = new LatLng(location.getLatitude(), location.getLongitude());
-//                Log.d(TAG, "Map is jumping to current location "+ll);
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(ll, zoomLevel));
             }
         }
@@ -101,13 +85,12 @@ public class ActivityMap extends FragmentActivity implements OnMapReadyCallback,
         //bounds.extend(loc);
         //map.fitBounds(bounds);       // auto-zoom
         //map.panToBounds(bounds);     // auto-center
-
     }
 
     // UI callbacks
 
     public void onMapLongClick(LatLng point) {
-        GeoArea area = new GeoArea(point.latitude, point.longitude, params.getArea().getRadius());
+        GeoArea area = new GeoArea(point.latitude, point.longitude, params.getRadius());
         areaBuilder.newArea(area);
         areaBuilder.updateActivityResult();
     }
@@ -117,6 +100,7 @@ public class ActivityMap extends FragmentActivity implements OnMapReadyCallback,
 
     interface AreaBuilder {
         void newArea(GeoArea area);
+        void readIntentParameters(MapIntentParameters params);
         void updateActivityResult();
     }
 
@@ -150,6 +134,14 @@ public class ActivityMap extends FragmentActivity implements OnMapReadyCallback,
             }
             if (circle != null) {
                 circle.remove();
+            }
+        }
+
+        public void readIntentParameters(MapIntentParameters params) {
+            GeoArea area = params.getArea();
+            if (area != null) {
+                newArea(area);
+                updateActivityResult();
             }
         }
 
@@ -226,6 +218,19 @@ public class ActivityMap extends FragmentActivity implements OnMapReadyCallback,
             circle.setFillColor(fillColor);
         }
 
+        public void readIntentParameters(MapIntentParameters params) {
+            GeoArea area = params.getArea();
+            if (area != null) {
+                newArea(area);
+                updateActivityResult();
+                area = params.getAreaTo();
+                if (area != null) {
+                    newArea(area);
+                    updateActivityResult();
+                }
+            }
+        }
+
         public void updateActivityResult() {
             Intent resultData = new Intent();
 
@@ -237,10 +242,10 @@ public class ActivityMap extends FragmentActivity implements OnMapReadyCallback,
                 resultData.putExtra(Preferences.longitudeKey, String.valueOf(longitude));
                 resultData.putExtra(Preferences.radiusKey, String.valueOf(radius));
 
-                Log.d(TAG, "Prepared result from=(" + latitude + "," + longitude + "), radius="+radius);
+                Log.d(TAG, "Prepared result from=(" + latitude + "," + longitude + "), radius=" + radius);
             }
 
-            if (marker2 != null) {
+            if(marker2 != null) {
                 double latitude = marker2.getPosition().latitude;
                 double longitude = marker2.getPosition().longitude;
                 resultData.putExtra(Preferences.latitudeToKey, String.valueOf(latitude));
@@ -256,7 +261,7 @@ public class ActivityMap extends FragmentActivity implements OnMapReadyCallback,
 
     // intent parameters
 
-    class IntentParameters {
+    class MapIntentParameters {
 
         TriggerType getTriggerType() {
             String name = getIntent().getStringExtra(Preferences.triggerTypeKey);
@@ -269,7 +274,7 @@ public class ActivityMap extends FragmentActivity implements OnMapReadyCallback,
             double radius = getDouble(Preferences.radiusKey);
 
             GeoArea area = null;
-            if (latitude != Double.NaN && longitude != Double.NaN && radius != Double.NaN) {
+            if (!Double.isNaN(latitude) && !Double.isNaN(longitude) && !Double.isNaN(radius)) {
                 area = new GeoArea(latitude, longitude, radius);
             }
 
@@ -282,11 +287,15 @@ public class ActivityMap extends FragmentActivity implements OnMapReadyCallback,
             double radiusTo = getDouble(Preferences.radiusKey);
 
             GeoArea area = null;
-            if (latitudeTo != Double.NaN && longitudeTo != Double.NaN && radiusTo != Double.NaN) {
+            if (!Double.isNaN(latitudeTo) && !Double.isNaN(longitudeTo) && !Double.isNaN(radiusTo)) {
                 area = new GeoArea(latitudeTo, longitudeTo, radiusTo);
             }
 
             return area;
+        }
+
+        double getRadius() {
+            return getDouble(Preferences.radiusKey);
         }
 
         private double getDouble(String key) {

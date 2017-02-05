@@ -4,8 +4,4 @@
     <string name="title_activity_trigger">GeoSwitch/Trigger</string>
     <string name="title_activity_main">GeoSwitch</string>
     <string name="title_activity_action">GeoSwitch/Action</string>
-    <string-array name="trigger_types">
-        <item>Area</item>
-        <item>From-To</item>
-    </string-array>
 </resources>

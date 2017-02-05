@@ -49,6 +49,9 @@ public class HttpUtils {
     };
 
     public void sendPostAsync(String url, AsyncResultCallback<PostResult> callback) {
+
+        GeoSwitchApp.getGpsLog().log("Sending POST request to "+url);
+
         String newUrl = url;
         PostJob job = new PostJob(callback);
 
@@ -84,8 +87,6 @@ public class HttpUtils {
             String responseBody = null;
 
             try {
-                GeoSwitchApp.getGpsLog().log("Sending POST");
-
                 URL obj = new URL(url);
                 HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
 

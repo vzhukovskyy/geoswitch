@@ -41,11 +41,9 @@ public class Preferences {
 
 
     public TriggerType getTriggerType() {
-        String triggerTypeString = sharedPrefs.getString(triggerTypeKey, TriggerType.Bidirectional.toString());
+        String triggerTypeString = sharedPrefs.getString(triggerTypeKey, TriggerType.Invalid.toString());
 
-        TriggerType triggerType = null;
-        if(triggerTypeString != null)
-            triggerType = TriggerType.valueOf(triggerTypeString);
+        TriggerType triggerType = TriggerType.valueOf(triggerTypeString);
 
         return triggerType;
     }
@@ -157,11 +155,11 @@ public class Preferences {
     }
 
     public String getRadiusAsString() {
-        return sharedPrefs.getString(radiusKey, "");
+        return sharedPrefs.getString(radiusKey, String.valueOf(getDefaultRadius()));
     }
 
     public Double getRadius() {
-        return getDouble(getRadiusAsString(), getDefaultRadius());
+        return getDouble(radiusKey, getDefaultRadius());
     }
 
     public boolean getActionEnabled() {
@@ -218,7 +216,7 @@ public class Preferences {
     // Default values
 
     public double getDefaultRadius() {
-        return 50.0;
+        return 100.0;
     }
 
     public String getDefaultUrl() {

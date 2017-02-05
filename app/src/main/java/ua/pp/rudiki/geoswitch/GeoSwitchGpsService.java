@@ -114,7 +114,9 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
                         if(lastLocation == null) {
                             lastLocation = location;
                             lastLocationUpdated = true;
-                            trigger.changeLocation(location.getLatitude(), location.getLongitude());
+                            if(trigger != null) {
+                                trigger.changeLocation(location.getLatitude(), location.getLongitude());
+                            }
                         }
                     }
 

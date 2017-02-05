@@ -44,6 +44,8 @@ public class ActivityAction extends AppCompatActivity {
     }
 
     public void onLaunchActionClick(View view) {
+        GeoSwitchApp.getGpsLog().log("User launched action");
+
         String url = urlEdit.getText().toString();
         ActionExecutor.execute(url);
     }

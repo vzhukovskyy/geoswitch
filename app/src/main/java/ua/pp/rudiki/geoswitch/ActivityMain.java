@@ -166,7 +166,7 @@ public class ActivityMain extends AppCompatActivity implements GoogleApiClient.O
         String longitudeTo = GeoSwitchApp.getPreferences().getLongitudeToAsString();
 
         String desc;
-        if(triggerType != null) {
+        if(triggerType != TriggerType.Invalid) {
             long roundedRadius = Math.round(ConversionUtils.toDouble(radius));
 
             if (triggerType == TriggerType.Bidirectional) {

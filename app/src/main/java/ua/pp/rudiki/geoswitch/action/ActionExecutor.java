@@ -6,12 +6,11 @@ import ua.pp.rudiki.geoswitch.peripherals.HttpUtils;
 import ua.pp.rudiki.geoswitch.peripherals.NetworkUtils;
 
 public class ActionExecutor {
-    public static void execute(String url) {
+    public static void execute(final String url) {
         GeoSwitchApp.getGeoSwitchGoogleApiClient().refreshToken(new AsyncResultCallback<Boolean>() {
             @Override
             public void onResult(Boolean success) {
                 if(success) {
-                    String url = GeoSwitchApp.getPreferences().getUrl();
                     GeoSwitchApp.getHttpUtils().sendPostAsync(url, new AsyncResultCallback<HttpUtils.PostResult>() {
                         @Override
                         public void onResult(HttpUtils.PostResult result) {
@@ -20,28 +19,39 @@ public class ActionExecutor {
                     });
                 }
                 else {
-                    actionFinished(null);
+                    refreshTokenFailed();
                 }
             }
         });
     }
 
-    private static void actionFinished(HttpUtils.PostResult result) {
+    private static void refreshTokenFailed() {
         String message;
-        if(result != null && result.responseCode == 200) {
-            message = "Action succeeded. Server response: "+result.responseBody;
+        if(NetworkUtils.isConnectedToInternet()) {
+            message = "Action failed. Could not connect to google server.";
         }
         else {
-            if(NetworkUtils.isConnectedToInternet()) {
-                message = "Action failed. Server not responding.";
-            }
-            else {
-                message = "Action failed. No connection to internet";
-            }
+            message = "Action failed. No connection to internet";
         }
 
+        reportActionResult(message);
+    }
+
+    private static void actionFinished(HttpUtils.PostResult result) {
+        String message;
+        if(result.responseCode == 200) {
+            message = "Action succeeded. Server response: " + result.responseBody;
+        } else {
+            message = "Action failed. Error code "+result.responseCode;
+        }
+
+        reportActionResult(message);
+    }
+
+    private static void reportActionResult(String message) {
         GeoSwitchApp.getGpsLog().log(message);
         GeoSwitchApp.getNotificationUtils().displayNotification(message, false);
         GeoSwitchApp.getSpeachUtils().speak(message);
     }
+
 }

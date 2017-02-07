@@ -4,20 +4,20 @@ import android.app.Application;
 import android.content.Context;
 
 import ua.pp.rudiki.geoswitch.peripherals.GeoSwitchGoogleApiClient;
-import ua.pp.rudiki.geoswitch.peripherals.GpsLog;
+import ua.pp.rudiki.geoswitch.peripherals.GeoSwitchLog;
 import ua.pp.rudiki.geoswitch.peripherals.HttpUtils;
 import ua.pp.rudiki.geoswitch.peripherals.NotificationUtils;
 import ua.pp.rudiki.geoswitch.peripherals.Preferences;
-import ua.pp.rudiki.geoswitch.peripherals.SpeachUtils;
+import ua.pp.rudiki.geoswitch.peripherals.SpeechUtils;
 
 public class GeoSwitchApp extends Application {
     private static Context context;
     private static Preferences preferences;
     private static HttpUtils httpUtils;
     private static GeoSwitchGoogleApiClient geoSwitchGoogleApiClient;
-    private static GpsLog gpsLog;
+    private static GeoSwitchLog geoSwitchLog;
     private static NotificationUtils notificationUtils;
-    private static SpeachUtils speachUtils;
+    private static SpeechUtils speechUtils;
 
     public void onCreate() {
         super.onCreate();
@@ -25,9 +25,9 @@ public class GeoSwitchApp extends Application {
         preferences = new Preferences(context);
         httpUtils = new HttpUtils();
         geoSwitchGoogleApiClient = new GeoSwitchGoogleApiClient(context);
-        gpsLog = new GpsLog(context);
+        geoSwitchLog = new GeoSwitchLog(context);
         notificationUtils = new NotificationUtils();
-        speachUtils = new SpeachUtils(context);
+        speechUtils = new SpeechUtils(context);
     }
 
     public static Context getAppContext() {
@@ -46,16 +46,16 @@ public class GeoSwitchApp extends Application {
         return geoSwitchGoogleApiClient;
     }
 
-    public static GpsLog getGpsLog() {
-        return gpsLog;
+    public static GeoSwitchLog getLogger() {
+        return geoSwitchLog;
     }
 
     public static NotificationUtils getNotificationUtils() {
         return notificationUtils;
     }
 
-    public static SpeachUtils getSpeachUtils() {
-        return speachUtils;
+    public static SpeechUtils getSpeechUtils() {
+        return speechUtils;
     }
 
 }

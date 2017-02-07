@@ -1,9 +1,9 @@
-package ua.pp.rudiki.geoswitch.action;
+package ua.pp.rudiki.geoswitch.peripherals;
+
+import java.util.Formatter;
 
 import ua.pp.rudiki.geoswitch.GeoSwitchApp;
-import ua.pp.rudiki.geoswitch.peripherals.AsyncResultCallback;
-import ua.pp.rudiki.geoswitch.peripherals.HttpUtils;
-import ua.pp.rudiki.geoswitch.peripherals.NetworkUtils;
+import ua.pp.rudiki.geoswitch.R;
 
 public class ActionExecutor {
     public static void execute(final String url) {
@@ -28,10 +28,10 @@ public class ActionExecutor {
     private static void refreshTokenFailed() {
         String message;
         if(NetworkUtils.isConnectedToInternet()) {
-            message = "Action failed. Could not connect to google server.";
+            message = GeoSwitchApp.getAppContext().getString(R.string.action_failed_refresh_token);
         }
         else {
-            message = "Action failed. No connection to internet";
+            message = GeoSwitchApp.getAppContext().getString(R.string.action_failed_no_internet);
         }
 
         reportActionResult(message);
@@ -40,18 +40,20 @@ public class ActionExecutor {
     private static void actionFinished(HttpUtils.PostResult result) {
         String message;
         if(result.responseCode == 200) {
-            message = "Action succeeded. Server response: " + result.responseBody;
+            message = GeoSwitchApp.getAppContext().getString(R.string.action_succeeded_with_server_response);
+            message = new Formatter().format(result.responseBody).toString();
         } else {
-            message = "Action failed. Error code "+result.responseCode;
+            message = GeoSwitchApp.getAppContext().getString(R.string.action_failed_with_error_code);
+            message = new Formatter().format(String.valueOf(result.responseCode)).toString();
         }
 
         reportActionResult(message);
     }
 
     private static void reportActionResult(String message) {
-        GeoSwitchApp.getGpsLog().log(message);
+        GeoSwitchApp.getLogger().log(message);
         GeoSwitchApp.getNotificationUtils().displayNotification(message, false);
-        GeoSwitchApp.getSpeachUtils().speak(message);
+        GeoSwitchApp.getSpeechUtils().speak(message);
     }
 
 }

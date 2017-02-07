@@ -5,22 +5,21 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.BatteryManager;
-import android.widget.Toast;
 
 public class PowerReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        String message;
+        String logMessage;
         if(intent.getAction() == Intent.ACTION_POWER_CONNECTED) {
-            message = "Power Connected";
+            logMessage = "Power Connected";
         } else if(intent.getAction() == Intent.ACTION_POWER_DISCONNECTED){
-            message = "Power Disconnected";
+            logMessage = "Power Disconnected";
         } else {
-            message = "Not recognized event";
+            logMessage = "Not recognized event";
         }
 
-        GeoSwitchApp.getGpsLog().log(message);
+        GeoSwitchApp.getLogger().log(logMessage);
 
         Intent serviceIntent = new Intent(context, GeoSwitchGpsService.class);
         context.startService(serviceIntent);

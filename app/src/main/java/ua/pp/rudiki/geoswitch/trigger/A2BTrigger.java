@@ -19,6 +19,9 @@ public class A2BTrigger implements GeoTrigger {
     }
 
     @Override
+    public TriggerType getType() { return TriggerType.Transition; }
+
+    @Override
     public void changeLocation(double latitude, double longitude) {
         aTrigger.changeLocation(latitude, longitude);
         bTrigger.changeLocation(latitude, longitude);

@@ -7,11 +7,9 @@ import android.support.annotation.IdRes;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
-import android.widget.Spinner;
 import android.widget.Toast;
 
 import ua.pp.rudiki.geoswitch.peripherals.ConversionUtils;
@@ -79,7 +77,8 @@ public class ActivityTrigger extends AppCompatActivity implements RadioGroup.OnC
             setResult(Activity.RESULT_OK, resultIndent);
             finish();
         } else {
-            Toast.makeText(this, "Configuration is invalid or incomplete", Toast.LENGTH_SHORT).show();
+            String message = getString(R.string.trigger_validation_failed);
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -135,7 +134,7 @@ public class ActivityTrigger extends AppCompatActivity implements RadioGroup.OnC
     private boolean storeValues() {
         TriggerType triggerType = getSelectedTriggerType();
 
-        if(triggerType == TriggerType.Bidirectional) {
+        if(triggerType == TriggerType.EnterArea) {
             double latitude = ConversionUtils.toDouble(latitudeEditBi.getText().toString());
             double longitude = ConversionUtils.toDouble(longitudeEditBi.getText().toString());
             double radius = ConversionUtils.toDouble(radiusEditBi.getText().toString());
@@ -174,7 +173,7 @@ public class ActivityTrigger extends AppCompatActivity implements RadioGroup.OnC
 
     private void loadValuesToUi() {
         TriggerType storedTriggerType = GeoSwitchApp.getPreferences().getTriggerType();
-        boolean isArea = (storedTriggerType != TriggerType.Unidirectional);;
+        boolean isArea = (storedTriggerType != TriggerType.Transition);;
         int radioId = isArea ? R.id.radioEnterArea : R.id.radioFromTo;
         triggerTypeRadioGroup.check(radioId);
         onCheckedChanged(triggerTypeRadioGroup, radioId);
@@ -195,12 +194,12 @@ public class ActivityTrigger extends AppCompatActivity implements RadioGroup.OnC
 
     TriggerType getSelectedTriggerType() {
         boolean isArea = (triggerTypeRadioGroup.getCheckedRadioButtonId() == R.id.radioEnterArea);
-        return isArea ? TriggerType.Bidirectional : TriggerType.Unidirectional;
+        return isArea ? TriggerType.EnterArea : TriggerType.Transition;
     }
 
     String getLatitudeEditValueAsString() {
         TriggerType type = getSelectedTriggerType();
-        if(type == TriggerType.Bidirectional)
+        if(type == TriggerType.EnterArea)
             return latitudeEditBi.getText().toString();
         else
             return latitudeFromEditUni.getText().toString();
@@ -208,7 +207,7 @@ public class ActivityTrigger extends AppCompatActivity implements RadioGroup.OnC
 
     String getLongitudeEditValueAsString() {
         TriggerType type = getSelectedTriggerType();
-        if(type == TriggerType.Bidirectional)
+        if(type == TriggerType.EnterArea)
             return longitudeEditBi.getText().toString();
         else
             return longitudeFromEditUni.getText().toString();

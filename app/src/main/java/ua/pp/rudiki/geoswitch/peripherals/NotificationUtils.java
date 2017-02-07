@@ -4,9 +4,6 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 
 import ua.pp.rudiki.geoswitch.ActivityTrigger;
@@ -25,8 +22,7 @@ public class NotificationUtils {
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle("GeoSwitch")
-                .setContentText(text)
-                .setTicker("Ticker");
+                .setContentText(text);
 
         PendingIntent resultPendingIntent = PendingIntent.getActivity(context, notificationId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         mBuilder.setContentIntent(resultPendingIntent);
@@ -38,13 +34,7 @@ public class NotificationUtils {
         notifyMgr.notify(notificationId, mBuilder.build());
 
         if(playRingtone) {
-            try {
-                Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-                Ringtone r = RingtoneManager.getRingtone(context, notification);
-                r.play();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            RingtoneUtils.playRingtone();
         }
     }
 }

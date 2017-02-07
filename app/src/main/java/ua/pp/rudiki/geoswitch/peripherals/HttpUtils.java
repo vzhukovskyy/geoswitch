@@ -2,6 +2,7 @@ package ua.pp.rudiki.geoswitch.peripherals;
 
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -15,17 +16,19 @@ import javax.net.ssl.HttpsURLConnection;
 import ua.pp.rudiki.geoswitch.GeoSwitchApp;
 
 public class HttpUtils {
+    final String TAG = this.getClass().getSimpleName();
 
     public void sendGet(String url) {
         try {
+            Log.d(TAG, "Sending request to URL: " + url);
+
             URL obj = new URL(url);
             HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
         //        con.setRequestMethod("GET");
         //        con.setRequestProperty("User-Agent", USER_AGENT);
 
             int responseCode = con.getResponseCode();
-            System.out.println("\nSending 'GET' request to URL : " + url);
-            System.out.println("Response Code : " + responseCode);
+            Log.d(TAG, "Response code: " + responseCode);
 
             BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
             String inputLine;
@@ -36,10 +39,10 @@ public class HttpUtils {
             }
             in.close();
 
-            System.out.println(response.toString());
+            Log.d(TAG, "Response text: "+response.toString());
         }
         catch (Exception ex) {
-            ex.printStackTrace();
+            Log.d(TAG, ex.getMessage(), ex);
         }
     }
 
@@ -50,7 +53,7 @@ public class HttpUtils {
 
     public void sendPostAsync(String url, AsyncResultCallback<PostResult> callback) {
 
-        GeoSwitchApp.getGpsLog().log("Sending POST request to "+url);
+        GeoSwitchApp.getLogger().log("Sending POST request to "+url);
 
         String newUrl = url;
         PostJob job = new PostJob(callback);
@@ -94,12 +97,9 @@ public class HttpUtils {
                 //        con.setRequestProperty("User-Agent", USER_AGENT);
                 //        con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
 
-                //String urlParameters = "sn=C02G8416DRJM&cn=&locale=&caller=&num=12345";
-
                 // Send post request
                 con.setDoOutput(true);
                 DataOutputStream wr = new DataOutputStream(con.getOutputStream());
-                //wr.writeBytes(urlParameters);
                 wr.flush();
                 wr.close();
 
@@ -123,10 +123,9 @@ public class HttpUtils {
 
                 responseCode = con.getResponseCode();
                 responseBody = (response != null) ? response.toString() : "<null>";
-                GeoSwitchApp.getGpsLog().log("Response code: " + responseCode + ", body: " + responseBody);
+                GeoSwitchApp.getLogger().log("Response code: " + responseCode + ", body: " + responseBody);
             } catch (Exception ex) {
-                ex.printStackTrace();
-                GeoSwitchApp.getGpsLog().log("Exception " + ex);
+                GeoSwitchApp.getLogger().log(ex);
             }
 
             if(listener != null) {

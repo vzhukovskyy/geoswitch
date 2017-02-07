@@ -14,11 +14,9 @@ import android.util.Log;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.concurrent.atomic.AtomicReference;
 
-import ua.pp.rudiki.geoswitch.action.ActionExecutor;
+import ua.pp.rudiki.geoswitch.peripherals.ActionExecutor;
 import ua.pp.rudiki.geoswitch.peripherals.AsyncResultCallback;
-import ua.pp.rudiki.geoswitch.trigger.GeoPoint;
 import ua.pp.rudiki.geoswitch.trigger.GeoTrigger;
 import ua.pp.rudiki.geoswitch.trigger.TriggerType;
 
@@ -34,9 +32,13 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
     private LocationManager locationManager;
     private SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 
-    GeoTrigger trigger;
-    boolean activeMode;
-    Location lastLocation;
+    // fields protected by mutex
+    private Object mutex = new Object();
+    private GeoTrigger trigger;
+    private Location lastLocation;
+    private boolean activeMode;
+    // end of fields protected by mutex
+
 
     // ***********************************************
     // ***** Android Service overrides
@@ -45,10 +47,13 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
     @Override
     public void onCreate() {
         Log.d(TAG, "onCreate");
-        GeoSwitchApp.getGpsLog().log("Service created");
+        GeoSwitchApp.getLogger().log("Service created");
 
-        activeMode = false;
-        trigger = loadTrigger();
+        GeoTrigger newTrigger = loadTrigger();
+        synchronized(mutex) {
+            trigger = newTrigger;
+            activeMode = false;
+        }
     }
 
     @Override
@@ -56,31 +61,62 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
         Log.d(TAG, "onStartCommand, intent=" + intent);
         GeoTrigger newTrigger = loadTrigger();
 
-        boolean switchToNewArea = false;
-        if (trigger != null) {
-            // there is already configured trigger
-             if(newTrigger != null && !trigger.equals(newTrigger)) {
-                // there is different area to monitor
-                switchToNewArea = true;
+        // copies which can be used outside of synchronized block
+        boolean frozenActiveMode = PowerReceiver.isCharging(GeoSwitchApp.getAppContext());
+        Location frozenLastLocation;
+
+        boolean switchToNewTrigger = false;
+        synchronized(mutex) {
+            activeMode = frozenActiveMode;
+            frozenLastLocation = lastLocation;
+
+            if (trigger != null) {
+                // there is already configured trigger
+                if (newTrigger != null && !trigger.equals(newTrigger)) {
+                    // there is different area to monitor
+                    switchToNewTrigger = true;
+                }
+            } else {
+                // no trigger being monitored yet
+                if (newTrigger != null) {
+                    // and there is area to monitor
+                    switchToNewTrigger = true;
+                }
             }
-        }
-        else {
-            // no trigger being monitored yet
-            if(newTrigger != null) {
-                // and there is area to monitor
-                switchToNewArea = true;
+
+            if (switchToNewTrigger) {
+                trigger = newTrigger;
+                if (lastLocation != null) {
+                    trigger.changeLocation(lastLocation.getLatitude(), lastLocation.getLongitude());
+                    // trigger cannot fire here because it needs at least 2 fixes
+                }
             }
         }
 
-        if(switchToNewArea) {
-            trigger = newTrigger;
-            GeoSwitchApp.getGpsLog().log("Started monitoring "+newTrigger);
+        if (switchToNewTrigger) {
+            GeoSwitchApp.getLogger().log("Start monitoring " + newTrigger);
         } else {
-            // commented out to reduce logging when screen orientation changed
-            GeoSwitchApp.getGpsLog().log("Continue monitoring "+newTrigger);
+            GeoSwitchApp.getLogger().log("Continue monitoring " + newTrigger);
         }
 
-        determineMode();
+        // for simplicity always unsubscribe and resubscribe if needed
+        unregisterLocationManagerListener();
+        removeStickyNotification();
+        if(frozenActiveMode) {
+            registerLocationManagerListener();
+            displayStickyNotification();
+        }
+
+        // update UIs
+        sendMessageToActivity(frozenActiveMode, frozenLastLocation);
+        if(frozenLastLocation != null && frozenActiveMode) {
+            updateStickyNotification(frozenLastLocation);
+        }
+
+        // request initial location from Google API
+        if(frozenLastLocation == null && frozenActiveMode) {
+            requestLastLocation();
+        }
 
         return START_STICKY;
     }
@@ -93,7 +129,7 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
     @Override
     public void onDestroy() {
         Log.d(TAG, "onDestroy");
-        GeoSwitchApp.getGpsLog().log("Service destroyed");
+        GeoSwitchApp.getLogger().log("Service destroyed");
 
         super.onDestroy();
     }
@@ -106,62 +142,42 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
         GeoSwitchApp.getGeoSwitchGoogleApiClient().requestLastLocation(new AsyncResultCallback<Location>() {
             @Override
             public void onResult(Location location) {
-                boolean lastLocationUpdated = false;
                 if(location != null) {
+                    boolean lastLocationUpdated = false;
+
                     // may be concurrently updated by location service
-                    synchronized (this) {
-                        // lastLocation may already be updated by GPS. Ignore if already not null
+                    synchronized (mutex) {
+                        if (!activeMode)
+                            return;
+
+                        // lastLocation may already be updated by GPS. Drop out in that case
                         if(lastLocation == null) {
                             lastLocation = location;
-                            lastLocationUpdated = true;
                             if(trigger != null) {
                                 trigger.changeLocation(location.getLatitude(), location.getLongitude());
                             }
+                            lastLocationUpdated = true;
                         }
                     }
 
                     if(lastLocationUpdated) {
-                        sendMessageToActivity(activeMode, location);
-                        if(activeMode) {
-                            updateStickyNotification(location);
-                        }
+                        sendMessageToActivity(true, location);
+                        updateStickyNotification(location);
+                        GeoSwitchApp.getLogger().log("Retrieved last known location " + location);
+                    } else {
+                        GeoSwitchApp.getLogger().log("Retrieved last known location " + location + " but too late. Ignored it.");
                     }
-                }
-
-                if(lastLocationUpdated) {
-                    GeoSwitchApp.getGpsLog().log("Retrieved last known location " + location);
                 } else {
-                    GeoSwitchApp.getGpsLog().log("Last location is unknown, start from scratch");
+                    GeoSwitchApp.getLogger().log("Last location is unknown, start from scratch");
                 }
             }
         });
     }
 
 
-    private void determineMode() {
-        unregisterLocationManagerListener();
-        removeStickyNotification();
-        activeMode = false;
-
-        if(PowerReceiver.isCharging(GeoSwitchApp.getAppContext())) {
-            registerLocationManagerListener();
-            displayStickyNotification();
-            activeMode = true;
-        }
-
-        if(lastLocation == null){
-            requestLastLocation();
-        } else {
-            sendMessageToActivity(activeMode, lastLocation);
-            if(activeMode) {
-                updateStickyNotification(lastLocation);
-            }
-        }
-    }
-
     private GeoTrigger loadTrigger() {
         GeoTrigger trigger;
-        if(GeoSwitchApp.getPreferences().getTriggerType() == TriggerType.Bidirectional) {
+        if(GeoSwitchApp.getPreferences().getTriggerType() == TriggerType.EnterArea) {
             trigger = GeoSwitchApp.getPreferences().loadAreaTrigger();
         } else {
             trigger = GeoSwitchApp.getPreferences().loadA2BTrigger();
@@ -175,14 +191,12 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
     }
 
     private void updateStickyNotification(Location location) {
-        assert(!activeMode);
-
         String message;
         if(location != null) {
             Date date = new Date(location.getTime());
-            message = "Last GPS fix received at "+dateFormat.format(date);
+            message = getString(R.string.sticky_status_gps_time) + dateFormat.format(date);
         } else {
-            message = "Waiting for GPS fix";
+            message = getString(R.string.sticky_status_waiting_gps);
         }
 
         Intent notificationIntent = new Intent(this, ActivityMain.class);
@@ -190,11 +204,10 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
 
         // make service a foreground service
         Notification notification = new Notification.Builder(this)
-                .setContentTitle("GeoSwitch: monitoring location")
+                .setContentTitle(getString(R.string.sticky_title))
                 .setContentText(message)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentIntent(pendingIntent)
-                .setTicker("Ticket text")
                 .build();
 
         startForeground(ONGOING_NOTIFICATION_ID, notification);
@@ -219,7 +232,7 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
     // ***********************************************
 
     private void registerLocationManagerListener() {
-        GeoSwitchApp.getGpsLog().log("Registering for GPS events");
+        GeoSwitchApp.getLogger().log("Registering for GPS events");
 
         // request update every second BUT ONLY IF distance changed by more then 10m
         final int LOCATION_INTERVAL = 1000;
@@ -234,51 +247,51 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
                     //LocationManager.PASSIVE_PROVIDER,
                     LOCATION_INTERVAL, LOCATION_DISTANCE, this);
         } catch (SecurityException ex) {
-            Log.i(TAG, "fail to request location update, ignore", ex);
-        } catch (IllegalArgumentException ex) {
-            Log.d(TAG, "gps provider does not exist " + ex.getMessage());
+            GeoSwitchApp.getLogger().log("Failed to request location updates: "+ex.getMessage());
         }
     }
 
     private void unregisterLocationManagerListener() {
         if(locationManager != null) {
-            locationManager.removeUpdates(this);
-            GeoSwitchApp.getGpsLog().log("Unregistered from GPS events");
+            try {
+                locationManager.removeUpdates(this);
+            } catch(SecurityException e) {
+                // ignore
+            }
+
+            GeoSwitchApp.getLogger().log("Unregistered from GPS events");
         }
     }
 
     @Override
     public void onLocationChanged(Location location) {
-        if(!activeMode)
-            return;
+        boolean triggered = false;
+        // may be concurrently updated by retrieving last known location from Google Api
+        synchronized (mutex) {
+            if (!activeMode)
+                return;
 
-//        Log.i(TAG, "onLocationChanged: " + location);
-        GeoSwitchApp.getGpsLog().log(location);
-        lastLocation = location;
-
-        if(trigger != null) {
-            boolean triggered;
-
-            // may be concurrently updated by retrieving last know location from Google Api
-            synchronized (this) {
+            lastLocation = location;
+            if(trigger != null) {
                 trigger.changeLocation(location.getLatitude(), location.getLongitude());
                 triggered = trigger.isTriggered();
             }
+        }
 
-            updateStickyNotification(location);
-            sendMessageToActivity(true, location);
+        GeoSwitchApp.getLogger().log(location);
+        updateStickyNotification(location);
+        sendMessageToActivity(true, location);
 
-            if (triggered) {
-                GeoSwitchApp.getGpsLog().log("Area entered.");
-                String notificationMessage = "You've entered the trigger area.";
-                if(GeoSwitchApp.getPreferences().getActionEnabled()) {
-                    executeAction();
-                    notificationMessage += " Action started.";
-                }
-
-                GeoSwitchApp.getNotificationUtils().displayNotification(notificationMessage, false);
-                GeoSwitchApp.getSpeachUtils().speak(notificationMessage);
+        if (triggered) {
+            GeoSwitchApp.getLogger().log("Trigger fired");
+            String notificationMessage = getString(R.string.trigger_fired);
+            if(GeoSwitchApp.getPreferences().getActionEnabled()) {
+                executeAction();
+                notificationMessage += getString(R.string.action_started);
             }
+
+            GeoSwitchApp.getNotificationUtils().displayNotification(notificationMessage, false);
+            GeoSwitchApp.getSpeechUtils().speak(notificationMessage);
         }
     }
 

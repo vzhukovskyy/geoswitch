@@ -8,7 +8,7 @@ import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
 
-import ua.pp.rudiki.geoswitch.action.ActionExecutor;
+import ua.pp.rudiki.geoswitch.peripherals.ActionExecutor;
 
 public class ActivityAction extends AppCompatActivity {
 
@@ -44,7 +44,7 @@ public class ActivityAction extends AppCompatActivity {
     }
 
     public void onLaunchActionClick(View view) {
-        GeoSwitchApp.getGpsLog().log("User launched action");
+        GeoSwitchApp.getLogger().log("User launched action");
 
         String url = urlEdit.getText().toString();
         ActionExecutor.execute(url);

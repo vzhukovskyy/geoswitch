@@ -17,7 +17,7 @@ import java.util.Date;
 
 import ua.pp.rudiki.geoswitch.GeoSwitchApp;
 
-public class GpsLog {
+public class GeoSwitchLog {
     final String TAG = getClass().getSimpleName();
 
     private final static String LOG_FILENAME = "geoswitch-gps-log.txt";
@@ -30,11 +30,7 @@ public class GpsLog {
     private FileOutputStream fileStream;
     private OutputStreamWriter fileStreamWriter;
 
-    private GpsLogListener listener;
-
-    private String shortAppLog, shortGpsLog;
-
-    public GpsLog(Context context) {
+    public GeoSwitchLog(Context context) {
         this.context = context;
         fileRoot = Environment.getExternalStorageDirectory();
         //fileRoot = context.getFilesDir(); - this location is not accessible from another app like
@@ -43,9 +39,6 @@ public class GpsLog {
         openFile();
 
         Log.i(TAG, "Saving GPS data to file "+file.getAbsolutePath());
-
-        shortAppLog = GeoSwitchApp.getPreferences().getShortAppLog();
-        shortGpsLog = GeoSwitchApp.getPreferences().getShortGpsLog();
     }
 
     public void log(Location location) {
@@ -56,24 +49,24 @@ public class GpsLog {
         String message = latitude + " " + longitude + " acc " + accuracy;
 
         doLog(message);
-        appendToShortGpsLog(message);
-
-        if(listener != null)
-            listener.onGpsCoordinatesLog(location.getLatitude(), location.getLongitude());
     }
 
     public void log(String message) {
         doLog(message);
-        appendToShortAppLog(message);
+    }
 
-        if(listener != null)
-            listener.onLog(message);
+    public void log(Throwable exception) {
+        String stackTrace = Log.getStackTraceString(exception);
+        String text = exception.getMessage() + "\n" + stackTrace;
+
+        doLog(text);
     }
 
     public String getAbsolutePath() {
         return file.getAbsolutePath();
     }
 
+    // may be called from different threads simultaneously
     private synchronized void doLog(String message) {
         rotateFileIfNeeded();
 
@@ -88,10 +81,6 @@ public class GpsLog {
         catch(IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public void addListener(GpsLogListener listener) {
-        this.listener = listener;
     }
 
     private void openFile() {
@@ -130,62 +119,4 @@ public class GpsLog {
             openFile();
         }
     }
-
-    //
-    // Short log
-    //
-
-    public String getShortAppLog() {
-        return shortAppLog;
-    }
-
-    public String getShortGpsLog() {
-        return shortGpsLog;
-    }
-
-    private void appendToShortGpsLog(String message) {
-        shortGpsLog += "\n" + now() + " " + message;
-        shortGpsLog = truncateLog(shortGpsLog, 6);
-
-        GeoSwitchApp.getPreferences().storeShortGpsLog(shortGpsLog);
-    }
-
-    private void appendToShortAppLog(String message) {
-        shortAppLog += "\n" + now() + " " + message;
-        shortAppLog = truncateLog(shortAppLog, 6);
-
-        GeoSwitchApp.getPreferences().storeShortAppLog(shortAppLog);
-    }
-
-    private String truncateLog(String text, int maxLines) {
-        int lines = countLines(text);
-        for(int i=0; i<lines-maxLines; i++) {
-            int lineEnd = text.indexOf('\n');
-            if(lineEnd > 0) {
-                text = text.substring(lineEnd+1);
-            }
-        }
-        return text;
-    }
-
-    private int countLines(String text) {
-        int lines = 0;
-
-        int pos;
-        while((pos = text.indexOf('\n')) > 0) {
-            text = text.substring(pos+1);
-            lines++;
-        }
-        lines++;
-
-        return lines;
-    }
-
-    private String now() {
-        Date date = new Date();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
-        return dateFormat.format(date);
-    }
-
-
 }

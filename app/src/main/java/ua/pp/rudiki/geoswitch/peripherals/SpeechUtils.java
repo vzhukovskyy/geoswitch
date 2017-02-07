@@ -7,25 +7,27 @@ import android.util.Log;
 
 import java.util.Locale;
 
-public class SpeachUtils {
+public class SpeechUtils {
+    private final String TAG = getClass().getSimpleName();
+
     private TextToSpeech tts;
     private boolean ttsReady = false;
 
-    public SpeachUtils(Context context) {
+    public SpeechUtils(Context context) {
         tts = new TextToSpeech(context, new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
                 if (status == TextToSpeech.SUCCESS) {
                     int result = tts.setLanguage(Locale.US);
                     if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                        Log.e("TTS", "This Language is not supported");
+                        Log.e(TAG, "This language is not supported");
                     }
                     else {
                         ttsReady = true;
                     }
 
                 } else {
-                    Log.e("TTS", "Initilization Failed!");
+                    Log.e(TAG, "TTS initialization failed");
                 }
             }
         });

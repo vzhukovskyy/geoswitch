@@ -4,4 +4,29 @@
     <string name="title_activity_trigger">GeoSwitch/Trigger</string>
     <string name="title_activity_main">GeoSwitch</string>
     <string name="title_activity_action">GeoSwitch/Action</string>
+    <string name="action_failed_refresh_token">Action failed. Could not connect to google server.</string>
+    <string name="action_failed_no_internet">Action failed. No connection to internet</string>
+    <string name="action_succeeded_with_server_response">Action succeeded. Server response: %s</string>
+    <string name="action_failed_with_error_code">Action failed. Error code %d</string>
+    <string name="status_active">Status: monitoring location</string>
+    <string name="status_inactive">Status: inactive</string>
+    <string name="substatus_waiting_gps">Waiting for GPS fix</string>
+    <string name="substatus_inactive">Connect to charger to activate</string>
+    <string name="substatus_gps_time">"Last GPS fix received at "</string>
+    <string name="trigger_area" formatted="false" >Triggers when entering %d meters radius circular area with center in (%s,%s)</string>
+    <string name="trigger_transition" formatted="false" >Triggers when moving from %dm radius circular area with center in (%s,%s)  to %dm radius circular area with center in (%s,%s)</string>
+    <string name="trigger_invalid">Trigger not configured</string>
+    <string name="action_disabled">Action configured but disabled</string>
+    <string name="action_post_with_token" formatted="false" >Send POST request including Google Sign-In token to %s</string>
+    <string name="action_post" formatted="false" >Send POST request to %s</string>
+    <string name="action_invalid">Action not configured</string>
+    <string name="map_area_tag">Area</string>
+    <string name="map_from_tag">From</string>
+    <string name="map_to_tag">To</string>
+    <string name="trigger_validation_failed">Configuration is invalid or incomplete</string>
+    <string name="trigger_fired">You have passed the trigger area.</string>
+    <string name="action_started">"Action started."</string>
+    <string name="sticky_status_gps_time">"Last GPS fix received at "</string>
+    <string name="sticky_status_waiting_gps">Waiting for GPS fix</string>
+    <string name="sticky_title">GeoSwitch: monitoring location</string>
 </resources>

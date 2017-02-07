@@ -50,9 +50,9 @@ public class ActivityMap extends FragmentActivity implements OnMapReadyCallback,
                 .findFragmentById(R.id.activity_map);
         mapFragment.getMapAsync(this);
 
-        if(params.getTriggerType() == TriggerType.Bidirectional)
+        if(params.getTriggerType() == TriggerType.EnterArea)
             areaBuilder = new SingleAreaBuilder();
-        else
+        else if(params.getTriggerType() == TriggerType.Transition)
             areaBuilder = new DoubleAreaBuilder();
     }
 
@@ -61,7 +61,11 @@ public class ActivityMap extends FragmentActivity implements OnMapReadyCallback,
         map = googleMap;
 
         map.setOnMapLongClickListener(this);
-        map.setMyLocationEnabled(true);
+        try {
+            map.setMyLocationEnabled(true);
+        } catch(SecurityException e) {
+            // ignore
+        }
 
         float zoomLevel = GeoSwitchApp.getPreferences().getDefaultMapZoomLevel();
 
@@ -74,7 +78,12 @@ public class ActivityMap extends FragmentActivity implements OnMapReadyCallback,
         } else {
             LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
             Criteria criteria = new Criteria();
-            Location location = locationManager.getLastKnownLocation(locationManager.getBestProvider(criteria, false));
+            Location location = null;
+            try {
+                location = locationManager.getLastKnownLocation(locationManager.getBestProvider(criteria, false));
+            } catch (SecurityException e) {
+                // ignore
+            }
             if (location != null) {
                 LatLng ll = new LatLng(location.getLatitude(), location.getLongitude());
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(ll, zoomLevel));
@@ -113,10 +122,11 @@ public class ActivityMap extends FragmentActivity implements OnMapReadyCallback,
             cleanArea();
 
             LatLng ll = new LatLng(area.getLatitude(), area.getLongitude());
+            String areaTag = getString(R.string.map_area_tag);
 
             marker = map.addMarker(new MarkerOptions()
                     .position(ll)
-                    .icon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon("Area"))));
+                    .icon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon(areaTag))));
 
             int fillColor = Color.argb(50, 255, 255, 0);
             int strokeColor = Color.argb(255, 255, 255, 0);
@@ -210,7 +220,8 @@ public class ActivityMap extends FragmentActivity implements OnMapReadyCallback,
         }
 
         private void colorMarker(Marker marker, Circle circle, boolean isFrom) {
-            marker.setIcon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon(isFrom ? "From" : "To")));
+            String tag = getString(isFrom ? R.string.map_from_tag : R.string.map_to_tag);
+            marker.setIcon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon(tag)));
 
             int fillColor = isFrom ? Color.argb(50, 255, 255, 0) : Color.argb(50, 255, 127, 127);
             int strokeColor = isFrom ? Color.argb(255, 255, 255, 0) : Color.argb(255, 255, 127, 127);

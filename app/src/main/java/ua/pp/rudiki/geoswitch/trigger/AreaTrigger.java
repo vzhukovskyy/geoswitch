@@ -31,6 +31,9 @@ public class AreaTrigger implements GeoTrigger {
     }
 
     @Override
+    public TriggerType getType() { return TriggerType.EnterArea; }
+
+    @Override
     public void changeLocation(double latitude, double longitude) {
         GeoPoint point = new GeoPoint(latitude, longitude);
 

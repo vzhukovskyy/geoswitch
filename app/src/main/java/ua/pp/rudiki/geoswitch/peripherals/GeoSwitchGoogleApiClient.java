@@ -1,9 +1,7 @@
 package ua.pp.rudiki.geoswitch.peripherals;
 
 import android.content.Context;
-import android.content.Intent;
 import android.location.Location;
-import android.support.v4.app.FragmentActivity;
 
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -31,14 +29,20 @@ public class GeoSwitchGoogleApiClient {
 
     public void refreshToken(final AsyncResultCallback<Boolean> callback) {
         new Thread( new Runnable() { public void run() {
-            doRefreshToken(callback);
-        }}).start();
+                boolean isSuccess = doRefreshToken();
+                if (callback != null) {
+                    callback.onResult(isSuccess);
+                }
+            }}).start();
     }
 
     public void requestLastLocation(final AsyncResultCallback<Location> callback) {
         new Thread( new Runnable() { public void run() {
-            doRetrieveLastLocation(callback);
-        }}).start();
+                Location lastLocation = doRetrieveLastLocation();
+                if (callback != null) {
+                    callback.onResult(lastLocation);
+                }
+            }}).start();
     }
 
     public String getToken() {
@@ -57,9 +61,9 @@ public class GeoSwitchGoogleApiClient {
                 .build();
     }
 
-    private synchronized void doRefreshToken(final AsyncResultCallback<Boolean> callback) {
+    private synchronized boolean doRefreshToken() {
         try {
-            GeoSwitchApp.getGpsLog().log("Connecting to Google API for a token");
+            GeoSwitchApp.getLogger().log("Connecting to Google API for an updated token");
 
             ConnectionResult result = mGoogleApiClient.blockingConnect();
             if (result.isSuccess()) {
@@ -67,13 +71,10 @@ public class GeoSwitchGoogleApiClient {
                 if (signInResult != null) {
                     GoogleSignInAccount signInAccount = signInResult.getSignInAccount();
                     if (signInAccount != null) {
-                        GeoSwitchApp.getGpsLog().log("Token obtained");
+                        GeoSwitchApp.getLogger().log("Token obtained");
 
                         token = signInAccount.getIdToken();
-                        if (callback != null) {
-                            callback.onResult(true);
-                            return;
-                        }
+                        return true; // finally block will be executed before return
                     }
                 }
             }
@@ -81,30 +82,26 @@ public class GeoSwitchGoogleApiClient {
             mGoogleApiClient.disconnect();
         }
 
-        GeoSwitchApp.getGpsLog().log("Failed to obtain token");
-        callback.onResult(false);
+        GeoSwitchApp.getLogger().log("Failed to obtain token");
+        return false;
     }
 
-    private synchronized void doRetrieveLastLocation(final AsyncResultCallback<Location> callback) {
+    private synchronized Location doRetrieveLastLocation() {
         try {
-            GeoSwitchApp.getGpsLog().log("Connecting to Google API for last location");
+            GeoSwitchApp.getLogger().log("Connecting to Google API for last location");
 
             ConnectionResult result = mGoogleApiClient.blockingConnect();
             if (result.isSuccess()) {
                 Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-                GeoSwitchApp.getGpsLog().log("Last location obtained");
-
-                if (callback != null) {
-                    callback.onResult(lastLocation);
-                    return;
-                }
+                GeoSwitchApp.getLogger().log("Last location obtained");
+                return lastLocation;
             }
         } finally {
             mGoogleApiClient.disconnect();
         }
 
-        GeoSwitchApp.getGpsLog().log("Failed to obtain last location");
-        callback.onResult(null);
+        GeoSwitchApp.getLogger().log("Failed to obtain last location");
+        return null;
     }
 
 }

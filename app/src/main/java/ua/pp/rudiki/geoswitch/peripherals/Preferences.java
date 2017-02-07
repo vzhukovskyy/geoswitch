@@ -23,8 +23,6 @@ public class Preferences {
     public final static String actionEnabledKey = "actionEnabled";
     public final static String appendTokenKey = "appendToken";
     public final static String urlKey = "url";
-    public final static String applicationKey = "log";
-    public final static String gpsLogKey = "gpsLog";
 
 
     SharedPreferences sharedPrefs;
@@ -172,27 +170,6 @@ public class Preferences {
 
     public String getUrl() {
         return sharedPrefs.getString(urlKey, getDefaultUrl());
-    }
-
-
-    public void storeShortGpsLog(String text) {
-        SharedPreferences.Editor editor = sharedPrefs.edit();
-        editor.putString(gpsLogKey, text);
-        editor.commit();
-    }
-
-    public String getShortGpsLog() {
-        return sharedPrefs.getString(gpsLogKey, "");
-    }
-
-    public void storeShortAppLog(String text) {
-        SharedPreferences.Editor editor = sharedPrefs.edit();
-        editor.putString(applicationKey, text);
-        editor.commit();
-    }
-
-    public String getShortAppLog() {
-        return sharedPrefs.getString(applicationKey, "");
     }
 
     // generic accessors

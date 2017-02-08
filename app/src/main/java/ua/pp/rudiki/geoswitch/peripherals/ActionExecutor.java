@@ -52,7 +52,7 @@ public class ActionExecutor {
 
     private static void reportActionResult(String message) {
         GeoSwitchApp.getLogger().log(message);
-        GeoSwitchApp.getNotificationUtils().displayNotification(message, false);
+        GeoSwitchApp.getNotificationUtils().displayNotification(message);
         GeoSwitchApp.getSpeechUtils().speak(message);
     }
 

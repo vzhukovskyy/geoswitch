@@ -199,17 +199,9 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
             message = getString(R.string.sticky_status_waiting_gps);
         }
 
-        Intent notificationIntent = new Intent(this, ActivityMain.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
-
         // make service a foreground service
-        Notification notification = new Notification.Builder(this)
-                .setContentTitle(getString(R.string.sticky_title))
-                .setContentText(message)
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentIntent(pendingIntent)
-                .build();
-
+        Notification notification =
+                GeoSwitchApp.getNotificationUtils().displayStickyNotification(message);
         startForeground(ONGOING_NOTIFICATION_ID, notification);
     }
 
@@ -290,7 +282,7 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
                 notificationMessage += getString(R.string.action_started);
             }
 
-            GeoSwitchApp.getNotificationUtils().displayNotification(notificationMessage, false);
+            GeoSwitchApp.getNotificationUtils().displayNotification(notificationMessage);
             GeoSwitchApp.getSpeechUtils().speak(notificationMessage);
         }
     }

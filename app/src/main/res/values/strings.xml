@@ -24,9 +24,10 @@
     <string name="map_from_tag">From</string>
     <string name="map_to_tag">To</string>
     <string name="trigger_validation_failed">Configuration is invalid or incomplete</string>
-    <string name="trigger_fired">You have passed the trigger area.</string>
+    <string name="trigger_fired">You have entered the trigger area.</string>
     <string name="action_started">"Action started."</string>
     <string name="sticky_status_gps_time">"Last GPS fix received at "</string>
     <string name="sticky_status_waiting_gps">Waiting for GPS fix</string>
     <string name="sticky_title">GeoSwitch: monitoring location</string>
+    <string name="notification_title">GeoSwitch</string>
 </resources>

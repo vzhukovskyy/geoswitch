@@ -11,13 +11,53 @@
     tools:context="ua.pp.rudiki.geoswitch.ActivityAction">
 
     <CheckBox
-        android:text="Enable action"
+        android:text="Display notification"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:id="@+id/enableActionCheckbox" />
+        android:id="@+id/showNotificationCheckbox"
+        android:onClick="ensureCheckboxesCohere" />
+
+    <CheckBox
+        android:text="Play sound"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/showNotificationCheckbox"
+        android:layout_alignParentStart="true"
+        android:id="@+id/playSoundCheckbox"
+        android:layout_marginLeft="26dp"
+        android:onClick="ensureCheckboxesCohere" />
+
+    <CheckBox
+        android:text="Append Google sign-in token to URL"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/sendPostCheckbox"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:id="@+id/appendSigninCheckbox"
+        android:layout_marginLeft="26dp"
+        android:onClick="ensureCheckboxesCohere" />
+
+    <CheckBox
+        android:text="Speak out"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/playSoundCheckbox"
+        android:layout_alignParentStart="true"
+        android:id="@+id/speakOutCheckbox"
+        android:onClick="ensureCheckboxesCohere" />
+
+    <CheckBox
+        android:text="Send HTTP POST request"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/speakOutCheckbox"
+        android:layout_alignParentStart="true"
+        android:id="@+id/sendPostCheckbox"
+        android:onClick="ensureCheckboxesCohere" />
 
     <Button
         android:text="Launch action now"
@@ -28,33 +68,6 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:onClick="onLaunchActionClick" />
-
-    <CheckBox
-        android:text="Append Google sign-in token to URL"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/enableActionCheckbox"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:id="@+id/appendSigninCheckbox" />
-
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="100dp"
-        android:ems="10"
-        android:id="@+id/urlEdit"
-        android:textSize="14sp"
-        android:hint="POST URL"
-        style="@style/Widget.AppCompat.EditText"
-        android:gravity="top|left"
-        android:layout_below="@+id/appendSigninCheckbox"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:maxLines="20"
-        android:imeOptions="actionDone"
-        android:inputType="textMultiLine" />
 
     <LinearLayout
         android:orientation="horizontal"
@@ -81,4 +94,21 @@
             android:layout_weight="1"
             android:onClick="onCancelClick" />
     </LinearLayout>
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="100dp"
+        android:ems="10"
+        android:id="@+id/urlEdit"
+        android:textSize="14sp"
+        android:hint="POST URL"
+        style="@style/Widget.AppCompat.EditText"
+        android:gravity="top|left"
+        android:maxLines="20"
+        android:imeOptions="actionDone"
+        android:inputType="textMultiLine"
+        android:layout_below="@+id/appendSigninCheckbox"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true" />
+
 </RelativeLayout>

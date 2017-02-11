@@ -20,7 +20,10 @@ public class Preferences {
     public final static String longitudeToKey = "longitudeTo";
     public final static String radiusKey = "radius";
 
-    public final static String actionEnabledKey = "actionEnabled";
+    public final static String showNotificationKey = "showNotification";
+    public final static String playSoundKey = "playSound";
+    public final static String speakOutKey = "speakOut";
+    public final static String sendPostKey = "sendPost";
     public final static String appendTokenKey = "appendToken";
     public final static String urlKey = "url";
 
@@ -111,9 +114,14 @@ public class Preferences {
         return a2bTrigger;
     }
 
-    public void storeAction(boolean enabled, boolean appendToken, String url) {
+    public void storeAction(boolean showNotification, boolean playSound, boolean speakOut,
+                            boolean sendPost, boolean appendToken, String url)
+    {
         SharedPreferences.Editor editor = sharedPrefs.edit();
-        editor.putBoolean(actionEnabledKey, enabled);
+        editor.putBoolean(showNotificationKey, showNotification);
+        editor.putBoolean(playSoundKey, playSound);
+        editor.putBoolean(speakOutKey, speakOut);
+        editor.putBoolean(sendPostKey, sendPost);
         editor.putBoolean(appendTokenKey, appendToken);
         editor.putString(urlKey, url);
         editor.commit();
@@ -160,8 +168,18 @@ public class Preferences {
         return getDouble(radiusKey, getDefaultRadius());
     }
 
-    public boolean getActionEnabled() {
-        return sharedPrefs.getBoolean(actionEnabledKey, true);
+    public boolean getShowNotification() {
+        return sharedPrefs.getBoolean(showNotificationKey, true);
+    }
+
+    public boolean getPlaySound() { return sharedPrefs.getBoolean(playSoundKey, true); }
+
+    public boolean getSpeakOut() {
+        return sharedPrefs.getBoolean(speakOutKey, true);
+    }
+
+    public boolean getSendPost() {
+        return sharedPrefs.getBoolean(sendPostKey, true);
     }
 
     public boolean getAppendToken() {

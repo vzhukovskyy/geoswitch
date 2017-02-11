@@ -7,7 +7,7 @@
     <string name="action_failed_refresh_token">Action failed. Could not connect to google server.</string>
     <string name="action_failed_no_internet">Action failed. No connection to internet</string>
     <string name="action_succeeded_with_server_response">Action succeeded. Server response: %s</string>
-    <string name="action_failed_with_error_code">Action failed. Error code %d</string>
+    <string name="action_failed_with_error_code">Action failed. HTTP error code %d</string>
     <string name="status_active">Status: monitoring location</string>
     <string name="status_inactive">Status: inactive</string>
     <string name="substatus_waiting_gps">Waiting for GPS fix</string>
@@ -16,7 +16,6 @@
     <string name="trigger_area" formatted="false" >Triggers when entering %d meters radius circular area with center in (%s,%s)</string>
     <string name="trigger_transition" formatted="false" >Triggers when moving from %dm radius circular area with center in (%s,%s)  to %dm radius circular area with center in (%s,%s)</string>
     <string name="trigger_invalid">Trigger not configured</string>
-    <string name="action_disabled">Action configured but disabled</string>
     <string name="action_post_with_token" formatted="false" >Send POST request including Google Sign-In token to %s</string>
     <string name="action_post" formatted="false" >Send POST request to %s</string>
     <string name="action_invalid">Action not configured</string>
@@ -30,4 +29,7 @@
     <string name="sticky_status_waiting_gps">Waiting for GPS fix</string>
     <string name="sticky_title">GeoSwitch: monitoring location</string>
     <string name="notification_title">GeoSwitch</string>
+    <string name="action_display_notification">Display notification</string>
+    <string name="action_play_sound">Play notification sound</string>
+    <string name="action_speak_out">Speak out</string>
 </resources>

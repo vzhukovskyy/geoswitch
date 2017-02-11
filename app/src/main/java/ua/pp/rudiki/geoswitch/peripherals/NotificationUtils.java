@@ -35,7 +35,7 @@ public class NotificationUtils {
         return notification;
     }
 
-    public void displayNotification(String text) {
+    public void displayNotification(String text, boolean playSound) {
         Context context = GeoSwitchApp.getAppContext();
 
         Intent intent = new Intent(context, ActivityMain.class);
@@ -47,7 +47,7 @@ public class NotificationUtils {
                 .setContentTitle(context.getString(R.string.notification_title))
                 .setContentText(text)
                 .setContentIntent(resultPendingIntent)
-                //.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+                .setSound(playSound ? RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION) : null)
                 .setAutoCancel(true)
                 .build();
 

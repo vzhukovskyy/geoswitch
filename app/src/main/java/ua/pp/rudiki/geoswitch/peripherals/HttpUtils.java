@@ -51,18 +51,19 @@ public class HttpUtils {
         public String responseBody;
     };
 
-    public void sendPostAsync(String url, AsyncResultCallback<PostResult> callback) {
+    public void sendPostAsync(String url, String token, AsyncResultCallback<PostResult> callback) {
+        boolean appendToken = (token != null);
+        GeoSwitchApp.getLogger().log("Sending POST request to "+url+", appendToken="+appendToken);
 
-        GeoSwitchApp.getLogger().log("Sending POST request to "+url);
-
-        String newUrl = url;
-        PostJob job = new PostJob(callback);
-
-        if(GeoSwitchApp.getPreferences().getAppendToken()) {
+        String newUrl;
+        if(token != null && !token.isEmpty()) {
             Character separator = (url.indexOf('?') != -1) ? '&' : '?';
             newUrl = url + separator + "access_token=" + GeoSwitchApp.getGeoSwitchGoogleApiClient().getToken();
+        } else {
+            newUrl = url;
         }
 
+        PostJob job = new PostJob(callback);
         job.execute(newUrl);
     }
 

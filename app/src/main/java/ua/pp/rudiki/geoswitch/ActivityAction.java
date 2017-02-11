@@ -14,7 +14,7 @@ public class ActivityAction extends AppCompatActivity {
 
     public String TAG = getClass().getSimpleName();
 
-    CheckBox actionEnabledCheckbox, appendSigninCheckbox;
+    CheckBox showNotificationCheckbox, playSoundCheckbox, speakOutCheckbox, sendPostCheckbox, appendSigninCheckbox;
     EditText urlEdit;
 
     @Override
@@ -22,7 +22,10 @@ public class ActivityAction extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_action);
 
-        actionEnabledCheckbox = (CheckBox)findViewById(R.id.enableActionCheckbox);
+        showNotificationCheckbox = (CheckBox)findViewById(R.id.showNotificationCheckbox);
+        playSoundCheckbox = (CheckBox)findViewById(R.id.playSoundCheckbox);
+        speakOutCheckbox = (CheckBox)findViewById(R.id.speakOutCheckbox);
+        sendPostCheckbox = (CheckBox)findViewById(R.id.sendPostCheckbox);
         appendSigninCheckbox = (CheckBox)findViewById(R.id.appendSigninCheckbox);
         urlEdit = (EditText)findViewById(R.id.urlEdit);
 
@@ -46,27 +49,54 @@ public class ActivityAction extends AppCompatActivity {
     public void onLaunchActionClick(View view) {
         GeoSwitchApp.getLogger().log("User launched action");
 
-        String url = urlEdit.getText().toString();
-        ActionExecutor.execute(url);
+        new ActionExecutor(showNotificationCheckbox.isChecked(),
+                playSoundCheckbox.isChecked(),
+                speakOutCheckbox.isChecked(),
+                sendPostCheckbox.isChecked(),
+                appendSigninCheckbox.isChecked(),
+                urlEdit.getText().toString()
+        ).execute();
     }
 
     // data persistence
 
     private void storeValues() {
         GeoSwitchApp.getPreferences().storeAction(
-            actionEnabledCheckbox.isChecked(),
+            showNotificationCheckbox.isChecked(),
+            playSoundCheckbox.isChecked(),
+            speakOutCheckbox.isChecked(),
+            sendPostCheckbox.isChecked(),
             appendSigninCheckbox.isChecked(),
             urlEdit.getText().toString()
         );
     }
 
     private void loadValuesToUi() {
-        boolean actionEnabled = GeoSwitchApp.getPreferences().getActionEnabled();
+        boolean showNotification = GeoSwitchApp.getPreferences().getShowNotification();
+        boolean playSound = GeoSwitchApp.getPreferences().getPlaySound();
+        boolean speakOut = GeoSwitchApp.getPreferences().getSpeakOut();
+        boolean sendPost = GeoSwitchApp.getPreferences().getSendPost();
         boolean appendSignin = GeoSwitchApp.getPreferences().getAppendToken();
         String url = GeoSwitchApp.getPreferences().getUrl();
 
-        actionEnabledCheckbox.setChecked(actionEnabled);
+        showNotificationCheckbox.setChecked(showNotification);
+        playSoundCheckbox.setChecked(playSound);
+        speakOutCheckbox.setChecked(speakOut);
+        sendPostCheckbox.setChecked(sendPost);
         appendSigninCheckbox.setChecked(appendSignin);
         urlEdit.setText(url);
+
+        ensureCheckboxesCohere(null);
+    }
+
+    public void ensureCheckboxesCohere(View activeView) {
+        playSoundCheckbox.setEnabled(showNotificationCheckbox.isChecked());
+        appendSigninCheckbox.setEnabled(sendPostCheckbox.isChecked());
+        if(playSoundCheckbox.isChecked() && speakOutCheckbox.isChecked()) {
+            if(activeView == playSoundCheckbox)
+                speakOutCheckbox.setChecked(false);
+            else if(activeView == speakOutCheckbox)
+                playSoundCheckbox.setChecked(false);
+        }
     }
 }

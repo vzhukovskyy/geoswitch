@@ -181,28 +181,56 @@ public class ActivityMain extends AppCompatActivity implements GoogleApiClient.O
     }
 
     private void loadActionToUi() {
-        boolean actionEnabled = GeoSwitchApp.getPreferences().getActionEnabled();
+        boolean showNotification = GeoSwitchApp.getPreferences().getShowNotification();
+        boolean playSound = GeoSwitchApp.getPreferences().getPlaySound();
+        boolean speakOut = GeoSwitchApp.getPreferences().getSpeakOut();
+        boolean sendPost = GeoSwitchApp.getPreferences().getSendPost();
         boolean appendSignin = GeoSwitchApp.getPreferences().getAppendToken();
         String url = GeoSwitchApp.getPreferences().getUrl();
 
-        String desc;
-        if(!TextUtils.isEmpty(url)) {
-            if (!actionEnabled) {
-                desc = getString(R.string.action_disabled);
-            } else {
-                if(appendSignin) {
-                    desc = getString(R.string.action_post_with_token);
-                } else {
-                    desc = getString(R.string.action_post);
-                }
-                desc = new Formatter().format(desc, url).toString();
-            }
+        String desc = "";
+        if (showNotification) {
+            desc = appendActionDescription(desc, getString(R.string.action_display_notification));
+            if(playSound)
+                desc = appendActionDescription(desc, getString(R.string.action_play_sound));
         }
-        else {
-            desc = getString(R.string.action_invalid);
+        if (speakOut) {
+            desc = appendActionDescription(desc, getString(R.string.action_speak_out));
+        }
+
+        if (sendPost) {
+            String format;
+            if (appendSignin) {
+                format = getString(R.string.action_post_with_token);
+            } else {
+                format = getString(R.string.action_post);
+            }
+            String postActionDesc = new Formatter().format(format, url).toString();
+            desc = appendActionDescription(desc, postActionDesc);
         }
 
         actionEdit.setText(desc);
+    }
+
+    private String appendActionDescription(String wholeDescription, String actionDescription) {
+        if(wholeDescription != null && !wholeDescription.isEmpty()) {
+            return wholeDescription + ", " + decapitalize(actionDescription);
+        }
+        else {
+            return capitalize(actionDescription);
+        }
+    }
+
+    private String capitalize(String message) {
+        if(message != null && !message.isEmpty()) {
+            return Character.toUpperCase(message.charAt(0)) + message.substring(1);
+        } else {
+            return message;
+        }
+    }
+
+    private String decapitalize(String message) {
+        return Character.toLowerCase(message.charAt(0)) + message.substring(1);
     }
 
     // Google sign-in

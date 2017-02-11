@@ -36,9 +36,9 @@ public class SpeechUtils {
     public void speak(String text){
         if(ttsReady) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, null);
+                tts.speak(text, TextToSpeech.QUEUE_ADD, null, null);
             } else {
-                tts.speak(text, TextToSpeech.QUEUE_FLUSH, null);
+                tts.speak(text, TextToSpeech.QUEUE_ADD, null);
             }
         }
     }

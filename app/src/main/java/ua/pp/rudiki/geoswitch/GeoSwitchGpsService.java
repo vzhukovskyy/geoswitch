@@ -276,20 +276,8 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
 
         if (triggered) {
             GeoSwitchApp.getLogger().log("Trigger fired");
-            String notificationMessage = getString(R.string.trigger_fired);
-            if(GeoSwitchApp.getPreferences().getActionEnabled()) {
-                executeAction();
-                notificationMessage += getString(R.string.action_started);
-            }
-
-            GeoSwitchApp.getNotificationUtils().displayNotification(notificationMessage);
-            GeoSwitchApp.getSpeechUtils().speak(notificationMessage);
+            new ActionExecutor().execute();
         }
-    }
-
-    void executeAction() {
-        String url = GeoSwitchApp.getPreferences().getUrl();
-        ActionExecutor.execute(url);
     }
 
     // ***********************************************

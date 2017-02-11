@@ -1,8 +1,10 @@
 package ua.pp.rudiki.geoswitch;
 
 import android.app.Application;
+import android.app.Notification;
 import android.content.Context;
 
+import ua.pp.rudiki.geoswitch.peripherals.ActionExecutor;
 import ua.pp.rudiki.geoswitch.peripherals.GeoSwitchGoogleApiClient;
 import ua.pp.rudiki.geoswitch.peripherals.GeoSwitchLog;
 import ua.pp.rudiki.geoswitch.peripherals.HttpUtils;
@@ -57,5 +59,4 @@ public class GeoSwitchApp extends Application {
     public static SpeechUtils getSpeechUtils() {
         return speechUtils;
     }
-
 }

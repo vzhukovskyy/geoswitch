@@ -27,7 +27,7 @@
         </activity>
 
         <service
-            android:name=".GeoSwitchGpsService"
+            android:name=".service.GeoSwitchGpsService"
             android:enabled="true"
             android:exported="true" />
         <!--
@@ -50,14 +50,18 @@
             android:label="@string/title_activity_maps" />
         <activity
             android:name=".ActivityAction"
-            android:label="@string/title_activity_action"></activity>
+            android:label="@string/title_activity_action" />
+        <activity
+            android:name=".ActivityGpsOptions"
+            android:label="@string/title_activity_gps_options" />
 
-        <receiver android:name=".PowerReceiver">
+        <receiver android:name=".peripherals.PowerReceiver">
             <intent-filter>
-                <action android:name="android.intent.action.ACTION_POWER_CONNECTED"/>
-                <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED"/>
+                <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />
+                <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED" />
             </intent-filter>
         </receiver>
+
     </application>
 
 </manifest>

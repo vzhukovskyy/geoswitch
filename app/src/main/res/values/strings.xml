@@ -4,6 +4,7 @@
     <string name="title_activity_trigger">GeoSwitch/Trigger</string>
     <string name="title_activity_main">GeoSwitch</string>
     <string name="title_activity_action">GeoSwitch/Action</string>
+    <string name="title_activity_gps_options">GeoSwitch/GPS Options</string>
     <string name="action_failed_refresh_token">Action failed. Could not connect to google server.</string>
     <string name="action_failed_no_internet">Action failed. No connection to internet</string>
     <string name="action_succeeded_with_server_response">Action succeeded. Server response: %s</string>
@@ -11,13 +12,13 @@
     <string name="status_active">Status: monitoring location</string>
     <string name="status_inactive">Status: inactive</string>
     <string name="substatus_waiting_gps">Waiting for GPS fix</string>
-    <string name="substatus_inactive">Connect to charger to activate</string>
+    <string name="substatus_bycharger_inactive">Connect to charger to activate</string>
     <string name="substatus_gps_time">"Last GPS fix received at "</string>
-    <string name="trigger_area" formatted="false" >Triggers when entering %d meters radius circular area with center in (%s,%s)</string>
-    <string name="trigger_transition" formatted="false" >Triggers when moving from %dm radius circular area with center in (%s,%s)  to %dm radius circular area with center in (%s,%s)</string>
+    <string name="trigger_area" formatted="false">Triggers when entering %d meters radius circular area with center in (%s,%s)</string>
+    <string name="trigger_transition" formatted="false">Triggers when moving from %dm radius circular area with center in (%s,%s)  to %dm radius circular area with center in (%s,%s)</string>
     <string name="trigger_invalid">Trigger not configured</string>
-    <string name="action_post_with_token" formatted="false" >Send POST request including Google Sign-In token to %s</string>
-    <string name="action_post" formatted="false" >Send POST request to %s</string>
+    <string name="action_post_with_token" formatted="false">Send POST request including Google Sign-In token to %s</string>
+    <string name="action_post" formatted="false">Send POST request to %s</string>
     <string name="action_invalid">Action not configured</string>
     <string name="map_area_tag">Area</string>
     <string name="map_from_tag">From</string>
@@ -32,4 +33,7 @@
     <string name="action_display_notification">Display notification</string>
     <string name="action_play_sound">Play notification sound</string>
     <string name="action_speak_out">Speak out</string>
+    <string name="gps_charging">GPS sensor is only turned on when the device is connected to charger</string>
+    <string name="gps_manual">GPS sensor activation is controlled manually</string>
+    <string name="substatus_manual_inactive">Switch on to activate</string>
 </resources>

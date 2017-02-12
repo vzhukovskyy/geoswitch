@@ -1,4 +1,4 @@
-package ua.pp.rudiki.geoswitch;
+package ua.pp.rudiki.geoswitch.peripherals;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -6,23 +6,19 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.BatteryManager;
 
+import ua.pp.rudiki.geoswitch.GeoSwitchApp;
+
 public class PowerReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        String logMessage;
         if(intent.getAction() == Intent.ACTION_POWER_CONNECTED) {
-            logMessage = "Power Connected";
+            GeoSwitchApp.getLogger().log("Power Connected");
+            GeoSwitchApp.getGpsServiceActivator().connectedToCharger();
         } else if(intent.getAction() == Intent.ACTION_POWER_DISCONNECTED){
-            logMessage = "Power Disconnected";
-        } else {
-            logMessage = "Not recognized event";
+            GeoSwitchApp.getLogger().log("Power Disconnected");
+            GeoSwitchApp.getGpsServiceActivator().disconnectedFromCharger();
         }
-
-        GeoSwitchApp.getLogger().log(logMessage);
-
-        Intent serviceIntent = new Intent(context, GeoSwitchGpsService.class);
-        context.startService(serviceIntent);
     }
 
     public static boolean isCharging(Context context) {

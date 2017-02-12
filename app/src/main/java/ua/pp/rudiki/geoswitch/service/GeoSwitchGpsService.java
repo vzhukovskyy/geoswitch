@@ -1,7 +1,6 @@
-package ua.pp.rudiki.geoswitch;
+package ua.pp.rudiki.geoswitch.service;
 
 import android.app.Notification;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -15,6 +14,8 @@ import android.util.Log;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import ua.pp.rudiki.geoswitch.GeoSwitchApp;
+import ua.pp.rudiki.geoswitch.R;
 import ua.pp.rudiki.geoswitch.peripherals.ActionExecutor;
 import ua.pp.rudiki.geoswitch.peripherals.AsyncResultCallback;
 import ua.pp.rudiki.geoswitch.trigger.GeoTrigger;
@@ -62,7 +63,7 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
         GeoTrigger newTrigger = loadTrigger();
 
         // copies which can be used outside of synchronized block
-        boolean frozenActiveMode = PowerReceiver.isCharging(GeoSwitchApp.getAppContext());
+        boolean frozenActiveMode = GeoSwitchApp.getGpsServiceActivator().isOn();
         Location frozenLastLocation;
 
         boolean switchToNewTrigger = false;

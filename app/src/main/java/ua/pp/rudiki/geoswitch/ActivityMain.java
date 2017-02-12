@@ -9,10 +9,10 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import com.google.android.gms.auth.api.Auth;
@@ -27,18 +27,24 @@ import java.util.Date;
 import java.util.Formatter;
 
 import ua.pp.rudiki.geoswitch.peripherals.ConversionUtils;
+import ua.pp.rudiki.geoswitch.service.GpsServiceActivationListener;
+import ua.pp.rudiki.geoswitch.service.GeoSwitchGpsService;
 import ua.pp.rudiki.geoswitch.trigger.TriggerType;
 
 
-public class ActivityMain extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
+public class ActivityMain extends AppCompatActivity implements
+        GoogleApiClient.OnConnectionFailedListener, GpsServiceActivationListener
+{
     final String TAG = getClass().getSimpleName();
 
     private final int RC_SIGN_IN = 9002;
+    private final static int CONFIGURE_GPSACTIVATION_ID = 9010;
     private final static int CONFIGURE_TRIGGER_ID = 9011;
     private final static int CONFIGURE_ACTION_ID = 9012;
 
-    EditText triggerEdit, actionEdit;
+    EditText gpsActivationEdit, triggerEdit, actionEdit;
     TextView statusLabel, substatusLabel;
+    Switch gpsActivationSwitch;
 
     private SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 
@@ -49,12 +55,17 @@ public class ActivityMain extends AppCompatActivity implements GoogleApiClient.O
 
         Log.d(TAG, "onCreate");
 
+        gpsActivationEdit = (EditText)findViewById(R.id.gpsActivationDescriptionEdit);
+        gpsActivationEdit.setKeyListener(null);
+        gpsActivationSwitch = (Switch)findViewById(R.id.gpsActivationSwitch);
         triggerEdit = (EditText)findViewById(R.id.triggerDescriptionEdit);
         triggerEdit.setKeyListener(null);
         actionEdit = (EditText)findViewById(R.id.actionDescriptionEdit);
         actionEdit.setKeyListener(null);
         statusLabel = (TextView)findViewById(R.id.statusLabel);
         substatusLabel = (TextView)findViewById(R.id.substatusLabel);
+
+        GeoSwitchApp.getGpsServiceActivator().registerListener(this);
 
         signIn();
         registerServiceMessageReceiver();
@@ -69,6 +80,8 @@ public class ActivityMain extends AppCompatActivity implements GoogleApiClient.O
 
         loadAreaToUi();
         loadActionToUi();
+        loadGpsActivationToUi();
+        updateActivationModeUi();
     }
 
     @Override
@@ -112,6 +125,22 @@ public class ActivityMain extends AppCompatActivity implements GoogleApiClient.O
         startActivity(intent);
     }
 
+    public void onGpsOptionsClick(View view) {
+        Intent intent = new Intent(this, ActivityGpsOptions.class);
+        startActivityForResult(intent, CONFIGURE_GPSACTIVATION_ID);
+    }
+
+    public void onGpsActivateButtonClick(View view) {
+        boolean checked = gpsActivationSwitch.isChecked();
+
+        GeoSwitchApp.getPreferences().storeGpsManuallyActivated(checked);
+        if(checked)
+            GeoSwitchApp.getGpsServiceActivator().switchedOnManually();
+        else
+            GeoSwitchApp.getGpsServiceActivator().switchedOffManually();
+    }
+
+
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.d(TAG, "onActivityResult requestCode="+requestCode+", resultCode="+resultCode);
         if (requestCode == CONFIGURE_TRIGGER_ID) {
@@ -126,13 +155,26 @@ public class ActivityMain extends AppCompatActivity implements GoogleApiClient.O
                 passValuesToService();
             }
         }
+        else if (requestCode == CONFIGURE_GPSACTIVATION_ID) {
+            if (resultCode == RESULT_OK) {
+                GeoSwitchApp.getGpsServiceActivator().activationModeChanged();
+
+                loadGpsActivationToUi();
+                updateActivationModeUi();
+                updateStatusUi(null);
+                passValuesToService();
+            }
+        }
         else if (requestCode == RC_SIGN_IN) {
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             handleSignInResult(result);
         }
     }
 
-    private void updateUiStatus(boolean active, Date gpsFixTime) {
+    private void updateStatusUi(Date gpsFixTime) {
+        boolean active = GeoSwitchApp.getGpsServiceActivator().isOn();
+        boolean activateOnCharger = GeoSwitchApp.getPreferences().getActivateOnCharger();
+
         String status, substatus;
         if(active) {
             status = getString(R.string.status_active);
@@ -143,11 +185,23 @@ public class ActivityMain extends AppCompatActivity implements GoogleApiClient.O
             }
         } else {
             status = getString(R.string.status_inactive);
-            substatus = getString(R.string.substatus_inactive);
+            if(activateOnCharger) {
+                substatus = getString(R.string.substatus_bycharger_inactive);
+            } else {
+                substatus = getString(R.string.substatus_manual_inactive);
+            }
         }
 
         statusLabel.setText(status);
         substatusLabel.setText(substatus);
+    }
+
+    private void updateActivationModeUi() {
+        boolean activateOnCharger = GeoSwitchApp.getPreferences().getActivateOnCharger();
+        boolean manuallyActivated = GeoSwitchApp.getPreferences().getGpsManuallyActivated();
+
+        gpsActivationSwitch.setVisibility(activateOnCharger ? View.GONE : View.VISIBLE);
+        gpsActivationSwitch.setChecked(manuallyActivated);
     }
 
     // data persistence
@@ -210,6 +264,19 @@ public class ActivityMain extends AppCompatActivity implements GoogleApiClient.O
         }
 
         actionEdit.setText(desc);
+    }
+
+    private void loadGpsActivationToUi() {
+        boolean activateOnCharger = GeoSwitchApp.getPreferences().getActivateOnCharger();
+
+        String desc = "";
+        if (activateOnCharger) {
+            desc = getString(R.string.gps_charging);
+        } else {
+            desc = getString(R.string.gps_manual);
+        }
+
+        gpsActivationEdit.setText(desc);
     }
 
     private String appendActionDescription(String wholeDescription, String actionDescription) {
@@ -299,8 +366,20 @@ public class ActivityMain extends AppCompatActivity implements GoogleApiClient.O
                         date = new Date(timestamp);
                     }
                 }
-                updateUiStatus(activeMode, date);
+                updateStatusUi(date);
             }
         }
     };
+
+    // GpsServiceActivationListener implementation
+
+    @Override
+    public void onActivated() {
+        updateActivationModeUi();
+    }
+
+    @Override
+    public void onDeactivated() {
+        updateActivationModeUi();
+    }
 }

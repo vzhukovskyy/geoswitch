@@ -27,6 +27,8 @@ public class Preferences {
     public final static String appendTokenKey = "appendToken";
     public final static String urlKey = "url";
 
+    public final static String activateOnChargerKey = "activateOnCharger";
+    public final static String gpsManuallyActivatedKey = "gpsManuallyActivated";
 
     SharedPreferences sharedPrefs;
 
@@ -127,6 +129,20 @@ public class Preferences {
         editor.commit();
     }
 
+    public void storeActivationOptions(boolean activateOnCharger)
+    {
+        SharedPreferences.Editor editor = sharedPrefs.edit();
+        editor.putBoolean(activateOnChargerKey, activateOnCharger);
+        editor.commit();
+    }
+
+    public void storeGpsManuallyActivated(boolean activated)
+    {
+        SharedPreferences.Editor editor = sharedPrefs.edit();
+        editor.putBoolean(gpsManuallyActivatedKey, activated);
+        editor.commit();
+    }
+
 
     public String getLatitudeAsString() {
         return sharedPrefs.getString(latitudeKey, "");
@@ -189,6 +205,12 @@ public class Preferences {
     public String getUrl() {
         return sharedPrefs.getString(urlKey, getDefaultUrl());
     }
+
+    public boolean getActivateOnCharger() {
+        return sharedPrefs.getBoolean(activateOnChargerKey, false);
+    }
+
+    public boolean getGpsManuallyActivated() { return sharedPrefs.getBoolean(gpsManuallyActivatedKey, false); }
 
     // generic accessors
 

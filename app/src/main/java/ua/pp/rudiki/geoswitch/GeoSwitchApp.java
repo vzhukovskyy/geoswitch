@@ -1,12 +1,11 @@
 package ua.pp.rudiki.geoswitch;
 
 import android.app.Application;
-import android.app.Notification;
 import android.content.Context;
 
-import ua.pp.rudiki.geoswitch.peripherals.ActionExecutor;
 import ua.pp.rudiki.geoswitch.peripherals.GeoSwitchGoogleApiClient;
 import ua.pp.rudiki.geoswitch.peripherals.GeoSwitchLog;
+import ua.pp.rudiki.geoswitch.service.GpsServiceActivator;
 import ua.pp.rudiki.geoswitch.peripherals.HttpUtils;
 import ua.pp.rudiki.geoswitch.peripherals.NotificationUtils;
 import ua.pp.rudiki.geoswitch.peripherals.Preferences;
@@ -20,6 +19,7 @@ public class GeoSwitchApp extends Application {
     private static GeoSwitchLog geoSwitchLog;
     private static NotificationUtils notificationUtils;
     private static SpeechUtils speechUtils;
+    private static GpsServiceActivator gpsServiceActivator;
 
     public void onCreate() {
         super.onCreate();
@@ -30,6 +30,7 @@ public class GeoSwitchApp extends Application {
         geoSwitchLog = new GeoSwitchLog(context);
         notificationUtils = new NotificationUtils();
         speechUtils = new SpeechUtils(context);
+        gpsServiceActivator = new GpsServiceActivator(context);
     }
 
     public static Context getAppContext() {
@@ -59,4 +60,6 @@ public class GeoSwitchApp extends Application {
     public static SpeechUtils getSpeechUtils() {
         return speechUtils;
     }
+
+    public static GpsServiceActivator getGpsServiceActivator() { return gpsServiceActivator; }
 }

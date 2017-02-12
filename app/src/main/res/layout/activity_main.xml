@@ -58,7 +58,7 @@
             android:singleLine="false"
             android:gravity="top|left"
             android:textSize="12sp"
-            android:layout_below="@+id/openLogButton"
+            android:layout_below="@+id/configureActivationButton"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_alignParentRight="true"
@@ -72,10 +72,9 @@
             android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"
             android:textSize="18sp"
-            android:paddingLeft="4dp" />
+            android:paddingLeft="4dp"
+            android:layout_toStartOf="@+id/gpsActivationSwitch" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -84,11 +83,42 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:id="@+id/substatusLabel"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"
             android:paddingLeft="12dp"
             android:textSize="12sp"
-            android:paddingTop="3dp" />
+            android:paddingTop="3dp"
+            android:layout_toStartOf="@+id/gpsActivationSwitch"
+            android:layout_alignParentEnd="true" />
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:text="GPS activation not set"
+            android:ems="10"
+            android:layout_below="@+id/openLogButton"
+            android:id="@+id/gpsActivationDescriptionEdit"
+            android:textSize="12sp"
+            android:gravity="top|left"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentStart="true"
+            android:inputType="textMultiLine"
+            android:layout_height="55dp"
+            android:layout_marginTop="10dp" />
+
+        <Button
+            android:text="GPS options"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/configureActivationButton"
+            android:layout_below="@+id/gpsActivationDescriptionEdit"
+            android:layout_alignParentEnd="true"
+            android:onClick="onGpsOptionsClick" />
+
+        <Switch
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/gpsActivationSwitch"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:onClick="onGpsActivateButtonClick" />
 
         <Button
             android:text="Open Log"
@@ -96,9 +126,8 @@
             android:layout_height="wrap_content"
             android:id="@+id/openLogButton"
             android:onClick="onOpenLogButtonClick"
-            android:layout_below="@+id/substatusLabel"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true" />
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentStart="true" />
 
     </RelativeLayout>
 </ScrollView>

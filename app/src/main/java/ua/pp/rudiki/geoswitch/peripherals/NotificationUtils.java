@@ -42,7 +42,7 @@ public class NotificationUtils {
         PendingIntent resultPendingIntent = PendingIntent.getActivity(context, NOTIFICATION_ID, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         Notification notification = new Notification.Builder(context)
-                .setSmallIcon(R.mipmap.geoswitch_bold_inverse)
+                .setSmallIcon(R.mipmap.geoswitch_bold_idea_inverse)
                 .setColor(Color.rgb(0,100,0))
                 .setContentTitle(context.getString(R.string.notification_title))
                 .setContentText(text)

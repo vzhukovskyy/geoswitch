@@ -23,11 +23,11 @@ import static org.mockito.Mockito.when;
 // 21 test total
 //*******************************************************************************
 
-public class A2BTriggerTest {
+public class TransitionTriggerTest {
 
     private static GeoPoint mockedGeoPointA;
     private static GeoPoint mockedGeoPointB;
-    private A2BTrigger a2bTrigger;
+    private TransitionTrigger transitionTrigger;
 
     @BeforeClass
     public static void initMocks() {
@@ -63,149 +63,149 @@ public class A2BTriggerTest {
         mockedGeoPointB.latitude = 10;
         mockedGeoPointB.longitude = 11;
 
-        a2bTrigger = new A2BTrigger(mockedGeoPointA, mockedGeoPointB);
+        transitionTrigger = new TransitionTrigger(mockedGeoPointA, mockedGeoPointB);
     }
 
     @Test
     public void testEmpty() {
-        assertFalse(a2bTrigger.isTriggered());
+        assertFalse(transitionTrigger.isTriggered());
     }
 
     @Test
     public void testInitialOutside() {
-        a2bTrigger.changeLocation(10,7);
-        assertFalse(a2bTrigger.isTriggered());
+        transitionTrigger.changeLocation(10,7);
+        assertFalse(transitionTrigger.isTriggered());
     }
 
     @Test
     public void testInitialInsideA() {
-        a2bTrigger.changeLocation(10,9.5);
-        assertFalse(a2bTrigger.isTriggered());
+        transitionTrigger.changeLocation(10,9.5);
+        assertFalse(transitionTrigger.isTriggered());
     }
 
     @Test
     public void testInitialInsideAB() {
-        a2bTrigger.changeLocation(10,10.5);
-        assertFalse(a2bTrigger.isTriggered());
+        transitionTrigger.changeLocation(10,10.5);
+        assertFalse(transitionTrigger.isTriggered());
     }
 
     @Test
     public void testInitialInsideB() {
-        a2bTrigger.changeLocation(10,11.5);
-        assertFalse(a2bTrigger.isTriggered());
+        transitionTrigger.changeLocation(10,11.5);
+        assertFalse(transitionTrigger.isTriggered());
     }
 
     @Test
     public void testOut2Out() {
-        a2bTrigger.changeLocation(10,7);
-        a2bTrigger.changeLocation(10,6);
-        assertFalse(a2bTrigger.isTriggered());
+        transitionTrigger.changeLocation(10,7);
+        transitionTrigger.changeLocation(10,6);
+        assertFalse(transitionTrigger.isTriggered());
     }
 
     @Test
     public void testOut2A() {
-        a2bTrigger.changeLocation(10,7);
-        a2bTrigger.changeLocation(10,9.5);
-        assertFalse(a2bTrigger.isTriggered());
+        transitionTrigger.changeLocation(10,7);
+        transitionTrigger.changeLocation(10,9.5);
+        assertFalse(transitionTrigger.isTriggered());
     }
 
     @Test
     public void testOut2AB() {
-        a2bTrigger.changeLocation(10,7);
-        a2bTrigger.changeLocation(10,10.5);
-        assertFalse(a2bTrigger.isTriggered());
+        transitionTrigger.changeLocation(10,7);
+        transitionTrigger.changeLocation(10,10.5);
+        assertFalse(transitionTrigger.isTriggered());
     }
 
     @Test
     public void testOut2B() {
-        a2bTrigger.changeLocation(10,7);
-        a2bTrigger.changeLocation(10,11.5);
-        assertFalse(a2bTrigger.isTriggered());
+        transitionTrigger.changeLocation(10,7);
+        transitionTrigger.changeLocation(10,11.5);
+        assertFalse(transitionTrigger.isTriggered());
     }
 
 
     @Test
     public void testA2Out() {
-        a2bTrigger.changeLocation(10,9.5);
-        a2bTrigger.changeLocation(10,7);
-        assertFalse(a2bTrigger.isTriggered());
+        transitionTrigger.changeLocation(10,9.5);
+        transitionTrigger.changeLocation(10,7);
+        assertFalse(transitionTrigger.isTriggered());
     }
 
     @Test
     public void testA2A() {
-        a2bTrigger.changeLocation(10,9.5);
-        a2bTrigger.changeLocation(10,9.6);
-        assertFalse(a2bTrigger.isTriggered());
+        transitionTrigger.changeLocation(10,9.5);
+        transitionTrigger.changeLocation(10,9.6);
+        assertFalse(transitionTrigger.isTriggered());
     }
 
     @Test
     public void testA2AB() {
-        a2bTrigger.changeLocation(10,9.5);
-        a2bTrigger.changeLocation(10,10.5);
-        assertFalse(a2bTrigger.isTriggered());
+        transitionTrigger.changeLocation(10,9.5);
+        transitionTrigger.changeLocation(10,10.5);
+        assertFalse(transitionTrigger.isTriggered());
     }
 
     @Test
     public void testA2B() {
-        a2bTrigger.changeLocation(10,9.5);
-        a2bTrigger.changeLocation(10,11.5);
-        assertTrue(a2bTrigger.isTriggered());
+        transitionTrigger.changeLocation(10,9.5);
+        transitionTrigger.changeLocation(10,11.5);
+        assertTrue(transitionTrigger.isTriggered());
     }
 
     @Test
     public void testAB2Out() {
-        a2bTrigger.changeLocation(10,10.5);
-        a2bTrigger.changeLocation(10,13);
-        assertFalse(a2bTrigger.isTriggered());
+        transitionTrigger.changeLocation(10,10.5);
+        transitionTrigger.changeLocation(10,13);
+        assertFalse(transitionTrigger.isTriggered());
     }
 
     @Test
     public void testAB2A() {
-        a2bTrigger.changeLocation(10,10.5);
-        a2bTrigger.changeLocation(10,9.5);
-        assertFalse(a2bTrigger.isTriggered());
+        transitionTrigger.changeLocation(10,10.5);
+        transitionTrigger.changeLocation(10,9.5);
+        assertFalse(transitionTrigger.isTriggered());
     }
 
     @Test
     public void testAB2AB() {
-        a2bTrigger.changeLocation(10,10.5);
-        a2bTrigger.changeLocation(10,10.6);
-        assertFalse(a2bTrigger.isTriggered());
+        transitionTrigger.changeLocation(10,10.5);
+        transitionTrigger.changeLocation(10,10.6);
+        assertFalse(transitionTrigger.isTriggered());
     }
 
     @Test
     public void testAB2B() {
-        a2bTrigger.changeLocation(10,10.5);
-        a2bTrigger.changeLocation(10,11.5);
-        assertTrue(a2bTrigger.isTriggered());
+        transitionTrigger.changeLocation(10,10.5);
+        transitionTrigger.changeLocation(10,11.5);
+        assertTrue(transitionTrigger.isTriggered());
     }
 
     @Test
     public void testB2Out() {
-        a2bTrigger.changeLocation(10,11.5);
-        a2bTrigger.changeLocation(10,13);
-        assertFalse(a2bTrigger.isTriggered());
+        transitionTrigger.changeLocation(10,11.5);
+        transitionTrigger.changeLocation(10,13);
+        assertFalse(transitionTrigger.isTriggered());
     }
 
     @Test
     public void testB2A() {
-        a2bTrigger.changeLocation(10,11.5);
-        a2bTrigger.changeLocation(10,9.5);
-        assertFalse(a2bTrigger.isTriggered());
+        transitionTrigger.changeLocation(10,11.5);
+        transitionTrigger.changeLocation(10,9.5);
+        assertFalse(transitionTrigger.isTriggered());
     }
 
     @Test
     public void testB2AB() {
-        a2bTrigger.changeLocation(10,11.5);
-        a2bTrigger.changeLocation(10,10.5);
-        assertFalse(a2bTrigger.isTriggered());
+        transitionTrigger.changeLocation(10,11.5);
+        transitionTrigger.changeLocation(10,10.5);
+        assertFalse(transitionTrigger.isTriggered());
     }
 
     @Test
     public void testB2B() {
-        a2bTrigger.changeLocation(10,11.5);
-        a2bTrigger.changeLocation(10,11.6);
-        assertFalse(a2bTrigger.isTriggered());
+        transitionTrigger.changeLocation(10,11.5);
+        transitionTrigger.changeLocation(10,11.6);
+        assertFalse(transitionTrigger.isTriggered());
     }
 
 }

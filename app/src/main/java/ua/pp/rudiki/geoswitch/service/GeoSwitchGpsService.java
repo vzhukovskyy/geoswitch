@@ -177,14 +177,7 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
 
 
     private GeoTrigger loadTrigger() {
-        GeoTrigger trigger;
-        if(GeoSwitchApp.getPreferences().getTriggerType() == TriggerType.EnterArea) {
-            trigger = GeoSwitchApp.getPreferences().loadAreaTrigger();
-        } else {
-            trigger = GeoSwitchApp.getPreferences().loadA2BTrigger();
-        }
-
-        return trigger;
+        return GeoSwitchApp.getPreferences().loadTrigger();
     }
 
     private void displayStickyNotification() {

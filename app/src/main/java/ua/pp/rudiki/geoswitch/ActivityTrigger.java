@@ -10,12 +10,15 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import ua.pp.rudiki.geoswitch.peripherals.ConversionUtils;
 import ua.pp.rudiki.geoswitch.peripherals.Preferences;
-import ua.pp.rudiki.geoswitch.trigger.A2BTrigger;
-import ua.pp.rudiki.geoswitch.trigger.AreaTrigger;
+import ua.pp.rudiki.geoswitch.trigger.ExitAreaTrigger;
+import ua.pp.rudiki.geoswitch.trigger.GeoTrigger;
+import ua.pp.rudiki.geoswitch.trigger.TransitionTrigger;
+import ua.pp.rudiki.geoswitch.trigger.EnterAreaTrigger;
 import ua.pp.rudiki.geoswitch.trigger.GeoArea;
 import ua.pp.rudiki.geoswitch.trigger.GeoPoint;
 import ua.pp.rudiki.geoswitch.trigger.TriggerType;
@@ -27,6 +30,7 @@ public class ActivityTrigger extends AppCompatActivity implements RadioGroup.OnC
     final int SELECT_COORDINATES_REQUEST_ID = 9001;
 
     RadioGroup triggerTypeRadioGroup;
+    TextView triggerTypeDescriptionLabel;
     RelativeLayout bidirectionalLayout, unidirectionalLayout;
     EditText latitudeEditBi, longitudeEditBi, radiusEditBi;
     EditText latitudeFromEditUni, longitudeFromEditUni, latitudeToEditUni, longitudeToEditUni, radiusEditUni;
@@ -38,6 +42,7 @@ public class ActivityTrigger extends AppCompatActivity implements RadioGroup.OnC
 
         triggerTypeRadioGroup = (RadioGroup) findViewById(R.id.triggerTypeRadioGroup);
         triggerTypeRadioGroup.setOnCheckedChangeListener(this);
+        triggerTypeDescriptionLabel = (TextView) findViewById(R.id.triggerTypeDescriptionLabel);
         bidirectionalLayout = (RelativeLayout) findViewById(R.id.bidirectionalGroup);
         unidirectionalLayout = (RelativeLayout) findViewById(R.id.unidirectionalGroup);
 
@@ -65,9 +70,32 @@ public class ActivityTrigger extends AppCompatActivity implements RadioGroup.OnC
 
     @Override
     public void onCheckedChanged(RadioGroup group, @IdRes int checkedId) {
-        boolean isArea = (triggerTypeRadioGroup.getCheckedRadioButtonId() == R.id.radioEnterArea);
-        bidirectionalLayout.setVisibility(isArea ? View.VISIBLE : View.GONE);
-        unidirectionalLayout.setVisibility(isArea ? View.GONE : View.VISIBLE);
+        TriggerType triggerType = radioIdToTriggerType(checkedId);
+
+        String desc;
+        boolean isBidirectionalLayout;
+        switch(triggerType) {
+            case EnterArea:
+                isBidirectionalLayout = true;
+                desc = "Enter area";
+                break;
+            case ExitArea:
+                isBidirectionalLayout = true;
+                desc = "Exit area";
+                break;
+            case Transition:
+                isBidirectionalLayout = false;
+                desc = "Transition from one area to another";
+                break;
+            default:
+                isBidirectionalLayout = true;
+                desc = "";
+        }
+
+        bidirectionalLayout.setVisibility(isBidirectionalLayout ? View.VISIBLE : View.GONE);
+        unidirectionalLayout.setVisibility(isBidirectionalLayout ? View.GONE : View.VISIBLE);
+
+        triggerTypeDescriptionLabel.setText(desc);
     }
 
     public void onOkClick(View view) {
@@ -92,11 +120,11 @@ public class ActivityTrigger extends AppCompatActivity implements RadioGroup.OnC
         Intent intent = new Intent(this, ActivityMap.class);
 
         intent.putExtra(Preferences.triggerTypeKey, getSelectedTriggerType().name());
-        intent.putExtra(Preferences.latitudeKey, getLatitudeEditValueAsString());
-        intent.putExtra(Preferences.longitudeKey, getLongitudeEditValueAsString());
-        intent.putExtra(Preferences.latitudeToKey, latitudeToEditUni.getText().toString());
-        intent.putExtra(Preferences.longitudeToKey, longitudeToEditUni.getText().toString());
-        intent.putExtra(Preferences.radiusKey, radiusEditBi.getText().toString());
+        intent.putExtra(Preferences.latitudeKey, getLatitudeEditboxValue());
+        intent.putExtra(Preferences.longitudeKey, getLongitudeEditboxValue());
+        intent.putExtra(Preferences.latitudeToKey, getLatitudeToEditboxValue());
+        intent.putExtra(Preferences.longitudeToKey, getLongitudeToEditboxValue());
+        intent.putExtra(Preferences.radiusKey, getRadiusEditboxValue());
 
         startActivityForResult(intent, SELECT_COORDINATES_REQUEST_ID);
     }
@@ -129,87 +157,231 @@ public class ActivityTrigger extends AppCompatActivity implements RadioGroup.OnC
         }
     }
 
+    // helpers
+
+    private int triggerTypeToRadioId(TriggerType triggerType) {
+        int radioId;
+        switch(triggerType) {
+            case Transition:
+                radioId = R.id.radioTransition;
+                break;
+            case EnterArea:
+                radioId = R.id.radioEnterArea;
+                break;
+            case ExitArea:
+                radioId = R.id.radioExitArea;
+                break;
+            default:
+                radioId = R.id.radioExitArea;
+        }
+
+        return radioId;
+    }
+
+    private TriggerType radioIdToTriggerType(int radioId) {
+        TriggerType triggerType;
+        switch(radioId) {
+            case R.id.radioTransition:
+                triggerType = TriggerType.Transition;
+                break;
+            case R.id.radioEnterArea:
+                triggerType = TriggerType.EnterArea;
+                break;
+            case R.id.radioExitArea:
+                triggerType = TriggerType.ExitArea;
+                break;
+            default:
+                triggerType = TriggerType.ExitArea;
+        }
+
+        return triggerType;
+    }
+
     // data persistence
 
     private boolean storeValues() {
         TriggerType triggerType = getSelectedTriggerType();
 
-        if(triggerType == TriggerType.EnterArea) {
-            double latitude = ConversionUtils.toDouble(latitudeEditBi.getText().toString());
-            double longitude = ConversionUtils.toDouble(longitudeEditBi.getText().toString());
-            double radius = ConversionUtils.toDouble(radiusEditBi.getText().toString());
-            if(Double.isNaN(latitude) || Double.isNaN(longitude) || Double.isNaN(radius)) {
-                return false;
+        double latitude = ConversionUtils.toDouble(latitudeEditBi.getText().toString());
+        double longitude = ConversionUtils.toDouble(longitudeEditBi.getText().toString());
+        double radius = ConversionUtils.toDouble(radiusEditBi.getText().toString());
+        double latitudeTo = ConversionUtils.toDouble(latitudeToEditUni.getText().toString());
+        double longitudeTo = ConversionUtils.toDouble(longitudeToEditUni.getText().toString());
+
+        if(Double.isNaN(latitude) || Double.isNaN(longitude) || Double.isNaN(radius)) {
+            return false;
+        }
+
+        GeoArea area = new GeoArea(latitude, longitude, radius);
+
+        GeoTrigger trigger;
+        if(triggerType == TriggerType.EnterArea || triggerType == TriggerType.ExitArea) {
+            if(triggerType == TriggerType.EnterArea) {
+                trigger = new EnterAreaTrigger(area);
+            } else {
+                trigger = new ExitAreaTrigger(area);
             }
-
-            GeoArea area = new GeoArea(latitude, longitude, radius);
-            AreaTrigger areaTrigger = new AreaTrigger(area);
-
-            GeoSwitchApp.getPreferences().storeAreaTrigger(areaTrigger);
         }
         else {
-            double latitudeFrom = ConversionUtils.toDouble(latitudeFromEditUni.getText().toString());
-            double longitudeFrom = ConversionUtils.toDouble(longitudeFromEditUni.getText().toString());
-            double latitudeTo = ConversionUtils.toDouble(latitudeToEditUni.getText().toString());
-            double longitudeTo = ConversionUtils.toDouble(longitudeToEditUni.getText().toString());
-            double radius = ConversionUtils.toDouble(radiusEditBi.getText().toString());
-            if(Double.isNaN(latitudeFrom) || Double.isNaN(longitudeFrom) ||
-                    Double.isNaN(latitudeTo) || Double.isNaN(longitudeTo) || Double.isNaN(radius))
-            {
+            // triggerType == TriggerType.Transition
+            if(Double.isNaN(latitudeTo) || Double.isNaN(longitudeTo)) {
                 return false;
             }
 
-            GeoPoint pointFrom = new GeoPoint(latitudeFrom, longitudeFrom);
+            GeoPoint pointFrom = new GeoPoint(latitude, longitude);
             GeoPoint pointTo = new GeoPoint(latitudeTo, longitudeTo);
-            A2BTrigger a2bTrigger = new A2BTrigger(pointFrom, pointTo);
-
-            GeoSwitchApp.getPreferences().storeA2BTrigger(a2bTrigger);
+            trigger = new TransitionTrigger(pointFrom, pointTo);
         }
 
-        GeoSwitchApp.getPreferences().storeTriggerType(triggerType);
-
+        GeoSwitchApp.getPreferences().storeTrigger(trigger);
         return true;
     }
 
     private void loadValuesToUi() {
-        TriggerType storedTriggerType = GeoSwitchApp.getPreferences().getTriggerType();
-        boolean isArea = (storedTriggerType != TriggerType.Transition);;
-        int radioId = isArea ? R.id.radioEnterArea : R.id.radioFromTo;
+        GeoTrigger trigger = GeoSwitchApp.getPreferences().loadTrigger();
+
+        int radioId;
+        switch(trigger.getType()) {
+            case Transition:
+                radioId = R.id.radioTransition;
+
+                TransitionTrigger transitionTrigger = (TransitionTrigger)trigger;
+                GeoPoint pointA = transitionTrigger.getPointA();
+                GeoPoint pointB = transitionTrigger.getPointB();
+                double radius = transitionTrigger.getRadius();
+
+                setLatitudeEditboxValue(pointA.getLatitude());
+                setLongitudeEditboxValue(pointA.getLongitude());
+                setRadiusEditboxValue(radius);
+                setLatitudeToEditboxValue(pointB.getLatitude());
+                setLongitudeToEditboxValue(pointB.getLongitude());
+
+                break;
+            case EnterArea: {
+                radioId = R.id.radioEnterArea;
+
+                EnterAreaTrigger enterAreaTrigger = (EnterAreaTrigger)trigger;
+                GeoArea area = enterAreaTrigger.getArea();
+
+                setLatitudeEditboxValue(area.getLatitude());
+                setLongitudeEditboxValue(area.getLongitude());
+                setRadiusEditboxValue(area.getRadius());
+            }
+            break;
+            case ExitArea:
+            default: {
+                radioId = R.id.radioExitArea;
+
+                ExitAreaTrigger exitAreaTrigger = (ExitAreaTrigger)trigger;
+                GeoArea area = exitAreaTrigger.getArea();
+
+                setLatitudeEditboxValue(area.getLatitude());
+                setLongitudeEditboxValue(area.getLongitude());
+                setRadiusEditboxValue(area.getRadius());
+            }
+            break;
+        }
+
         triggerTypeRadioGroup.check(radioId);
         onCheckedChanged(triggerTypeRadioGroup, radioId);
-
-        latitudeEditBi.setText(GeoSwitchApp.getPreferences().getLatitudeAsString());
-        longitudeEditBi.setText(GeoSwitchApp.getPreferences().getLongitudeAsString());
-        radiusEditBi.setText(GeoSwitchApp.getPreferences().getRadiusAsString());
-
-        latitudeFromEditUni.setText(GeoSwitchApp.getPreferences().getLatitudeAsString());
-        longitudeFromEditUni.setText(GeoSwitchApp.getPreferences().getLongitudeAsString());
-        latitudeToEditUni.setText(GeoSwitchApp.getPreferences().getLatitudeToAsString());
-        longitudeToEditUni.setText(GeoSwitchApp.getPreferences().getLongitudeToAsString());
-        radiusEditUni.setText(GeoSwitchApp.getPreferences().getRadiusAsString());
-
     }
 
-    // accessors
+    // form field accessors
 
     TriggerType getSelectedTriggerType() {
-        boolean isArea = (triggerTypeRadioGroup.getCheckedRadioButtonId() == R.id.radioEnterArea);
-        return isArea ? TriggerType.EnterArea : TriggerType.Transition;
+        int radioId = triggerTypeRadioGroup.getCheckedRadioButtonId();
+        return radioIdToTriggerType(radioId);
     }
 
-    String getLatitudeEditValueAsString() {
+    double getLatitudeEditboxValue() {
         TriggerType type = getSelectedTriggerType();
-        if(type == TriggerType.EnterArea)
-            return latitudeEditBi.getText().toString();
-        else
-            return latitudeFromEditUni.getText().toString();
+
+        String text;
+        switch(type) {
+            case EnterArea:
+            case ExitArea:
+            default:
+                text = latitudeEditBi.getText().toString();
+                break;
+            case Transition:
+                text = latitudeFromEditUni.getText().toString();
+                break;
+        }
+
+        return ConversionUtils.toDouble(text);
     }
 
-    String getLongitudeEditValueAsString() {
-        TriggerType type = getSelectedTriggerType();
-        if(type == TriggerType.EnterArea)
-            return longitudeEditBi.getText().toString();
-        else
-            return longitudeFromEditUni.getText().toString();
+    void setLatitudeEditboxValue(double value) {
+        String text = String.valueOf(value);
+        latitudeEditBi.setText(text);
+        latitudeFromEditUni.setText(text);
     }
+
+    double getLongitudeEditboxValue() {
+        TriggerType type = getSelectedTriggerType();
+
+        String text;
+        switch(type) {
+            case EnterArea:
+            case ExitArea:
+            default:
+                text = longitudeEditBi.getText().toString();
+                break;
+            case Transition:
+                text = longitudeFromEditUni.getText().toString();
+                break;
+        }
+
+        return ConversionUtils.toDouble(text);
+    }
+
+    void setLongitudeEditboxValue(double value) {
+        String text = String.valueOf(value);
+        longitudeEditBi.setText(text);
+        longitudeFromEditUni.setText(text);
+    }
+
+    double getLatitudeToEditboxValue() {
+        String text = latitudeToEditUni.getText().toString();
+        return ConversionUtils.toDouble(text);
+    }
+
+    void setLatitudeToEditboxValue(double value) {
+        latitudeToEditUni.setText(String.valueOf(value));
+    }
+
+    double getLongitudeToEditboxValue() {
+        String text = longitudeToEditUni.getText().toString();
+        return ConversionUtils.toDouble(text);
+    }
+
+    void setLongitudeToEditboxValue(double value) {
+        longitudeToEditUni.setText(String.valueOf(value));
+    }
+
+    double getRadiusEditboxValue() {
+        TriggerType type = getSelectedTriggerType();
+
+        String text;
+        switch(type) {
+            case EnterArea:
+            case ExitArea:
+            default:
+                text = radiusEditBi.getText().toString();
+                break;
+            case Transition:
+                text = radiusEditUni.getText().toString();
+                break;
+        }
+
+        return ConversionUtils.toDouble(text);
+    }
+
+    void setRadiusEditboxValue(double value) {
+        String text = String.valueOf(value);
+        radiusEditUni.setText(text);
+        radiusEditBi.setText(text);
+    }
+
+
 }

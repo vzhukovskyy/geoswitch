@@ -1,21 +1,23 @@
 package ua.pp.rudiki.geoswitch.trigger;
 
 
-/*
-A and B - intersecting radial areas
-Triggers when location transitions from zone A to zone B (just came out of A but still inside B)
- */
+// A and B - intersecting radial areas
+// Triggers when location transitions from zone A to zone B (just comes out of A but still inside B)
 
 import java.util.Objects;
 
-public class A2BTrigger implements GeoTrigger {
+public class TransitionTrigger implements GeoTrigger {
     private AreaTrigger aTrigger;
     private AreaTrigger bTrigger;
 
-    public A2BTrigger(GeoPoint a, GeoPoint b) {
+    public TransitionTrigger(GeoPoint a, GeoPoint b) {
         double radius = calculateRadius(a, b);
         aTrigger = new AreaTrigger(a, radius);
         bTrigger = new AreaTrigger(b, radius);
+    }
+
+    public TransitionTrigger(GeoArea areaA, GeoArea areaB) {
+        this(areaA.getCenter(), areaB.getCenter());
     }
 
     @Override
@@ -66,9 +68,9 @@ public class A2BTrigger implements GeoTrigger {
             return false;
         if (getClass() != o.getClass())
             return false;
-        A2BTrigger a2bTrigger = (A2BTrigger)o;
-        return Objects.equals(aTrigger, a2bTrigger.aTrigger) &&
-               Objects.equals(bTrigger, a2bTrigger.bTrigger);
+        TransitionTrigger transitionTrigger = (TransitionTrigger)o;
+        return Objects.equals(aTrigger, transitionTrigger.aTrigger) &&
+               Objects.equals(bTrigger, transitionTrigger.bTrigger);
     }
 
     public String toString() {

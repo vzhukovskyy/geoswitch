@@ -14,8 +14,9 @@
     <string name="substatus_waiting_gps">Waiting for GPS fix</string>
     <string name="substatus_bycharger_inactive">Connect to charger to activate</string>
     <string name="substatus_gps_time">"Last GPS fix received at "</string>
-    <string name="trigger_area" formatted="false">Triggers when entering %d meters radius circular area with center in (%s,%s)</string>
-    <string name="trigger_transition" formatted="false">Triggers when moving from %dm radius circular area with center in (%s,%s)  to %dm radius circular area with center in (%s,%s)</string>
+    <string name="trigger_desc_enter_area" formatted="false">Triggers when entering %d meters radius circular area with center in (%s,%s)</string>
+    <string name="trigger_desc_exit_area" formatted="false">Triggers when exiting %d meters radius circular area with center in (%s,%s)</string>
+    <string name="trigger_desc_transition" formatted="false">Triggers when moving from %dm radius circular area with center in (%s,%s)  to %dm radius circular area with center in (%s,%s)</string>
     <string name="trigger_invalid">Trigger not configured</string>
     <string name="action_post_with_token" formatted="false">Send POST request including Google Sign-In token to %s</string>
     <string name="action_post" formatted="false">Send POST request to %s</string>
@@ -24,7 +25,7 @@
     <string name="map_from_tag">From</string>
     <string name="map_to_tag">To</string>
     <string name="trigger_validation_failed">Configuration is invalid or incomplete</string>
-    <string name="trigger_fired">You have entered the trigger area.</string>
+    <string name="trigger_fired_message">The location trigger has fired.</string>
     <string name="action_started">"Action started."</string>
     <string name="sticky_status_gps_time">"Last GPS fix received at "</string>
     <string name="sticky_status_waiting_gps">Waiting for GPS fix</string>
@@ -35,5 +36,5 @@
     <string name="action_speak_out">Speak out</string>
     <string name="gps_charging">GPS sensor is only turned on when the device is connected to charger</string>
     <string name="gps_manual">GPS sensor activation is controlled manually</string>
-    <string name="substatus_manual_inactive">Switch on to activate</string>
+    <string name="substatus_manual_inactive">Tap switch to activate</string>
 </resources>

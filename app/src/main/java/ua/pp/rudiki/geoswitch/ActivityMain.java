@@ -26,9 +26,14 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Formatter;
 
-import ua.pp.rudiki.geoswitch.peripherals.ConversionUtils;
 import ua.pp.rudiki.geoswitch.service.GpsServiceActivationListener;
 import ua.pp.rudiki.geoswitch.service.GeoSwitchGpsService;
+import ua.pp.rudiki.geoswitch.trigger.EnterAreaTrigger;
+import ua.pp.rudiki.geoswitch.trigger.ExitAreaTrigger;
+import ua.pp.rudiki.geoswitch.trigger.GeoArea;
+import ua.pp.rudiki.geoswitch.trigger.GeoPoint;
+import ua.pp.rudiki.geoswitch.trigger.GeoTrigger;
+import ua.pp.rudiki.geoswitch.trigger.TransitionTrigger;
 import ua.pp.rudiki.geoswitch.trigger.TriggerType;
 
 
@@ -74,20 +79,21 @@ public class ActivityMain extends AppCompatActivity implements
 
     @Override
     public void onStart() {
-        super.onResume();
+        super.onStart();
 
         Log.d(TAG, "onStart");
 
-        loadAreaToUi();
+        loadTriggerToUi();
         loadActionToUi();
         loadGpsActivationToUi();
-        updateActivationModeUi();
     }
 
     @Override
     public void onResume() {
         super.onResume();
         Log.d(TAG, "onResume");
+
+        updateActivationModeUi();
     }
 
     @Override
@@ -145,7 +151,7 @@ public class ActivityMain extends AppCompatActivity implements
         Log.d(TAG, "onActivityResult requestCode="+requestCode+", resultCode="+resultCode);
         if (requestCode == CONFIGURE_TRIGGER_ID) {
             if (resultCode == RESULT_OK) {
-                loadAreaToUi();
+                loadTriggerToUi();
                 passValuesToService();
             }
         }
@@ -206,29 +212,50 @@ public class ActivityMain extends AppCompatActivity implements
 
     // data persistence
 
-    private void loadAreaToUi() {
-        TriggerType triggerType = GeoSwitchApp.getPreferences().getTriggerType();
-        String latitude = GeoSwitchApp.getPreferences().getLatitudeAsString();
-        String longitude = GeoSwitchApp.getPreferences().getLongitudeAsString();
-        String radius = GeoSwitchApp.getPreferences().getRadiusAsString();
-        String latitudeTo = GeoSwitchApp.getPreferences().getLatitudeToAsString();
-        String longitudeTo = GeoSwitchApp.getPreferences().getLongitudeToAsString();
+    private void loadTriggerToUi() {
+        GeoTrigger trigger = GeoSwitchApp.getPreferences().loadTrigger();
 
-        String desc;
-        if(triggerType != TriggerType.Invalid) {
-            long roundedRadius = Math.round(ConversionUtils.toDouble(radius));
+        TriggerType triggerType = trigger.getType();
 
-            if (triggerType == TriggerType.EnterArea) {
-                String format = getString(R.string.trigger_area);
+        String desc, format;
+        switch(triggerType) {
+            case EnterArea: {
+                GeoArea area = ((EnterAreaTrigger) trigger).getArea();
+                String latitude = String.valueOf(area.getLatitude());
+                String longitude = String.valueOf(area.getLongitude());
+                long roundedRadius = Math.round(area.getRadius());
+
+                format = getString(R.string.trigger_desc_enter_area);
                 desc = new Formatter().format(format, roundedRadius, latitude, longitude).toString();
-            } else {
-                String format = getString(R.string.trigger_transition);
+            }
+            break;
+            case ExitArea: {
+                GeoArea area = ((ExitAreaTrigger) trigger).getArea();
+                String latitude = String.valueOf(area.getLatitude());
+                String longitude = String.valueOf(area.getLongitude());
+                long roundedRadius = Math.round(area.getRadius());
+
+                format = getString(R.string.trigger_desc_exit_area);
+                desc = new Formatter().format(format, roundedRadius, latitude, longitude).toString();
+            }
+            break;
+            case Transition: {
+                TransitionTrigger transitionTrigger = (TransitionTrigger) trigger;
+                GeoPoint pointA = transitionTrigger.getPointA();
+                GeoPoint pointB = transitionTrigger.getPointB();
+                String latitude = String.valueOf(pointA.getLatitude());
+                String longitude = String.valueOf(pointA.getLongitude());
+                String latitudeTo = String.valueOf(pointB.getLatitude());
+                String longitudeTo = String.valueOf(pointB.getLongitude());
+                long roundedRadius = Math.round(transitionTrigger.getRadius());
+
+                format = getString(R.string.trigger_desc_transition);
                 desc = new Formatter().format(format, roundedRadius, latitude, longitude,
                         roundedRadius, latitudeTo, longitudeTo).toString();
             }
-        }
-        else {
-            desc = getString(R.string.trigger_invalid);
+            break;
+            default:
+                desc = getString(R.string.trigger_invalid);
         }
 
         triggerEdit.setText(desc);

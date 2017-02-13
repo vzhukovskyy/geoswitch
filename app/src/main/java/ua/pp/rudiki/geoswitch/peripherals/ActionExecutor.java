@@ -6,6 +6,7 @@ import java.util.Formatter;
 
 import ua.pp.rudiki.geoswitch.GeoSwitchApp;
 import ua.pp.rudiki.geoswitch.R;
+import ua.pp.rudiki.geoswitch.trigger.TriggerType;
 
 public class ActionExecutor {
 
@@ -28,8 +29,8 @@ public class ActionExecutor {
         url = GeoSwitchApp.getPreferences().getUrl();
     }
 
-    public ActionExecutor(boolean showNotification, boolean playSound, boolean speakOut,
-                          boolean sendPost, boolean appendToken, String url)
+    public ActionExecutor(boolean showNotification, boolean playSound,
+                          boolean speakOut, boolean sendPost, boolean appendToken, String url)
     {
         this.context = GeoSwitchApp.getAppContext();
 
@@ -42,7 +43,7 @@ public class ActionExecutor {
     }
 
     public void execute() {
-        String message = context.getString(R.string.trigger_fired);
+        String message = context.getString(R.string.trigger_fired_message);
         if(sendPost) {
             message += context.getString(R.string.action_started);
         }

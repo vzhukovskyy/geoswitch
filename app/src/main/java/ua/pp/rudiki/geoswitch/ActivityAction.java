@@ -28,6 +28,11 @@ public class ActivityAction extends AppCompatActivity {
         sendPostCheckbox = (CheckBox)findViewById(R.id.sendPostCheckbox);
         appendSigninCheckbox = (CheckBox)findViewById(R.id.appendSigninCheckbox);
         urlEdit = (EditText)findViewById(R.id.urlEdit);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
 
         loadValuesToUi();
     }
@@ -92,6 +97,7 @@ public class ActivityAction extends AppCompatActivity {
     public void ensureCheckboxesCohere(View activeView) {
         playSoundCheckbox.setEnabled(showNotificationCheckbox.isChecked());
         appendSigninCheckbox.setEnabled(sendPostCheckbox.isChecked());
+        urlEdit.setEnabled(sendPostCheckbox.isChecked());
         if(playSoundCheckbox.isChecked() && speakOutCheckbox.isChecked()) {
             if(activeView == playSoundCheckbox)
                 speakOutCheckbox.setChecked(false);

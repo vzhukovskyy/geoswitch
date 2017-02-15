@@ -189,7 +189,7 @@ public class Preferences {
     // Default values
 
     public double getDefaultRadius() {
-        return 50.0;
+        return 100.0;
     }
 
     public String getDefaultUrl() {

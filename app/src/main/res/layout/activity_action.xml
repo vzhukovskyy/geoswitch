@@ -11,27 +11,26 @@
     tools:context="ua.pp.rudiki.geoswitch.ActivityAction">
 
     <CheckBox
-        android:text="Display notification"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:id="@+id/showNotificationCheckbox"
-        android:onClick="ensureCheckboxesCohere" />
+        android:onClick="ensureCheckboxesCohere"
+        android:text="@string/activity_action_notification" />
 
     <CheckBox
-        android:text="Play sound"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/showNotificationCheckbox"
         android:layout_alignParentStart="true"
         android:id="@+id/playSoundCheckbox"
         android:layout_marginLeft="26dp"
-        android:onClick="ensureCheckboxesCohere" />
+        android:onClick="ensureCheckboxesCohere"
+        android:text="@string/activity_action_playsound" />
 
     <CheckBox
-        android:text="Append Google sign-in token to URL"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/sendPostCheckbox"
@@ -39,19 +38,20 @@
         android:layout_alignParentStart="true"
         android:id="@+id/appendSigninCheckbox"
         android:layout_marginLeft="26dp"
-        android:onClick="ensureCheckboxesCohere" />
+        android:onClick="ensureCheckboxesCohere"
+        android:text="@string/activity_action_appendtoken" />
 
     <CheckBox
-        android:text="Speak out"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/playSoundCheckbox"
         android:layout_alignParentStart="true"
         android:id="@+id/speakOutCheckbox"
-        android:onClick="ensureCheckboxesCohere" />
+        android:onClick="ensureCheckboxesCohere"
+        android:text="@string/activity_action_speakout" />
 
     <CheckBox
-        android:text="Send HTTP POST request"
+        android:text="@string/activity_action_sendhttp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/speakOutCheckbox"
@@ -60,14 +60,14 @@
         android:onClick="ensureCheckboxesCohere" />
 
     <Button
-        android:text="Launch action now"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/button"
         android:layout_below="@+id/urlEdit"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:onClick="onLaunchActionClick" />
+        android:onClick="onLaunchActionClick"
+        android:text="@string/activity_action_launch_button" />
 
     <LinearLayout
         android:orientation="horizontal"
@@ -79,20 +79,20 @@
         android:layout_marginTop="10dp">
 
         <Button
-            android:text="OK"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/okButton"
             android:layout_weight="1"
-            android:onClick="onOkClick" />
+            android:onClick="onOkClick"
+            android:text="@string/activity_action_ok_button" />
 
         <Button
-            android:text="Cancel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/cancelButton"
             android:layout_weight="1"
-            android:onClick="onCancelClick" />
+            android:onClick="onCancelClick"
+            android:text="@string/activity_action_cancel_button" />
     </LinearLayout>
 
     <EditText
@@ -101,7 +101,6 @@
         android:ems="10"
         android:id="@+id/urlEdit"
         android:textSize="14sp"
-        android:hint="HTTP URL"
         style="@style/Widget.AppCompat.EditText"
         android:gravity="top|left"
         android:maxLines="20"
@@ -109,6 +108,7 @@
         android:layout_below="@+id/appendSigninCheckbox"
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
-        android:inputType="textMultiLine|textImeMultiLine" />
+        android:inputType="textMultiLine|textImeMultiLine"
+        android:hint="@string/activity_action_url" />
 
 </RelativeLayout>

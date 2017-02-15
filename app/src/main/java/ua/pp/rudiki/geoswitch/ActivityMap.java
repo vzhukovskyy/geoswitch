@@ -128,7 +128,7 @@ public class ActivityMap extends FragmentActivity implements OnMapReadyCallback,
             cleanArea();
 
             LatLng ll = new LatLng(area.getLatitude(), area.getLongitude());
-            String areaTag = getString(R.string.map_area_tag);
+            String areaTag = getString(R.string.activity_map_area);
 
             marker = map.addMarker(new MarkerOptions()
                     .position(ll)
@@ -226,7 +226,7 @@ public class ActivityMap extends FragmentActivity implements OnMapReadyCallback,
         }
 
         private void colorMarker(Marker marker, Circle circle, boolean isFrom) {
-            String tag = getString(isFrom ? R.string.map_from_tag : R.string.map_to_tag);
+            String tag = getString(isFrom ? R.string.activity_map_from : R.string.activity_map_to);
             marker.setIcon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon(tag)));
 
             int fillColor = isFrom ? Color.argb(50, 255, 255, 0) : Color.argb(50, 255, 127, 127);

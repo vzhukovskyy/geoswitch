@@ -11,11 +11,11 @@
     tools:context="ua.pp.rudiki.geoswitch.ActivityGpsOptions">
 
     <TextView
-        android:text="GPS sensor consumes much battery power. These options specify when GPS sensor is to be turned on for location tracking."
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/textView"
-        android:layout_marginBottom="10dp" />
+        android:layout_marginBottom="10dp"
+        android:text="@string/activity_gps_label" />
 
     <RadioGroup
         android:layout_width="wrap_content"
@@ -27,21 +27,21 @@
         android:layout_marginBottom="6dp">
 
         <RadioButton
-            android:text="Automatically turn on when connected to charger and turn off when disconnected from charger (recommended for use in car)"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/radioOnCharge"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:text="@string/activity_gps_charger" />
 
         <RadioButton
-            android:text="Turn GPS on/off manually"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/radioManual"
             android:layout_below="@+id/gpsOptionsRadioGroup"
             android:layout_alignParentStart="true"
             android:layout_weight="1"
-            android:layout_marginTop="6dp" />
+            android:layout_marginTop="6dp"
+            android:text="@string/activity_gps_manual" />
     </RadioGroup>
 
     <LinearLayout
@@ -53,20 +53,20 @@
         android:layout_marginTop="10dp">
 
         <Button
-            android:text="OK"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/okButton"
             android:layout_weight="1"
-            android:onClick="onOkClick" />
+            android:onClick="onOkClick"
+            android:text="@string/activity_gps_ok" />
 
         <Button
-            android:text="Cancel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/cancelButton"
             android:layout_weight="1"
-            android:onClick="onCancelClick" />
+            android:onClick="onCancelClick"
+            android:text="@string/activity_gps_cancel" />
     </LinearLayout>
 
 </RelativeLayout>

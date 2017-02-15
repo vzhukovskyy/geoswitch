@@ -5,6 +5,7 @@ import android.content.Context;
 
 import ua.pp.rudiki.geoswitch.peripherals.GeoSwitchGoogleApiClient;
 import ua.pp.rudiki.geoswitch.peripherals.GeoSwitchLog;
+import ua.pp.rudiki.geoswitch.peripherals.ResourceUtils;
 import ua.pp.rudiki.geoswitch.service.GpsServiceActivator;
 import ua.pp.rudiki.geoswitch.peripherals.HttpUtils;
 import ua.pp.rudiki.geoswitch.peripherals.NotificationUtils;
@@ -20,6 +21,7 @@ public class GeoSwitchApp extends Application {
     private static NotificationUtils notificationUtils;
     private static SpeechUtils speechUtils;
     private static GpsServiceActivator gpsServiceActivator;
+    private static ResourceUtils resourceUtils;
 
     public void onCreate() {
         super.onCreate();
@@ -31,6 +33,7 @@ public class GeoSwitchApp extends Application {
         notificationUtils = new NotificationUtils();
         speechUtils = new SpeechUtils(context);
         gpsServiceActivator = new GpsServiceActivator(context);
+        resourceUtils = new ResourceUtils(context);
     }
 
     public static Context getAppContext() {
@@ -45,7 +48,7 @@ public class GeoSwitchApp extends Application {
         return httpUtils;
     }
 
-    public static GeoSwitchGoogleApiClient getGeoSwitchGoogleApiClient() {
+    public static GeoSwitchGoogleApiClient getGoogleApiClient() {
         return geoSwitchGoogleApiClient;
     }
 
@@ -62,4 +65,6 @@ public class GeoSwitchApp extends Application {
     }
 
     public static GpsServiceActivator getGpsServiceActivator() { return gpsServiceActivator; }
+
+    public static ResourceUtils getResourceUtils() { return resourceUtils; }
 }

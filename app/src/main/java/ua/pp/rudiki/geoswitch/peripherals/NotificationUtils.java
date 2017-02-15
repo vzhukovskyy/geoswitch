@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.media.RingtoneManager;
-import android.net.Uri;
 
 import ua.pp.rudiki.geoswitch.ActivityMain;
 import ua.pp.rudiki.geoswitch.GeoSwitchApp;
@@ -26,7 +25,7 @@ public class NotificationUtils {
         PendingIntent pendingIntent = PendingIntent.getActivity(context, STICKY_NOTIFICATION_ID, notificationIntent, 0);
 
         Notification notification = new Notification.Builder(context)
-                .setContentTitle(context.getString(R.string.sticky_title))
+                .setContentTitle(context.getString(R.string.service_sticky_title))
                 .setContentText(message)
                 .setSmallIcon(R.mipmap.geoswitch_bold_inverse)
                 .setShowWhen(false)
@@ -44,7 +43,7 @@ public class NotificationUtils {
         Notification notification = new Notification.Builder(context)
                 .setSmallIcon(R.mipmap.geoswitch_bold_idea_inverse)
                 .setColor(Color.rgb(0,100,0))
-                .setContentTitle(context.getString(R.string.notification_title))
+                .setContentTitle(context.getString(R.string.service_notification_title))
                 .setContentText(text)
                 .setContentIntent(resultPendingIntent)
                 .setSound(playSound ? RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION) : null)

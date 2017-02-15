@@ -15,7 +15,7 @@
         android:layout_height="match_parent">
 
         <Button
-            android:text="Configure Action"
+            android:text="@string/activity_main_action_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/configureActionButton"
@@ -27,7 +27,7 @@
             android:layout_alignStart="@+id/configureTriggerButton" />
 
         <Button
-            android:text="Configure Trigger"
+            android:text="@string/activity_main_trigger_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/configureTriggerButton"
@@ -37,7 +37,7 @@
             android:onClick="onConfigureTriggerClick" />
 
         <EditText
-            android:text="Action not configured"
+            android:text="@string/activity_main_action_not_configured"
             android:layout_width="wrap_content"
             android:layout_height="100dp"
             android:id="@+id/actionDescriptionEdit"
@@ -54,7 +54,7 @@
             android:layout_width="wrap_content"
             android:id="@+id/triggerDescriptionEdit"
             android:layout_height="100dp"
-            android:text="Trigger not configured"
+            android:text="@string/activity_main_trigger_invalid"
             android:singleLine="false"
             android:gravity="top|left"
             android:textSize="12sp"
@@ -65,7 +65,7 @@
             android:layout_alignParentEnd="true" />
 
         <TextView
-            android:text="Status: unknown"
+            android:text="@string/activity_main_status_inactive"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/statusLabel"
@@ -91,7 +91,7 @@
 
         <EditText
             android:layout_width="wrap_content"
-            android:text="GPS activation not set"
+            android:text="@string/activity_main_gps_manual"
             android:ems="10"
             android:layout_below="@+id/openLogButton"
             android:id="@+id/gpsActivationDescriptionEdit"
@@ -104,13 +104,13 @@
             android:layout_marginTop="10dp" />
 
         <Button
-            android:text="GPS options"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/configureActivationButton"
             android:layout_below="@+id/gpsActivationDescriptionEdit"
             android:layout_alignParentEnd="true"
-            android:onClick="onGpsOptionsClick" />
+            android:onClick="onGpsOptionsClick"
+            android:text="@string/activity_main_gps_button" />
 
         <Switch
             android:layout_width="wrap_content"
@@ -121,7 +121,7 @@
             android:onClick="onGpsActivateButtonClick" />
 
         <Button
-            android:text="Open Log"
+            android:text="@string/activity_main_log_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/openLogButton"

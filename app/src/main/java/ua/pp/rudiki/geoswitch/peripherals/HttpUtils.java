@@ -58,7 +58,7 @@ public class HttpUtils {
         String newUrl;
         if(token != null && !token.isEmpty()) {
             Character separator = (url.indexOf('?') != -1) ? '&' : '?';
-            newUrl = url + separator + "access_token=" + GeoSwitchApp.getGeoSwitchGoogleApiClient().getToken();
+            newUrl = url + separator + "access_token=" + GeoSwitchApp.getGoogleApiClient().getToken();
         } else {
             newUrl = url;
         }

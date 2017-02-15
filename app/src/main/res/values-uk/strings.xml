@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="application_name">GeoSwitch</string>
+    <string name="service_notification_title">GeoSwitch</string>
+    <string name="activity_action_appendtoken">Приєднати Google sign-in токен до URL</string>
+    <string name="activity_action_cancel_button">Відмінити</string>
+    <string name="activity_action_launch_button">Запустити дію зараз</string>
+    <string name="activity_action_notification">Відобразити нотифікацію</string>
+    <string name="activity_action_ok_button">Гаразд</string>
+    <string name="activity_action_playsound">Грати звук</string>
+    <string name="activity_action_sendhttp">Відіслати HTTP POST запит</string>
+    <string name="activity_action_speakout">Промовити</string>
+    <string name="activity_action_title">Дія</string>
+    <string name="activity_action_url">HTTP URL</string>
+    <string name="activity_gps_cancel">Відмінити</string>
+    <string name="activity_gps_charger">Автоматично включати при приєднанні до зарядного пристрою та вимикати при від\'єднанні (рекомендується для використання в авто)</string>
+    <string name="activity_gps_label">GPS датчик в значній мірі споживає заряд батареї. Ці опції визначають, коли датчик повинен включатись для відслідковування положення.</string>
+    <string name="activity_gps_manual">Включати та виключати GPS вручну</string>
+    <string name="activity_gps_ok">Гаразд</string>
+    <string name="activity_gps_title">Налаштування GPS</string>
+    <string name="activity_main_action_button">Налаштувати дію</string>
+    <string name="activity_main_action_display_notification">Відобразити нотифікацію</string>
+    <string name="activity_main_action_not_configured">Дія не зазначена</string>
+    <string name="activity_main_action_play_sound">Грати звук нотифікації</string>
+    <string name="activity_main_action_post"  formatted="false">Відіслати HTTP POST запит на %s</string>
+    <string name="activity_main_action_post_with_token" formatted="false">Відіслати HTTP POST запит включаючи Google Sign-in токен на %s</string>
+    <string name="activity_main_action_speak_out">Промовити</string>
+    <string name="activity_main_gps_button">Налаштувати GPS</string>
+    <string name="activity_main_gps_charging">GPS датчик включений лише коли прилад під\'єднаний до зарядного пристрою</string>
+    <string name="activity_main_gps_manual">Активація GPS датчика контролюється вручну</string>
+    <string name="activity_main_log_button">Відкрити лог</string>
+    <string name="activity_main_status_active">Статус: спостереження</string>
+    <string name="activity_main_status_inactive">Статус: неактивний</string>
+    <string name="activity_main_substatus_bycharger_inactive">Під\'єднайте до зарядного пристрою для активізіції</string>
+    <string name="activity_main_substatus_gps_time">"Місцезнаходження оновлене о "</string>
+    <string name="activity_main_substatus_manual_inactive">Стукніть по вимикачу для активації</string>
+    <string name="activity_main_substatus_waiting_gps">Очікування даних від GPS</string>
+    <string name="activity_main_title">GeoSwitch</string>
+    <string name="activity_main_trigger_button">Налаштувати тригер</string>
+    <string name="activity_main_trigger_desc_enter_area" formatted="false">Спрацьовує при входженні до кола радіусом %d метрів з центром в (%s,%s)</string>
+    <string name="activity_main_trigger_desc_exit_area" formatted="false">Спрацьовує при виході із кола радіусом %d метрів з центром в (%s,%s)</string>
+    <string name="activity_main_trigger_desc_transition" formatted="false">Спрацьовує при переміщенні з кола радіусом %d метрів з центром в (%s,%s) до кола радіусом %d метрів з центром в (%s,%s)</string>
+    <string name="activity_main_trigger_invalid">Тригер не заданий</string>
+    <string name="activity_map_area">Ділянка</string>
+    <string name="activity_map_from">Звідки</string>
+    <string name="activity_map_to">Куди</string>
+    <string name="activity_map_title">Карта</string>
+    <string name="activity_trigger_area_section">Ділянка</string>
+    <string name="activity_trigger_cancel_button">Відмінити</string>
+    <string name="activity_trigger_enter_desc">Входження до ділянки</string>
+    <string name="activity_trigger_enter_radio">Вхід</string>
+    <string name="activity_trigger_exit_desc">Вихід з ділянки</string>
+    <string name="activity_trigger_exit_radio">Вихід</string>
+    <string name="activity_trigger_from_section">Звідки</string>
+    <string name="activity_trigger_latitude_hint">Широта</string>
+    <string name="activity_trigger_latitude_label">Широта</string>
+    <string name="activity_trigger_longitide_label">Довгота</string>
+    <string name="activity_trigger_longitude_hint">Довгота</string>
+    <string name="activity_trigger_map_button">Вибрати на карті</string>
+    <string name="activity_trigger_ok_button">Гаразд</string>
+    <string name="activity_trigger_radius_hint">Радіус в метрах</string>
+    <string name="activity_trigger_radius_label">Радіус</string>
+    <string name="activity_trigger_title">Тригер</string>
+    <string name="activity_trigger_to_section">Куди</string>
+    <string name="activity_trigger_transition_desc">Переміщення за однієї ділянки до іншої</string>
+    <string name="activity_trigger_transition_radio">Переміщення</string>
+    <string name="activity_trigger_type">Тип</string>
+    <string name="activity_trigger_validation_failed">Конфігурація неповна або помилкова</string>
+    <string name="service_action_failed_no_internet">Дія зазнала невдачу. Немає з\'єднання з інтернетом</string>
+    <string name="service_action_failed_refresh_token">Дія зазнала невдачу. Не вдалося встановити з\'єднання з сервером Google</string>
+    <string name="service_action_failed_with_error_code" formatted="false">Дія зазнала невдачу. Помилка HTTP %d</string>
+    <string name="service_action_started">Дія запущена.</string>
+    <string name="service_action_succeeded_with_server_response"  formatted="false">Дія завершилась успішно. Відповідь сервера: %s</string>
+    <string name="service_sticky_status_gps_time">"Останні дані про місцезнаходження отримані о "</string>
+    <string name="service_sticky_status_waiting_gps">Очікування даних про місцезнаходження</string>
+    <string name="service_sticky_title">GeoSwitch: спостереження</string>
+    <string name="service_trigger_fired">Спрацював геолокаційний тригер.</string>
+    <string name="service_action_succeeded">Дія завершилась успішно.</string>
+</resources>

@@ -13,12 +13,12 @@
         android:name=".GeoSwitchApp"
         android:allowBackup="true"
         android:icon="@mipmap/geoswitch_launcher"
-        android:label="@string/app_name"
+        android:label="@string/application_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
             android:name=".ActivityMain"
-            android:label="@string/title_activity_main">
+            android:label="@string/activity_main_title">
             <intent-filter>
                 <category android:name="android.intent.category.LAUNCHER" />
 
@@ -44,16 +44,16 @@
 
         <activity
             android:name=".ActivityTrigger"
-            android:label="@string/title_activity_trigger" />
+            android:label="@string/activity_trigger_title" />
         <activity
             android:name=".ActivityMap"
-            android:label="@string/title_activity_maps" />
+            android:label="@string/activity_map_title" />
         <activity
             android:name=".ActivityAction"
-            android:label="@string/title_activity_action" />
+            android:label="@string/activity_action_title" />
         <activity
             android:name=".ActivityGpsOptions"
-            android:label="@string/title_activity_gps_options" />
+            android:label="@string/activity_gps_title" />
 
         <receiver android:name=".peripherals.PowerReceiver">
             <intent-filter>

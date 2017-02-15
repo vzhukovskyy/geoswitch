@@ -22,7 +22,7 @@
             android:layout_below="@+id/unidirectionalGroup">
 
             <Button
-                android:text="OK"
+                android:text="@string/activity_trigger_ok_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/okButton"
@@ -33,7 +33,7 @@
                 android:onClick="onOkClick" />
 
             <Button
-                android:text="Cancel"
+                android:text="@string/activity_trigger_cancel_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/cancelButton"
@@ -47,7 +47,6 @@
         </LinearLayout>
 
         <TextView
-            android:text="Type"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
@@ -55,7 +54,8 @@
             android:id="@+id/triggerTypeLabel"
             android:layout_width="62dp"
             android:gravity="center_vertical"
-            android:layout_alignBottom="@+id/triggerTypeRadioGroup" />
+            android:layout_alignBottom="@+id/triggerTypeRadioGroup"
+            android:text="@string/activity_trigger_type" />
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -66,7 +66,7 @@
             android:layout_alignParentStart="true">
 
             <TextView
-                android:text="Latitude"
+                android:text="@string/activity_trigger_latitude_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/latitudeLabelBi"
@@ -80,7 +80,7 @@
                 android:layout_below="@+id/areaLabelBi" />
 
             <TextView
-                android:text="Longitude"
+                android:text="@string/activity_trigger_longitide_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/longitudeLabelBi"
@@ -99,20 +99,20 @@
                 android:layout_below="@+id/latitudeEditBi"
                 android:layout_toRightOf="@+id/longitudeLabelBi"
                 android:id="@+id/longitudeEditBi"
-                android:hint="Longitude"
+                android:hint="@string/activity_trigger_longitude_hint"
                 android:textSize="14sp"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true" />
 
             <Button
-                android:text="Select on Map"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/mapButtonBi"
                 android:onClick="onMapClick"
                 android:layout_below="@+id/longitudeEditBi"
                 android:layout_toRightOf="@+id/longitudeLabelBi"
-                android:layout_toEndOf="@+id/longitudeLabelBi" />
+                android:layout_toEndOf="@+id/longitudeLabelBi"
+                android:text="@string/activity_trigger_map_button" />
 
             <EditText
                 android:layout_width="wrap_content"
@@ -120,7 +120,7 @@
                 android:inputType="numberDecimal"
                 android:ems="10"
                 android:id="@+id/radiusEditBi"
-                android:hint="Radius in meters"
+                android:hint="@string/activity_trigger_radius_hint"
                 android:layout_below="@+id/mapButtonBi"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true"
@@ -129,7 +129,7 @@
                 android:textSize="14sp" />
 
             <TextView
-                android:text="Radius"
+                android:text="@string/activity_trigger_radius_label"
                 android:layout_height="wrap_content"
                 android:id="@+id/radiusLabelBi"
                 android:textSize="14sp"
@@ -148,7 +148,7 @@
                 android:inputType="none"
                 android:ems="10"
                 android:id="@+id/latitudeEditBi"
-                android:hint="Latitude"
+                android:hint="@string/activity_trigger_latitude_hint"
                 android:textSize="14sp"
                 android:layout_below="@+id/areaLabelBi"
                 android:layout_alignParentRight="true"
@@ -157,7 +157,7 @@
                 android:layout_toEndOf="@+id/latitudeLabelBi"/>
 
             <TextView
-                android:text="Area"
+                android:text="@string/activity_trigger_area_section"
                 android:layout_width="wrap_content"
                 android:layout_height="30dp"
                 android:id="@+id/areaLabelBi"
@@ -179,7 +179,7 @@
             android:layout_alignParentStart="true">
 
             <TextView
-                android:text="From"
+                android:text="@string/activity_trigger_from_section"
                 android:layout_width="wrap_content"
                 android:id="@+id/fromLabelUni"
                 android:gravity="center_vertical|center_horizontal"
@@ -192,7 +192,7 @@
                 android:layout_marginTop="12dp" />
 
             <TextView
-                android:text="Latitude"
+                android:text="@string/activity_trigger_latitude_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/latitudeFromLabel"
@@ -205,7 +205,7 @@
             <EditText
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:hint="Latitude"
+                android:hint="@string/activity_trigger_latitude_hint"
                 android:ems="10"
                 android:layout_below="@+id/fromLabelUni"
                 android:id="@+id/latitudeFromEditUni"
@@ -217,7 +217,7 @@
                 android:inputType="none" />
 
             <TextView
-                android:text="Longitude"
+                android:text="@string/activity_trigger_longitide_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/longitudeFromLabel"
@@ -230,7 +230,7 @@
             <EditText
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:hint="Longitude"
+                android:hint="@string/activity_trigger_longitude_hint"
                 android:ems="10"
                 android:layout_below="@+id/latitudeFromEditUni"
                 android:id="@+id/longitudeFromEditUni"
@@ -242,7 +242,7 @@
                 android:inputType="none" />
 
             <TextView
-                android:text="To"
+                android:text="@string/activity_trigger_to_section"
                 android:layout_width="wrap_content"
                 android:id="@+id/toLabelUni"
                 android:layout_below="@+id/longitudeFromEditUni"
@@ -256,7 +256,7 @@
                 android:layout_marginTop="8dp" />
 
             <TextView
-                android:text="Latitude"
+                android:text="@string/activity_trigger_latitude_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/latitudeToLabel"
@@ -269,7 +269,7 @@
             <EditText
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:hint="Latitude"
+                android:hint="@string/activity_trigger_latitude_hint"
                 android:ems="10"
                 android:layout_below="@+id/toLabelUni"
                 android:id="@+id/latitudeToEditUni"
@@ -281,7 +281,7 @@
                 android:inputType="none" />
 
             <TextView
-                android:text="Longitude"
+                android:text="@string/activity_trigger_longitide_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/longitudeToLabel"
@@ -294,7 +294,7 @@
             <EditText
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:hint="Longitude"
+                android:hint="@string/activity_trigger_longitude_hint"
                 android:ems="10"
                 android:layout_below="@+id/latitudeToEditUni"
                 android:id="@+id/longitudeToEditUni"
@@ -306,7 +306,7 @@
                 android:inputType="none" />
 
             <Button
-                android:text="Select on Map"
+                android:text="@string/activity_trigger_map_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/mapButtonUni"
@@ -316,7 +316,7 @@
                 android:layout_toEndOf="@+id/longitudeToLabel" />
 
             <TextView
-                android:text="Radius"
+                android:text="@string/activity_trigger_radius_label"
                 android:layout_height="wrap_content"
                 android:id="@+id/radiusLabelUni"
                 android:textSize="14sp"
@@ -335,7 +335,7 @@
                 android:inputType="numberDecimal"
                 android:ems="10"
                 android:id="@+id/radiusEditUni"
-                android:hint="Radius in meters"
+                android:hint="@string/activity_trigger_radius_hint"
                 android:layout_below="@+id/mapButtonUni"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true"
@@ -359,21 +359,21 @@
             android:checkedButton="@+id/radioEnterArea">
 
             <RadioButton
-                android:text="Enter"
+                android:text="@string/activity_trigger_enter_radio"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/radioEnterArea"
                 android:layout_weight="1" />
 
             <RadioButton
-                android:text="Exit"
+                android:text="@string/activity_trigger_exit_radio"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/radioExitArea"
                 android:layout_weight="1" />
 
             <RadioButton
-                android:text="Transition"
+                android:text="@string/activity_trigger_transition_radio"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/radioTransition"
@@ -382,7 +382,7 @@
         </RadioGroup>
 
         <TextView
-            android:text="Trigger type description"
+            android:text="@string/activity_trigger_enter_desc"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/triggerTypeDescriptionLabel"

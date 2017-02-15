@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -16,12 +15,9 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Formatter;
@@ -37,21 +33,15 @@ import ua.pp.rudiki.geoswitch.trigger.TransitionTrigger;
 import ua.pp.rudiki.geoswitch.trigger.TriggerType;
 
 
-public class ActivityMain extends AppCompatActivity implements
-        GoogleApiClient.OnConnectionFailedListener, GpsServiceActivationListener
+public class ActivityMain extends AppCompatActivity implements GpsServiceActivationListener
 {
     final String TAG = getClass().getSimpleName();
-
-    private final int RC_SIGN_IN = 9002;
-    private final static int CONFIGURE_GPSACTIVATION_ID = 9010;
-    private final static int CONFIGURE_TRIGGER_ID = 9011;
-    private final static int CONFIGURE_ACTION_ID = 9012;
 
     EditText gpsActivationEdit, triggerEdit, actionEdit;
     TextView statusLabel, substatusLabel;
     Switch gpsActivationSwitch;
 
-    private SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+    private DateFormat dateFormat = SimpleDateFormat.getTimeInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,10 +60,10 @@ public class ActivityMain extends AppCompatActivity implements
         statusLabel = (TextView)findViewById(R.id.statusLabel);
         substatusLabel = (TextView)findViewById(R.id.substatusLabel);
 
+        GeoSwitchApp.getGoogleApiClient().startSigninForResult(this, RequestCode.MAIN_SIGN_IN);
         GeoSwitchApp.getGpsServiceActivator().registerListener(this);
-
-        signIn();
         registerServiceMessageReceiver();
+
         restartService();
     }
 
@@ -116,12 +106,12 @@ public class ActivityMain extends AppCompatActivity implements
 
     public void onConfigureTriggerClick(View view) {
         Intent intent = new Intent(this, ActivityTrigger.class);
-        startActivityForResult(intent, CONFIGURE_TRIGGER_ID);
+        startActivityForResult(intent, RequestCode.MAIN_TRIGGER_ID);
     }
 
     public void onConfigureActionClick(View view) {
         Intent intent = new Intent(this, ActivityAction.class);
-        startActivityForResult(intent, CONFIGURE_ACTION_ID);
+        startActivityForResult(intent, RequestCode.MAIN_ACTION_ID);
     }
 
     public void onOpenLogButtonClick(View view) {
@@ -133,7 +123,7 @@ public class ActivityMain extends AppCompatActivity implements
 
     public void onGpsOptionsClick(View view) {
         Intent intent = new Intent(this, ActivityGpsOptions.class);
-        startActivityForResult(intent, CONFIGURE_GPSACTIVATION_ID);
+        startActivityForResult(intent, RequestCode.MAIN_GPSACTIVATION_ID);
     }
 
     public void onGpsActivateButtonClick(View view) {
@@ -149,19 +139,19 @@ public class ActivityMain extends AppCompatActivity implements
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.d(TAG, "onActivityResult requestCode="+requestCode+", resultCode="+resultCode);
-        if (requestCode == CONFIGURE_TRIGGER_ID) {
+        if (requestCode == RequestCode.MAIN_TRIGGER_ID) {
             if (resultCode == RESULT_OK) {
                 loadTriggerToUi();
                 passValuesToService();
             }
         }
-        else if (requestCode == CONFIGURE_ACTION_ID) {
+        else if (requestCode == RequestCode.MAIN_ACTION_ID) {
             if (resultCode == RESULT_OK) {
                 loadActionToUi();
                 passValuesToService();
             }
         }
-        else if (requestCode == CONFIGURE_GPSACTIVATION_ID) {
+        else if (requestCode == RequestCode.MAIN_GPSACTIVATION_ID) {
             if (resultCode == RESULT_OK) {
                 GeoSwitchApp.getGpsServiceActivator().activationModeChanged();
 
@@ -171,11 +161,12 @@ public class ActivityMain extends AppCompatActivity implements
                 passValuesToService();
             }
         }
-        else if (requestCode == RC_SIGN_IN) {
+        else if (requestCode == RequestCode.MAIN_SIGN_IN) {
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-            handleSignInResult(result);
+            GeoSwitchApp.getGoogleApiClient().handleSignInResult(result);
         }
     }
+
 
     private void updateStatusUi(Date gpsFixTime) {
         boolean active = GeoSwitchApp.getGpsServiceActivator().isOn();
@@ -183,18 +174,18 @@ public class ActivityMain extends AppCompatActivity implements
 
         String status, substatus;
         if(active) {
-            status = getString(R.string.status_active);
+            status = getString(R.string.activity_main_status_active);
             if(gpsFixTime != null) {
-                substatus = getString(R.string.substatus_gps_time) + dateFormat.format(gpsFixTime);
+                substatus = getString(R.string.activity_main_substatus_gps_time) + dateFormat.format(gpsFixTime);
             } else {
-                substatus = getString(R.string.substatus_waiting_gps);
+                substatus = getString(R.string.activity_main_substatus_waiting_gps);
             }
         } else {
-            status = getString(R.string.status_inactive);
+            status = getString(R.string.activity_main_status_inactive);
             if(activateOnCharger) {
-                substatus = getString(R.string.substatus_bycharger_inactive);
+                substatus = getString(R.string.activity_main_substatus_bycharger_inactive);
             } else {
-                substatus = getString(R.string.substatus_manual_inactive);
+                substatus = getString(R.string.activity_main_substatus_manual_inactive);
             }
         }
 
@@ -214,8 +205,7 @@ public class ActivityMain extends AppCompatActivity implements
 
     private void loadTriggerToUi() {
         GeoTrigger trigger = GeoSwitchApp.getPreferences().loadTrigger();
-
-        TriggerType triggerType = trigger.getType();
+        TriggerType triggerType = (trigger != null) ? trigger.getType() : TriggerType.Invalid;
 
         String desc, format;
         switch(triggerType) {
@@ -225,7 +215,7 @@ public class ActivityMain extends AppCompatActivity implements
                 String longitude = String.valueOf(area.getLongitude());
                 long roundedRadius = Math.round(area.getRadius());
 
-                format = getString(R.string.trigger_desc_enter_area);
+                format = getString(R.string.activity_main_trigger_desc_enter_area);
                 desc = new Formatter().format(format, roundedRadius, latitude, longitude).toString();
             }
             break;
@@ -235,7 +225,7 @@ public class ActivityMain extends AppCompatActivity implements
                 String longitude = String.valueOf(area.getLongitude());
                 long roundedRadius = Math.round(area.getRadius());
 
-                format = getString(R.string.trigger_desc_exit_area);
+                format = getString(R.string.activity_main_trigger_desc_exit_area);
                 desc = new Formatter().format(format, roundedRadius, latitude, longitude).toString();
             }
             break;
@@ -249,13 +239,13 @@ public class ActivityMain extends AppCompatActivity implements
                 String longitudeTo = String.valueOf(pointB.getLongitude());
                 long roundedRadius = Math.round(transitionTrigger.getRadius());
 
-                format = getString(R.string.trigger_desc_transition);
+                format = getString(R.string.activity_main_trigger_desc_transition);
                 desc = new Formatter().format(format, roundedRadius, latitude, longitude,
                         roundedRadius, latitudeTo, longitudeTo).toString();
             }
             break;
             default:
-                desc = getString(R.string.trigger_invalid);
+                desc = getString(R.string.activity_main_trigger_invalid);
         }
 
         triggerEdit.setText(desc);
@@ -271,20 +261,20 @@ public class ActivityMain extends AppCompatActivity implements
 
         String desc = "";
         if (showNotification) {
-            desc = appendActionDescription(desc, getString(R.string.action_display_notification));
+            desc = appendActionDescription(desc, getString(R.string.activity_main_action_display_notification));
             if(playSound)
-                desc = appendActionDescription(desc, getString(R.string.action_play_sound));
+                desc = appendActionDescription(desc, getString(R.string.activity_main_action_play_sound));
         }
         if (speakOut) {
-            desc = appendActionDescription(desc, getString(R.string.action_speak_out));
+            desc = appendActionDescription(desc, getString(R.string.activity_main_action_speak_out));
         }
 
         if (sendPost) {
             String format;
             if (appendSignin) {
-                format = getString(R.string.action_post_with_token);
+                format = getString(R.string.activity_main_action_post_with_token);
             } else {
-                format = getString(R.string.action_post);
+                format = getString(R.string.activity_main_action_post);
             }
             String postActionDesc = new Formatter().format(format, url).toString();
             desc = appendActionDescription(desc, postActionDesc);
@@ -298,9 +288,9 @@ public class ActivityMain extends AppCompatActivity implements
 
         String desc = "";
         if (activateOnCharger) {
-            desc = getString(R.string.gps_charging);
+            desc = getString(R.string.activity_main_gps_charging);
         } else {
-            desc = getString(R.string.gps_manual);
+            desc = getString(R.string.activity_main_gps_manual);
         }
 
         gpsActivationEdit.setText(desc);
@@ -327,41 +317,6 @@ public class ActivityMain extends AppCompatActivity implements
         return Character.toLowerCase(message.charAt(0)) + message.substring(1);
     }
 
-    // Google sign-in
-    // This is initial sign-in into application. After successful sign-in what is needed is refreshing token
-    // right before making POST request to the server
-    // Here I am using separate googleApiClient other than GeoSwitchGoogleApiClient because sign-in includes user operations,
-    // Leveraging automanage facility is clearly better choice than handling it by my own
-
-    void signIn() {
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestEmail()
-                .build();
-        GoogleApiClient googleApiClient = new GoogleApiClient.Builder(this)
-                .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
-                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-                .build();
-        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(googleApiClient);
-        startActivityForResult(signInIntent, RC_SIGN_IN);
-
-        Log.i(TAG, "Sign-in for foreground activity initiated");
-    }
-
-    private void handleSignInResult(GoogleSignInResult result) {
-        Log.i(TAG, "handleSignInResult:" + result.isSuccess());
-        if (result.isSuccess()) {
-            GoogleSignInAccount account = result.getSignInAccount();
-            Log.i(TAG, "Signed in for foreground activity as "+account.getEmail());
-        } else {
-            Log.e(TAG, "Sign-in failed");
-        }
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Log.e(TAG, "Connection to google sign-in service failed");
-    }
-
     // service
 
     private void restartService() {
@@ -377,26 +332,49 @@ public class ActivityMain extends AppCompatActivity implements
     }
 
     private void registerServiceMessageReceiver() {
-        IntentFilter filter = new IntentFilter(GeoSwitchGpsService.SERVICE_BROADCAST_ACTION);
+        IntentFilter filter = new IntentFilter(GeoSwitchGpsService.BROADCAST_ACTION);
         LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver, filter);
     }
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if(intent.getAction().equals(GeoSwitchGpsService.SERVICE_BROADCAST_ACTION)) {
-                boolean activeMode = intent.getBooleanExtra(GeoSwitchGpsService.SERVICE_BROADCAST_ISACTIVEMODE_KEY, false);
+            if(intent.getAction().equals(GeoSwitchGpsService.BROADCAST_ACTION)) {
+                boolean activeMode = intent.getBooleanExtra(GeoSwitchGpsService.BROADCAST_ISACTIVEMODE_KEY, false);
                 Date date = null;
-                if (activeMode) {
-                    long timestamp = intent.getLongExtra(GeoSwitchGpsService.SERVICE_BROADCAST_GPSFIXTIMESTAMP_KEY, 0);
-                    if(timestamp != 0) {
-                        date = new Date(timestamp);
-                    }
+                long timestamp = intent.getLongExtra(GeoSwitchGpsService.BROADCAST_GPSFIXTIMESTAMP_KEY, 0);
+                if(timestamp != 0) {
+                    date = new Date(timestamp);
                 }
-                updateStatusUi(date);
+                double latitude = intent.getDoubleExtra(GeoSwitchGpsService.BROADCAST_LATITUDE_KEY, Double.NaN);
+                double longitude = intent.getDoubleExtra(GeoSwitchGpsService.BROADCAST_LONGITUDE_KEY, Double.NaN);
+
+                onServiceUpdateReceived(activeMode, latitude, longitude, date);
             }
         }
     };
+
+    private void onServiceUpdateReceived(boolean activeMode, double latitude, double longitude, Date date)
+    {
+        updateStatusUi(date);
+
+        if(GeoSwitchApp.getPreferences().getTriggerType() == TriggerType.Invalid) {
+            // First run. Callback most probably with last know location from Fused location API.
+            // Set up initial trigger
+            if(!Double.isNaN(latitude) && !Double.isNaN(longitude)){
+                createInitialTrigger(latitude, longitude);
+                loadTriggerToUi();
+                passValuesToService();
+            }
+        }
+    }
+
+    private void createInitialTrigger(double latitude, double longitude) {
+        double radius = GeoSwitchApp.getPreferences().getDefaultRadius();
+        GeoArea area = new GeoArea(latitude, longitude, radius);
+        ExitAreaTrigger trigger = new ExitAreaTrigger(area);
+        GeoSwitchApp.getPreferences().storeTrigger(trigger);
+    }
 
     // GpsServiceActivationListener implementation
 

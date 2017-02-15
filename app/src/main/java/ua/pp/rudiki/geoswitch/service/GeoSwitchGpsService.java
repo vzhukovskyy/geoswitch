@@ -11,30 +11,32 @@ import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import ua.pp.rudiki.geoswitch.GeoSwitchApp;
 import ua.pp.rudiki.geoswitch.R;
+import ua.pp.rudiki.geoswitch.RequestCode;
 import ua.pp.rudiki.geoswitch.peripherals.ActionExecutor;
 import ua.pp.rudiki.geoswitch.peripherals.AsyncResultCallback;
 import ua.pp.rudiki.geoswitch.trigger.GeoTrigger;
-import ua.pp.rudiki.geoswitch.trigger.TriggerType;
 
 public class GeoSwitchGpsService extends Service implements android.location.LocationListener
 {
-    public static final String SERVICE_BROADCAST_ACTION = "GPSSERVICE_BROADCAST";
-    public static final String SERVICE_BROADCAST_ISACTIVEMODE_KEY = "MODE_ISACTIVE";
-    public static final String SERVICE_BROADCAST_GPSFIXTIMESTAMP_KEY = "GPS_TIMESTAMP";
+    public static final String BROADCAST_ACTION = "GPSSERVICE_BROADCAST";
+    public static final String BROADCAST_ISACTIVEMODE_KEY = "MODE_ISACTIVE";
+    public static final String BROADCAST_GPSFIXTIMESTAMP_KEY = "GPS_TIMESTAMP";
+    public static final String BROADCAST_LATITUDE_KEY = "GPS_LATITUDE";
+    public static final String BROADCAST_LONGITUDE_KEY = "GPS_LONGITUDE";
 
     final String TAG = getClass().getSimpleName();
-    private final int ONGOING_NOTIFICATION_ID = 9004;
 
     private LocationManager locationManager;
-    private SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+    private DateFormat dateFormat = SimpleDateFormat.getTimeInstance();
 
     // fields protected by mutex
-    private Object mutex = new Object();
+    private final Object mutex = new Object();
     private GeoTrigger trigger;
     private Location lastLocation;
     private boolean activeMode;
@@ -115,7 +117,7 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
         }
 
         // request initial location from Google API
-        if(frozenLastLocation == null && frozenActiveMode) {
+        if(frozenLastLocation == null/* && frozenActiveMode*/) {
             requestLastLocation();
         }
 
@@ -140,7 +142,7 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
     // ***********************************************
 
     private void requestLastLocation() {
-        GeoSwitchApp.getGeoSwitchGoogleApiClient().requestLastLocation(new AsyncResultCallback<Location>() {
+        GeoSwitchApp.getGoogleApiClient().requestLastLocation(new AsyncResultCallback<Location>() {
             @Override
             public void onResult(Location location) {
                 if(location != null) {
@@ -148,8 +150,8 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
 
                     // may be concurrently updated by location service
                     synchronized (mutex) {
-                        if (!activeMode)
-                            return;
+//                        if (!activeMode)
+//                            return;
 
                         // lastLocation may already be updated by GPS. Drop out in that case
                         if(lastLocation == null) {
@@ -188,27 +190,31 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
         String message;
         if(location != null) {
             Date date = new Date(location.getTime());
-            message = getString(R.string.sticky_status_gps_time) + dateFormat.format(date);
+            message = getString(R.string.service_sticky_status_gps_time) + dateFormat.format(date);
         } else {
-            message = getString(R.string.sticky_status_waiting_gps);
+            message = getString(R.string.service_sticky_status_waiting_gps);
         }
 
         // make service a foreground service
         Notification notification =
                 GeoSwitchApp.getNotificationUtils().displayStickyNotification(message);
-        startForeground(ONGOING_NOTIFICATION_ID, notification);
+        startForeground(RequestCode.STICKY_NOTIFICATION_ID, notification);
     }
 
     private void removeStickyNotification() {
         stopForeground(true);
     }
 
-    private void sendMessageToActivity(boolean mode, Location location) {
-        Intent intent = new Intent(SERVICE_BROADCAST_ACTION);
-        intent.putExtra(SERVICE_BROADCAST_ISACTIVEMODE_KEY, mode);
+    private void sendMessageToActivity(boolean isActiveMode, Location location) {
+        Intent intent = new Intent(BROADCAST_ACTION);
+
+        intent.putExtra(BROADCAST_ISACTIVEMODE_KEY, isActiveMode);
         if(location != null) {
-            intent.putExtra(SERVICE_BROADCAST_GPSFIXTIMESTAMP_KEY, location.getTime());
+            intent.putExtra(BROADCAST_GPSFIXTIMESTAMP_KEY, location.getTime());
+            intent.putExtra(BROADCAST_LATITUDE_KEY, location.getLatitude());
+            intent.putExtra(BROADCAST_LONGITUDE_KEY, location.getLongitude());
         }
+
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 

@@ -27,7 +27,6 @@ import ua.pp.rudiki.geoswitch.trigger.TriggerType;
 public class ActivityTrigger extends AppCompatActivity implements RadioGroup.OnCheckedChangeListener {
 
     final String TAG = getClass().getSimpleName();
-    final int SELECT_COORDINATES_REQUEST_ID = 9001;
 
     RadioGroup triggerTypeRadioGroup;
     TextView triggerTypeDescriptionLabel;
@@ -77,15 +76,15 @@ public class ActivityTrigger extends AppCompatActivity implements RadioGroup.OnC
         switch(triggerType) {
             case EnterArea:
                 isBidirectionalLayout = true;
-                desc = "Enter area";
+                desc = getString(R.string.activity_trigger_enter_desc);
                 break;
             case ExitArea:
                 isBidirectionalLayout = true;
-                desc = "Exit area";
+                desc = getString(R.string.activity_trigger_exit_desc);
                 break;
             case Transition:
                 isBidirectionalLayout = false;
-                desc = "Transition from one area to another";
+                desc = getString(R.string.activity_trigger_transition_desc);
                 break;
             default:
                 isBidirectionalLayout = true;
@@ -105,7 +104,7 @@ public class ActivityTrigger extends AppCompatActivity implements RadioGroup.OnC
             setResult(Activity.RESULT_OK, resultIndent);
             finish();
         } else {
-            String message = getString(R.string.trigger_validation_failed);
+            String message = getString(R.string.activity_trigger_validation_failed);
             Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
         }
     }
@@ -126,14 +125,14 @@ public class ActivityTrigger extends AppCompatActivity implements RadioGroup.OnC
         intent.putExtra(Preferences.longitudeToKey, getLongitudeToEditboxValue());
         intent.putExtra(Preferences.radiusKey, getRadiusEditboxValue());
 
-        startActivityForResult(intent, SELECT_COORDINATES_REQUEST_ID);
+        startActivityForResult(intent, RequestCode.TRIGGER_COORDINATES_ID);
     }
 
     // return value from the map activity
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.d(TAG, "onActivityResult requestCode="+requestCode);
-        if (requestCode == SELECT_COORDINATES_REQUEST_ID && data != null) {
+        if (requestCode == RequestCode.TRIGGER_COORDINATES_ID && data != null) {
             String latitude = data.getStringExtra(Preferences.latitudeKey);
             String longitude = data.getStringExtra(Preferences.longitudeKey);
             String radius = data.getStringExtra(Preferences.radiusKey);
@@ -239,9 +238,10 @@ public class ActivityTrigger extends AppCompatActivity implements RadioGroup.OnC
 
     private void loadValuesToUi() {
         GeoTrigger trigger = GeoSwitchApp.getPreferences().loadTrigger();
+        TriggerType triggerType = (trigger != null) ? trigger.getType() : TriggerType.Invalid;
 
         int radioId;
-        switch(trigger.getType()) {
+        switch(triggerType) {
             case Transition:
                 radioId = R.id.radioTransition;
 
@@ -268,8 +268,7 @@ public class ActivityTrigger extends AppCompatActivity implements RadioGroup.OnC
                 setRadiusEditboxValue(area.getRadius());
             }
             break;
-            case ExitArea:
-            default: {
+            case ExitArea: {
                 radioId = R.id.radioExitArea;
 
                 ExitAreaTrigger exitAreaTrigger = (ExitAreaTrigger)trigger;
@@ -278,6 +277,11 @@ public class ActivityTrigger extends AppCompatActivity implements RadioGroup.OnC
                 setLatitudeEditboxValue(area.getLatitude());
                 setLongitudeEditboxValue(area.getLongitude());
                 setRadiusEditboxValue(area.getRadius());
+            }
+            break;
+            default: {
+                radioId = R.id.radioExitArea;
+                setRadiusEditboxValue(GeoSwitchApp.getPreferences().getDefaultRadius());
             }
             break;
         }

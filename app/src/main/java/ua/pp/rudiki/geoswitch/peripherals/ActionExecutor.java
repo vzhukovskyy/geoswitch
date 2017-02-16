@@ -116,7 +116,7 @@ public class ActionExecutor {
             notificationFormat = context.getString(R.string.service_action_failed_with_error_code);
             speechFormat = getStringInSpeechLocale(R.string.service_action_failed_with_error_code);
             notificationMessage = new Formatter().format(notificationFormat, result.responseCode).toString();
-            speechMessage = new Formatter().format(speechFormat, result.responseBody).toString();
+            speechMessage = new Formatter().format(speechFormat, result.responseCode).toString();
         }
 
         displayNotification(notificationMessage);

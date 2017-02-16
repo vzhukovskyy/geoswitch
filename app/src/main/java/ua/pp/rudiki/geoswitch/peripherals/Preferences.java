@@ -173,7 +173,7 @@ public class Preferences {
     }
 
     public boolean getAppendToken() {
-        return sharedPrefs.getBoolean(appendTokenKey, true);
+        return sharedPrefs.getBoolean(appendTokenKey, false);
     }
 
     public String getUrl() {

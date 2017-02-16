@@ -49,19 +49,17 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
 
     @Override
     public void onCreate() {
-        Log.d(TAG, "onCreate");
         GeoSwitchApp.getLogger().log("Service created");
 
-        GeoTrigger newTrigger = loadTrigger();
-        synchronized(mutex) {
-            trigger = newTrigger;
-            activeMode = false;
-        }
+//        GeoTrigger newTrigger = loadTrigger();
+//        synchronized(mutex) {
+//            trigger = newTrigger;
+//            activeMode = false;
+//        }
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(TAG, "onStartCommand, intent=" + intent);
         GeoTrigger newTrigger = loadTrigger();
 
         // copies which can be used outside of synchronized block
@@ -95,6 +93,8 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
                 }
             }
         }
+
+        GeoSwitchApp.getLogger().log("Service.onStartCommand activeMode="+frozenActiveMode+", lastLocation="+frozenLastLocation);
 
         if (switchToNewTrigger) {
             GeoSwitchApp.getLogger().log("Start monitoring " + newTrigger);
@@ -147,11 +147,13 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
             public void onResult(Location location) {
                 if(location != null) {
                     boolean lastLocationUpdated = false;
+                    boolean frozenActiveMode;
 
                     // may be concurrently updated by location service
                     synchronized (mutex) {
 //                        if (!activeMode)
 //                            return;
+                        frozenActiveMode = activeMode;
 
                         // lastLocation may already be updated by GPS. Drop out in that case
                         if(lastLocation == null) {
@@ -164,9 +166,12 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
                     }
 
                     if(lastLocationUpdated) {
-                        sendMessageToActivity(true, location);
-                        updateStickyNotification(location);
                         GeoSwitchApp.getLogger().log("Retrieved last known location " + location);
+
+                        sendMessageToActivity(frozenActiveMode, location);
+                        if(frozenActiveMode) {
+                            updateStickyNotification(location);
+                        }
                     } else {
                         GeoSwitchApp.getLogger().log("Retrieved last known location " + location + " but too late. Ignored it.");
                     }

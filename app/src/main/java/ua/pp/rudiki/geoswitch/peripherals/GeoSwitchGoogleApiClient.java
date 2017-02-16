@@ -14,10 +14,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 
 import ua.pp.rudiki.geoswitch.GeoSwitchApp;
 
@@ -25,7 +21,7 @@ public class GeoSwitchGoogleApiClient {
     private final String TAG = getClass().getSimpleName();
     private static final String SERVER_CLIENT_ID = "815763108077-nb9vs1kk1d7g7k153496c6bajj32nq27.apps.googleusercontent.com";
 
-    private GoogleApiClient mGoogleApiClient;
+    private GoogleApiClient googleApiClientForSilentSignin, googleApiClientForActivitySignin;
     private Context context;
     private String token;
 
@@ -64,8 +60,6 @@ public class GeoSwitchGoogleApiClient {
     // Leveraging automanage facility is clearly better choice than handling it by my own
 
     public void startSigninForResult(FragmentActivity activity, int requestCode) {
-        if(true) return;
-
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
                 .build();
@@ -77,26 +71,20 @@ public class GeoSwitchGoogleApiClient {
             }
         };
 
-        GoogleApiClient googleApiClient = new GoogleApiClient.Builder(activity)
+        googleApiClientForActivitySignin = new GoogleApiClient.Builder(activity)
                 .enableAutoManage(activity, connectionFailedListener)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
 
-        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(googleApiClient);
+        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(googleApiClientForActivitySignin);
         activity.startActivityForResult(signInIntent, requestCode);
 
         Log.i(TAG, "Sign-in for foreground activity initiated");
     }
 
-
-    public void handleSignInResult(GoogleSignInResult result) {
-        Log.i(TAG, "handleSignInResult:" + result.isSuccess());
-        if (result.isSuccess()) {
-            GoogleSignInAccount account = result.getSignInAccount();
-            Log.i(TAG, "Signed in for foreground activity as "+account.getEmail());
-        } else {
-            Log.e(TAG, "Sign-in failed");
-        }
+    public void detachGoogleApiClientFromActivity(FragmentActivity activity) {
+        googleApiClientForActivitySignin.stopAutoManage(activity);
+        googleApiClientForActivitySignin.disconnect();
     }
 
     // Private
@@ -107,7 +95,7 @@ public class GeoSwitchGoogleApiClient {
                 .requestEmail()
                 .build();
 
-        mGoogleApiClient = new GoogleApiClient.Builder(context)
+        googleApiClientForSilentSignin = new GoogleApiClient.Builder(context)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .addApi(LocationServices.API)
                 .build();
@@ -117,9 +105,9 @@ public class GeoSwitchGoogleApiClient {
         try {
             GeoSwitchApp.getLogger().log("Connecting to Google API for an updated token");
 
-            ConnectionResult result = mGoogleApiClient.blockingConnect();
+            ConnectionResult result = googleApiClientForSilentSignin.blockingConnect();
             if (result.isSuccess()) {
-                GoogleSignInResult signInResult = Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient).await();
+                GoogleSignInResult signInResult = Auth.GoogleSignInApi.silentSignIn(googleApiClientForSilentSignin).await();
                 if (signInResult != null) {
                     GoogleSignInAccount signInAccount = signInResult.getSignInAccount();
                     if (signInAccount != null) {
@@ -131,7 +119,7 @@ public class GeoSwitchGoogleApiClient {
                 }
             }
         } finally {
-            mGoogleApiClient.disconnect();
+            googleApiClientForSilentSignin.disconnect();
         }
 
         GeoSwitchApp.getLogger().log("Failed to obtain token");
@@ -142,14 +130,14 @@ public class GeoSwitchGoogleApiClient {
         try {
             GeoSwitchApp.getLogger().log("Connecting to Google API for last location");
 
-            ConnectionResult result = mGoogleApiClient.blockingConnect();
+            ConnectionResult result = googleApiClientForSilentSignin.blockingConnect();
             if (result.isSuccess()) {
-                Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+                Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClientForSilentSignin);
                 GeoSwitchApp.getLogger().log("Last location obtained: "+lastLocation);
                 return lastLocation;
             }
         } finally {
-            mGoogleApiClient.disconnect();
+            googleApiClientForSilentSignin.disconnect();
         }
 
         GeoSwitchApp.getLogger().log("Failed to obtain last location");

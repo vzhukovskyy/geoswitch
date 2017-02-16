@@ -104,11 +104,11 @@
         style="@style/Widget.AppCompat.EditText"
         android:gravity="top|left"
         android:maxLines="20"
-        android:imeOptions="actionDone"
         android:layout_below="@+id/appendSigninCheckbox"
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
-        android:inputType="textMultiLine|textImeMultiLine"
-        android:hint="@string/activity_action_url" />
+        android:inputType="text|textUri"
+        android:hint="@string/activity_action_url"
+        android:imeOptions="actionDone" />
 
 </RelativeLayout>

@@ -14,9 +14,6 @@ import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.TextView;
 
-import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -60,7 +57,10 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
         statusLabel = (TextView)findViewById(R.id.statusLabel);
         substatusLabel = (TextView)findViewById(R.id.substatusLabel);
 
-        GeoSwitchApp.getGoogleApiClient().startSigninForResult(this, RequestCode.MAIN_SIGN_IN);
+        loadTriggerToUi();
+        loadActionToUi();
+        loadGpsActivationToUi();
+
         GeoSwitchApp.getGpsServiceActivator().registerListener(this);
         registerServiceMessageReceiver();
 
@@ -72,10 +72,6 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
         super.onStart();
 
         Log.d(TAG, "onStart");
-
-        loadTriggerToUi();
-        loadActionToUi();
-        loadGpsActivationToUi();
     }
 
     @Override
@@ -83,7 +79,7 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
         super.onResume();
         Log.d(TAG, "onResume");
 
-        updateActivationModeUi();
+        //updateActivationModeUi();
     }
 
     @Override
@@ -161,12 +157,7 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
                 passValuesToService();
             }
         }
-        else if (requestCode == RequestCode.MAIN_SIGN_IN) {
-            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-            GeoSwitchApp.getGoogleApiClient().handleSignInResult(result);
-        }
     }
-
 
     private void updateStatusUi(Date gpsFixTime) {
         boolean active = GeoSwitchApp.getGpsServiceActivator().isOn();
@@ -191,6 +182,9 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
 
         statusLabel.setText(status);
         substatusLabel.setText(substatus);
+
+        gpsActivationSwitch.setVisibility(activateOnCharger ? View.GONE : View.VISIBLE);
+        gpsActivationSwitch.setChecked(active);
     }
 
     private void updateActivationModeUi() {
@@ -356,6 +350,8 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
 
     private void onServiceUpdateReceived(boolean activeMode, double latitude, double longitude, Date date)
     {
+        //Log.e(TAG, "fake message");
+
         updateStatusUi(date);
 
         if(GeoSwitchApp.getPreferences().getTriggerType() == TriggerType.Invalid) {

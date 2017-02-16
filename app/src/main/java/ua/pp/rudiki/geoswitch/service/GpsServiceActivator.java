@@ -8,7 +8,6 @@ import ua.pp.rudiki.geoswitch.peripherals.PowerReceiver;
 
 public class GpsServiceActivator {
     private Context context;
-    private boolean on, byCharger;
     private GpsServiceActivationListener listener;
 
     public GpsServiceActivator(Context context) {
@@ -44,7 +43,7 @@ public class GpsServiceActivator {
         // if mode changed to onCharger, de/activate depending on whether connected to charger or not
         // in any case, turn off switch for manual mode
         if(GeoSwitchApp.getPreferences().getActivateOnCharger())
-            startService(isOn(), true);
+            startService(PowerReceiver.isCharging(context), true);
         else
             startService(false, false);
 
@@ -52,9 +51,6 @@ public class GpsServiceActivator {
     }
 
     private void startService(boolean on, boolean byCharger) {
-        this.on = on;
-        this.byCharger = byCharger;
-
         Intent serviceIntent = new Intent(context, GeoSwitchGpsService.class);
         context.startService(serviceIntent);
 
@@ -71,6 +67,6 @@ public class GpsServiceActivator {
         if(GeoSwitchApp.getPreferences().getActivateOnCharger())
             return PowerReceiver.isCharging(context);
         else
-            return on;
+            return GeoSwitchApp.getPreferences().getGpsManuallyActivated();
     }
 }

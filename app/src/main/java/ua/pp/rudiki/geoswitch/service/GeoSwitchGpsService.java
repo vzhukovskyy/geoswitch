@@ -9,13 +9,12 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import ua.pp.rudiki.geoswitch.GeoSwitchApp;
+import ua.pp.rudiki.geoswitch.App;
 import ua.pp.rudiki.geoswitch.R;
 import ua.pp.rudiki.geoswitch.RequestCode;
 import ua.pp.rudiki.geoswitch.peripherals.ActionExecutor;
@@ -24,13 +23,13 @@ import ua.pp.rudiki.geoswitch.trigger.GeoTrigger;
 
 public class GeoSwitchGpsService extends Service implements android.location.LocationListener
 {
+    private final static String TAG = GeoSwitchGpsService.class.getSimpleName();
+
     public static final String BROADCAST_ACTION = "GPSSERVICE_BROADCAST";
     public static final String BROADCAST_ISACTIVEMODE_KEY = "MODE_ISACTIVE";
     public static final String BROADCAST_GPSFIXTIMESTAMP_KEY = "GPS_TIMESTAMP";
     public static final String BROADCAST_LATITUDE_KEY = "GPS_LATITUDE";
     public static final String BROADCAST_LONGITUDE_KEY = "GPS_LONGITUDE";
-
-    final String TAG = getClass().getSimpleName();
 
     private LocationManager locationManager;
     private DateFormat dateFormat = SimpleDateFormat.getTimeInstance();
@@ -49,7 +48,7 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
 
     @Override
     public void onCreate() {
-        GeoSwitchApp.getLogger().log("Service created");
+        App.getLogger().info(TAG, "Service created");
 
 //        GeoTrigger newTrigger = loadTrigger();
 //        synchronized(mutex) {
@@ -60,10 +59,21 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        App.getLogger().debug(TAG, "onStartCommand");
+
+        // Called from:
+        // MainActivity
+        // a. when user launches the app
+        // b. upon first run after main activity has configured initial trigger
+        // c. after user modified configuration (gps turn-on, trigger or action)
+        // d. when running app comes to foreground, main activity restarted by OS, screen orientation changed
+        // GpsServiceActivator
+        // e. upon plug in/unplug from charger
+
         GeoTrigger newTrigger = loadTrigger();
 
         // copies which can be used outside of synchronized block
-        boolean frozenActiveMode = GeoSwitchApp.getGpsServiceActivator().isOn();
+        boolean frozenActiveMode = App.getGpsServiceActivator().isOn();
         Location frozenLastLocation;
 
         boolean switchToNewTrigger = false;
@@ -94,12 +104,12 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
             }
         }
 
-        GeoSwitchApp.getLogger().log("Service.onStartCommand activeMode="+frozenActiveMode+", lastLocation="+frozenLastLocation);
+        App.getLogger().info(TAG, "activeMode="+frozenActiveMode+", lastLocation="+frozenLastLocation);
 
         if (switchToNewTrigger) {
-            GeoSwitchApp.getLogger().log("Start monitoring " + newTrigger);
+            App.getLogger().info(TAG, "Start monitoring " + newTrigger);
         } else {
-            GeoSwitchApp.getLogger().log("Continue monitoring " + newTrigger);
+            App.getLogger().info(TAG, "Continue monitoring " + newTrigger);
         }
 
         // for simplicity always unsubscribe and resubscribe if needed
@@ -131,8 +141,7 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
 
     @Override
     public void onDestroy() {
-        Log.d(TAG, "onDestroy");
-        GeoSwitchApp.getLogger().log("Service destroyed");
+        App.getLogger().debug(TAG, "onDestroy");
 
         super.onDestroy();
     }
@@ -142,7 +151,7 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
     // ***********************************************
 
     private void requestLastLocation() {
-        GeoSwitchApp.getGoogleApiClient().requestLastLocation(new AsyncResultCallback<Location>() {
+        App.getGoogleApiClient().requestLastLocation(new AsyncResultCallback<Location>() {
             @Override
             public void onResult(Location location) {
                 if(location != null) {
@@ -166,17 +175,17 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
                     }
 
                     if(lastLocationUpdated) {
-                        GeoSwitchApp.getLogger().log("Retrieved last known location " + location);
+                        App.getLogger().info(TAG, "Retrieved last known location " + location);
 
                         sendMessageToActivity(frozenActiveMode, location);
                         if(frozenActiveMode) {
                             updateStickyNotification(location);
                         }
                     } else {
-                        GeoSwitchApp.getLogger().log("Retrieved last known location " + location + " but too late. Ignored it.");
+                        App.getLogger().info(TAG, "Retrieved last known location " + location + " but too late. Ignored it.");
                     }
                 } else {
-                    GeoSwitchApp.getLogger().log("Last location is unknown, start from scratch");
+                    App.getLogger().info(TAG, "Last location is unknown, start from scratch");
                 }
             }
         });
@@ -184,7 +193,7 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
 
 
     private GeoTrigger loadTrigger() {
-        return GeoSwitchApp.getPreferences().loadTrigger();
+        return App.getPreferences().loadTrigger();
     }
 
     private void displayStickyNotification() {
@@ -202,7 +211,7 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
 
         // make service a foreground service
         Notification notification =
-                GeoSwitchApp.getNotificationUtils().displayStickyNotification(message);
+                App.getNotificationUtils().displayStickyNotification(message);
         startForeground(RequestCode.STICKY_NOTIFICATION_ID, notification);
     }
 
@@ -229,7 +238,7 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
     // ***********************************************
 
     private void registerLocationManagerListener() {
-        GeoSwitchApp.getLogger().log("Registering for GPS events");
+        App.getLogger().info(TAG, "Registering for GPS events");
 
         // request update every second BUT ONLY IF distance changed by more then 10m
         final int LOCATION_INTERVAL = 1000;
@@ -244,7 +253,7 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
                     //LocationManager.PASSIVE_PROVIDER,
                     LOCATION_INTERVAL, LOCATION_DISTANCE, this);
         } catch (SecurityException ex) {
-            GeoSwitchApp.getLogger().log("Failed to request location updates: "+ex.getMessage());
+            App.getLogger().exception(TAG, ex);
         }
     }
 
@@ -256,7 +265,7 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
                 // ignore
             }
 
-            GeoSwitchApp.getLogger().log("Unregistered from GPS events");
+            App.getLogger().info(TAG, "Unregistered from GPS events");
         }
     }
 
@@ -275,12 +284,12 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
             }
         }
 
-        GeoSwitchApp.getLogger().log(location);
+        App.getLogger().logLocation(location);
         updateStickyNotification(location);
         sendMessageToActivity(true, location);
 
         if (triggered) {
-            GeoSwitchApp.getLogger().log("Trigger fired");
+            App.getLogger().info(TAG, "Trigger fired");
             new ActionExecutor().execute();
         }
     }
@@ -291,17 +300,23 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
 
     @Override
     public void onProviderDisabled(String provider) {
-//        Log.i(TAG, "onProviderDisabled: " + provider);
+        if(provider.equals(LocationManager.GPS_PROVIDER)) {
+            App.getLogger().info(TAG, "onProviderDisabled: " + provider);
+        }
     }
 
     @Override
     public void onProviderEnabled(String provider) {
-//        Log.i(TAG, "onProviderEnabled: " + provider);
+        if(provider.equals(LocationManager.GPS_PROVIDER)) {
+            App.getLogger().info(TAG, "onProviderEnabled: " + provider);
+        }
     }
 
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
-//        Log.i(TAG, "onStatusChanged: " + provider);
+        if(provider.equals(LocationManager.GPS_PROVIDER)) {
+            App.getLogger().info(TAG, "onStatusChanged: " + provider);
+        }
     }
 
 

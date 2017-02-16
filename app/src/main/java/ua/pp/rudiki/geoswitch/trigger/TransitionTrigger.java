@@ -7,13 +7,13 @@ package ua.pp.rudiki.geoswitch.trigger;
 import java.util.Objects;
 
 public class TransitionTrigger implements GeoTrigger {
-    private AreaTrigger aTrigger;
-    private AreaTrigger bTrigger;
+    private SmoothingAreaTrigger aTrigger;
+    private SmoothingAreaTrigger bTrigger;
 
     public TransitionTrigger(GeoPoint a, GeoPoint b) {
         double radius = calculateRadius(a, b);
-        aTrigger = new AreaTrigger(a, radius);
-        bTrigger = new AreaTrigger(b, radius);
+        aTrigger = new SmoothingAreaTrigger(a, radius, SmoothingAreaTrigger.SMOOTHING_COUNT);
+        bTrigger = new SmoothingAreaTrigger(b, radius, SmoothingAreaTrigger.SMOOTHING_COUNT);
     }
 
     public TransitionTrigger(GeoArea areaA, GeoArea areaB) {

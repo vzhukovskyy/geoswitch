@@ -7,15 +7,22 @@ import ua.pp.rudiki.geoswitch.peripherals.GeoSwitchGoogleApiClient;
 import ua.pp.rudiki.geoswitch.peripherals.GeoSwitchLog;
 import ua.pp.rudiki.geoswitch.peripherals.ResourceUtils;
 import ua.pp.rudiki.geoswitch.service.GpsServiceActivator;
-import ua.pp.rudiki.geoswitch.peripherals.HttpUtils;
 import ua.pp.rudiki.geoswitch.peripherals.NotificationUtils;
 import ua.pp.rudiki.geoswitch.peripherals.Preferences;
 import ua.pp.rudiki.geoswitch.peripherals.SpeechUtils;
 
-public class GeoSwitchApp extends Application {
-    private static Context context;
+public class App extends Application {
+    private final static String TAG = App.class.getSimpleName();
+
+    // refer to https://nfrolov.wordpress.com/2014/07/12/android-using-context-statically-and-in-singletons/
+
+    private static Context appContext;
+
+    // Application object is guaranteed to live so long as the process
+    // These fields will hold references to the objects preventing them to be unloaded by Android
+    // They will hog some memory, but I prefer to reduce number of bugs related to object/class unload by Android
+
     private static Preferences preferences;
-    private static HttpUtils httpUtils;
     private static GeoSwitchGoogleApiClient geoSwitchGoogleApiClient;
     private static GeoSwitchLog geoSwitchLog;
     private static NotificationUtils notificationUtils;
@@ -25,27 +32,26 @@ public class GeoSwitchApp extends Application {
 
     public void onCreate() {
         super.onCreate();
-        context = getApplicationContext();
-        preferences = new Preferences(context);
-        httpUtils = new HttpUtils();
-        geoSwitchGoogleApiClient = new GeoSwitchGoogleApiClient(context);
-        geoSwitchLog = new GeoSwitchLog(context);
+
+        appContext = getApplicationContext();
+
+        preferences = new Preferences(appContext);
+        geoSwitchGoogleApiClient = new GeoSwitchGoogleApiClient();
+        geoSwitchLog = new GeoSwitchLog();
         notificationUtils = new NotificationUtils();
-        speechUtils = new SpeechUtils(context);
-        gpsServiceActivator = new GpsServiceActivator(context);
-        resourceUtils = new ResourceUtils(context);
+        speechUtils = new SpeechUtils();
+        gpsServiceActivator = new GpsServiceActivator();
+        resourceUtils = new ResourceUtils();
+
+        geoSwitchLog.info(TAG, "onCreate complete");
     }
 
     public static Context getAppContext() {
-        return context;
+        return appContext;
     }
 
     public static Preferences getPreferences() {
         return preferences;
-    }
-
-    public static HttpUtils getHttpUtils() {
-        return httpUtils;
     }
 
     public static GeoSwitchGoogleApiClient getGoogleApiClient() {

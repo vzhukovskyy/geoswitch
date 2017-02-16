@@ -14,7 +14,7 @@ import ua.pp.rudiki.geoswitch.trigger.GeoPoint;
 import ua.pp.rudiki.geoswitch.trigger.TriggerType;
 
 public class Preferences {
-    final String TAG = getClass().getSimpleName();
+    private final static String TAG = Preferences.class.getSimpleName();
 
     public final static String triggerTypeKey = "triggerType";
     public final static String latitudeKey = "latitude";
@@ -33,7 +33,7 @@ public class Preferences {
     public final static String activateOnChargerKey = "activateOnCharger";
     public final static String gpsManuallyActivatedKey = "gpsManuallyActivated";
 
-    SharedPreferences sharedPrefs;
+    private SharedPreferences sharedPrefs;
 
     public Preferences(Context context) {
         this.sharedPrefs = context.getSharedPreferences("Preferences", Context.MODE_PRIVATE);
@@ -201,7 +201,7 @@ public class Preferences {
     }
 
     public int getMaxLogFileSize() {
-        return 200*1024;
+        return 1024*1024;
     }
 
 }

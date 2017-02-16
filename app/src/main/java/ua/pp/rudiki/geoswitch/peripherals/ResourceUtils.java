@@ -6,25 +6,28 @@ import android.content.res.Resources;
 
 import java.util.Locale;
 
+import ua.pp.rudiki.geoswitch.App;
+
 public class ResourceUtils {
 
-    Context context;
+    public ResourceUtils() {
+    }
 
-    public ResourceUtils(Context context) {
-        this.context = context;
+    public String getString(int stringId) {
+        return App.getAppContext().getString(stringId);
     }
 
     public String getString(int stringId, Locale locale){
-        Resources ttsLocaleResources = getLocalizedResources(context, locale);
+        Resources ttsLocaleResources = getLocalizedResources(locale);
         String s = ttsLocaleResources.getString(stringId);
         return s;
     }
 
-    private Resources getLocalizedResources(Context context, Locale desiredLocale) {
-        Configuration conf = context.getResources().getConfiguration();
+    private Resources getLocalizedResources(Locale desiredLocale) {
+        Configuration conf = App.getAppContext().getResources().getConfiguration();
         conf = new Configuration(conf);
         conf.setLocale(desiredLocale);
-        Context localizedContext = context.createConfigurationContext(conf);
+        Context localizedContext = App.getAppContext().createConfigurationContext(conf);
         return localizedContext.getResources();
     }
 }

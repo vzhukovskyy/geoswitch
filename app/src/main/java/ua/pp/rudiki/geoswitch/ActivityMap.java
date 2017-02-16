@@ -9,7 +9,6 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -30,7 +29,7 @@ import ua.pp.rudiki.geoswitch.trigger.TriggerType;
 
 public class ActivityMap extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMapLongClickListener {
 
-    private final String TAG = getClass().getSimpleName();
+    private static final String TAG = ActivityMap.class.getSimpleName();
 
     MapIntentParametersParser params = new MapIntentParametersParser();
     AreaBuilder areaBuilder;
@@ -40,6 +39,8 @@ public class ActivityMap extends FragmentActivity implements OnMapReadyCallback,
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        App.getLogger().debug(TAG, "onCreate");
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
 
@@ -63,6 +64,36 @@ public class ActivityMap extends FragmentActivity implements OnMapReadyCallback,
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        App.getLogger().debug(TAG, "onStart");
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        App.getLogger().debug(TAG, "onResume");
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        App.getLogger().debug(TAG, "onPause");
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        App.getLogger().debug(TAG, "onStop");
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        App.getLogger().debug(TAG, "onDestroy");
+    }
+
+    @Override
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
 
@@ -73,7 +104,7 @@ public class ActivityMap extends FragmentActivity implements OnMapReadyCallback,
             // ignore
         }
 
-        float zoomLevel = GeoSwitchApp.getPreferences().getDefaultMapZoomLevel();
+        float zoomLevel = App.getPreferences().getDefaultMapZoomLevel();
 
         GeoArea area = params.getArea();
         if (area != null) {
@@ -171,8 +202,6 @@ public class ActivityMap extends FragmentActivity implements OnMapReadyCallback,
                 resultData.putExtra(Preferences.latitudeKey, String.valueOf(latitude));
                 resultData.putExtra(Preferences.longitudeKey, String.valueOf(longitude));
                 resultData.putExtra(Preferences.radiusKey, String.valueOf(radius));
-
-                Log.d(TAG, "Prepared result (" + latitude + "," + longitude + "), R="+radius);
             }
 
             setResult(Activity.RESULT_OK, resultData);
@@ -258,8 +287,6 @@ public class ActivityMap extends FragmentActivity implements OnMapReadyCallback,
                 resultData.putExtra(Preferences.latitudeKey, String.valueOf(latitude));
                 resultData.putExtra(Preferences.longitudeKey, String.valueOf(longitude));
                 resultData.putExtra(Preferences.radiusKey, String.valueOf(radius));
-
-                Log.d(TAG, "Prepared result from=(" + latitude + "," + longitude + "), radius=" + radius);
             }
 
             if(marker2 != null) {
@@ -267,8 +294,6 @@ public class ActivityMap extends FragmentActivity implements OnMapReadyCallback,
                 double longitude = marker2.getPosition().longitude;
                 resultData.putExtra(Preferences.latitudeToKey, String.valueOf(latitude));
                 resultData.putExtra(Preferences.longitudeToKey, String.valueOf(longitude));
-
-                Log.d(TAG, "Prepared result to=(" + latitude + "," + longitude + ")");
             }
 
             setResult(Activity.RESULT_OK, resultData);

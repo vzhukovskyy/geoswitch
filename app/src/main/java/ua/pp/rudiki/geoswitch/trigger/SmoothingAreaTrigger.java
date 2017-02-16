@@ -1,16 +1,16 @@
 package ua.pp.rudiki.geoswitch.trigger;
 
 import java.util.ArrayDeque;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Objects;
-import java.util.Queue;
 
 // GPS fix is not a reliable source of geolocation info. It often provides false location.
 // This class is for working around this issue, it uses history of location info and triggers
 // only if several subsequent fixes are in the area or out of the area
 
 public class SmoothingAreaTrigger {
+
+    public final static int SMOOTHING_COUNT = 2;
 
     protected GeoArea area;
 

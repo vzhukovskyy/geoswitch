@@ -4,11 +4,11 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
-import ua.pp.rudiki.geoswitch.GeoSwitchApp;
+import ua.pp.rudiki.geoswitch.App;
 
 public class NetworkUtils {
     public static boolean isConnectedToInternet() {
-        Context context = GeoSwitchApp.getAppContext();
+        Context context = App.getAppContext();
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();

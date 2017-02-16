@@ -9,17 +9,18 @@ import android.graphics.Color;
 import android.media.RingtoneManager;
 
 import ua.pp.rudiki.geoswitch.ActivityMain;
-import ua.pp.rudiki.geoswitch.GeoSwitchApp;
+import ua.pp.rudiki.geoswitch.App;
 import ua.pp.rudiki.geoswitch.R;
 
 public class NotificationUtils {
-    final String TAG = getClass().getSimpleName();
+    private static final String TAG = NotificationUtils.class.getSimpleName();
+
     final static int NOTIFICATION_ID = 0;
     final static int STICKY_NOTIFICATION_ID = 1;
 
 
     public Notification displayStickyNotification(String message) {
-        Context context = GeoSwitchApp.getAppContext();
+        Context context = App.getAppContext();
 
         Intent notificationIntent = new Intent(context, ActivityMain.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, STICKY_NOTIFICATION_ID, notificationIntent, 0);
@@ -35,7 +36,7 @@ public class NotificationUtils {
     }
 
     public void displayNotification(String text, boolean playSound) {
-        Context context = GeoSwitchApp.getAppContext();
+        Context context = App.getAppContext();
 
         Intent intent = new Intent(context, ActivityMain.class);
         PendingIntent resultPendingIntent = PendingIntent.getActivity(context, NOTIFICATION_ID, intent, PendingIntent.FLAG_UPDATE_CURRENT);

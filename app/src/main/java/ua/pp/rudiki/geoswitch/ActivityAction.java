@@ -3,31 +3,28 @@ package ua.pp.rudiki.geoswitch;
 import android.content.Intent;
 import android.os.Bundle;
 import android.app.Activity;
-import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-
-import java.text.Format;
 
 import ua.pp.rudiki.geoswitch.peripherals.ActionExecutor;
 
 public class ActivityAction extends AppCompatActivity {
 
-    public String TAG = getClass().getSimpleName();
+    private static String TAG = ActivityAction.class.getSimpleName();
 
     CheckBox showNotificationCheckbox, playSoundCheckbox, speakOutCheckbox, sendPostCheckbox, appendSigninCheckbox;
     EditText urlEdit;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        App.getLogger().debug(TAG, "onCreate");
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_action);
 
@@ -48,6 +45,31 @@ public class ActivityAction extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
+        App.getLogger().debug(TAG, "onStart");
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        App.getLogger().debug(TAG, "onResume");
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        App.getLogger().debug(TAG, "onPause");
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        App.getLogger().debug(TAG, "onStop");
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        App.getLogger().debug(TAG, "onDestroy");
     }
 
     public void onOkClick(View view) {
@@ -81,7 +103,7 @@ public class ActivityAction extends AppCompatActivity {
     }
 
     public void onLaunchActionClick(View view) {
-        GeoSwitchApp.getLogger().log("User launched action");
+        App.getLogger().info(TAG, "User launched action");
 
         new ActionExecutor(showNotificationCheckbox.isChecked(),
                 playSoundCheckbox.isChecked(),
@@ -108,7 +130,7 @@ public class ActivityAction extends AppCompatActivity {
     }
 
     private void saveForm() {
-        GeoSwitchApp.getPreferences().storeAction(
+        App.getPreferences().storeAction(
                 showNotificationCheckbox.isChecked(),
                 playSoundCheckbox.isChecked(),
                 speakOutCheckbox.isChecked(),
@@ -119,12 +141,12 @@ public class ActivityAction extends AppCompatActivity {
     }
 
     private void loadValuesToUi() {
-        boolean showNotification = GeoSwitchApp.getPreferences().getShowNotification();
-        boolean playSound = GeoSwitchApp.getPreferences().getPlaySound();
-        boolean speakOut = GeoSwitchApp.getPreferences().getSpeakOut();
-        boolean sendPost = GeoSwitchApp.getPreferences().getSendPost();
-        boolean appendSignin = GeoSwitchApp.getPreferences().getAppendToken();
-        String url = GeoSwitchApp.getPreferences().getUrl();
+        boolean showNotification = App.getPreferences().getShowNotification();
+        boolean playSound = App.getPreferences().getPlaySound();
+        boolean speakOut = App.getPreferences().getSpeakOut();
+        boolean sendPost = App.getPreferences().getSendPost();
+        boolean appendSignin = App.getPreferences().getAppendToken();
+        String url = App.getPreferences().getUrl();
 
         showNotificationCheckbox.setChecked(showNotification);
         playSoundCheckbox.setChecked(playSound);
@@ -150,7 +172,7 @@ public class ActivityAction extends AppCompatActivity {
 
     // Sign in
     private void signIn() {
-        GeoSwitchApp.getGoogleApiClient().startSigninForResult(this, RequestCode.ACTIVITY_SIGN_IN);
+        App.getGoogleApiClient().startSigninForResult(this, RequestCode.ACTIVITY_SIGN_IN);
     }
 
     @Override
@@ -174,7 +196,7 @@ public class ActivityAction extends AppCompatActivity {
                 Toast.makeText(this, message, Toast.LENGTH_LONG).show();
             }
 
-            GeoSwitchApp.getGoogleApiClient().detachGoogleApiClientFromActivity(this);
+            App.getGoogleApiClient().detachGoogleApiClientFromActivity(this);
         }
     }
 

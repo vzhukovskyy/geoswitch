@@ -6,24 +6,27 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.BatteryManager;
 
-import ua.pp.rudiki.geoswitch.GeoSwitchApp;
+import ua.pp.rudiki.geoswitch.App;
 
 public class PowerReceiver extends BroadcastReceiver {
+    private final static String TAG = BroadcastReceiver.class.getSimpleName();
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        if(intent.getAction() == Intent.ACTION_POWER_CONNECTED) {
-            GeoSwitchApp.getLogger().log("Power Connected");
-            GeoSwitchApp.getGpsServiceActivator().connectedToCharger();
-        } else if(intent.getAction() == Intent.ACTION_POWER_DISCONNECTED){
-            GeoSwitchApp.getLogger().log("Power Disconnected");
-            GeoSwitchApp.getGpsServiceActivator().disconnectedFromCharger();
+        String intentAction = intent.getAction();
+
+        if(intentAction.equals(Intent.ACTION_POWER_CONNECTED)) {
+            App.getLogger().info(TAG, "Power Connected");
+            App.getGpsServiceActivator().connectedToCharger();
+        } else if(intentAction.equals(Intent.ACTION_POWER_DISCONNECTED)){
+            App.getLogger().info(TAG, "Power Disconnected");
+            App.getGpsServiceActivator().disconnectedFromCharger();
         }
     }
 
-    public static boolean isCharging(Context context) {
+    public static boolean isCharging() {
         IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-        Intent batteryStatus = context.registerReceiver(null, ifilter);
+        Intent batteryStatus = App.getAppContext().registerReceiver(null, ifilter);
 
         int status = batteryStatus.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
         boolean isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||

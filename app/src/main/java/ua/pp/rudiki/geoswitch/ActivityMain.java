@@ -8,7 +8,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Switch;
@@ -32,7 +31,7 @@ import ua.pp.rudiki.geoswitch.trigger.TriggerType;
 
 public class ActivityMain extends AppCompatActivity implements GpsServiceActivationListener
 {
-    final String TAG = getClass().getSimpleName();
+    private final static String TAG = ActivityMain.class.getSimpleName();
 
     EditText gpsActivationEdit, triggerEdit, actionEdit;
     TextView statusLabel, substatusLabel;
@@ -42,10 +41,10 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        App.getLogger().debug(TAG, "onCreate");
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        Log.d(TAG, "onCreate");
 
         gpsActivationEdit = (EditText)findViewById(R.id.gpsActivationDescriptionEdit);
         gpsActivationEdit.setKeyListener(null);
@@ -60,8 +59,9 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
         loadTriggerToUi();
         loadActionToUi();
         loadGpsActivationToUi();
+        updateActivationModeUi();
 
-        GeoSwitchApp.getGpsServiceActivator().registerListener(this);
+        App.getGpsServiceActivator().registerListener(this);
         registerServiceMessageReceiver();
 
         restartService();
@@ -70,34 +70,32 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
     @Override
     public void onStart() {
         super.onStart();
-
-        Log.d(TAG, "onStart");
+        App.getLogger().debug(TAG, "onStart");
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        Log.d(TAG, "onResume");
-
-        //updateActivationModeUi();
+        App.getLogger().debug(TAG, "onResume");
+        App.getLogger().debug(TAG, "------------------------------------------------");
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        Log.d(TAG, "onPause");
+        App.getLogger().debug(TAG, "onPause");
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        Log.d(TAG, "onStop");
+        App.getLogger().debug(TAG, "onStop");
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.d(TAG, "onDestroy");
+        App.getLogger().debug(TAG, "onDestroy");
     }
 
     public void onConfigureTriggerClick(View view) {
@@ -112,7 +110,7 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
 
     public void onOpenLogButtonClick(View view) {
         Intent intent = new Intent(Intent.ACTION_VIEW);
-        Uri uri = Uri.parse("file://"+GeoSwitchApp.getLogger().getAbsolutePath());
+        Uri uri = Uri.parse("file://"+ App.getLogger().getAbsolutePath());
         intent.setDataAndType(uri, "text/plain");
         startActivity(intent);
     }
@@ -124,17 +122,18 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
 
     public void onGpsActivateButtonClick(View view) {
         boolean checked = gpsActivationSwitch.isChecked();
+        App.getLogger().debug(TAG, "onGpsActivateButtonClick checked="+checked);
 
-        GeoSwitchApp.getPreferences().storeGpsManuallyActivated(checked);
+        App.getPreferences().storeGpsManuallyActivated(checked);
+
         if(checked)
-            GeoSwitchApp.getGpsServiceActivator().switchedOnManually();
+            App.getGpsServiceActivator().switchedOnManually();
         else
-            GeoSwitchApp.getGpsServiceActivator().switchedOffManually();
+            App.getGpsServiceActivator().switchedOffManually();
     }
 
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.d(TAG, "onActivityResult requestCode="+requestCode+", resultCode="+resultCode);
         if (requestCode == RequestCode.MAIN_TRIGGER_ID) {
             if (resultCode == RESULT_OK) {
                 loadTriggerToUi();
@@ -149,19 +148,18 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
         }
         else if (requestCode == RequestCode.MAIN_GPSACTIVATION_ID) {
             if (resultCode == RESULT_OK) {
-                GeoSwitchApp.getGpsServiceActivator().activationModeChanged();
-
                 loadGpsActivationToUi();
                 updateActivationModeUi();
                 updateStatusUi(null);
-                passValuesToService();
+
+                App.getGpsServiceActivator().activationModeChanged(); // starts service
             }
         }
     }
 
     private void updateStatusUi(Date gpsFixTime) {
-        boolean active = GeoSwitchApp.getGpsServiceActivator().isOn();
-        boolean activateOnCharger = GeoSwitchApp.getPreferences().getActivateOnCharger();
+        boolean active = App.getGpsServiceActivator().isOn();
+        boolean activateOnCharger = App.getPreferences().getActivateOnCharger();
 
         String status, substatus;
         if(active) {
@@ -188,8 +186,8 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
     }
 
     private void updateActivationModeUi() {
-        boolean activateOnCharger = GeoSwitchApp.getPreferences().getActivateOnCharger();
-        boolean manuallyActivated = GeoSwitchApp.getPreferences().getGpsManuallyActivated();
+        boolean activateOnCharger = App.getPreferences().getActivateOnCharger();
+        boolean manuallyActivated = App.getPreferences().getGpsManuallyActivated();
 
         gpsActivationSwitch.setVisibility(activateOnCharger ? View.GONE : View.VISIBLE);
         gpsActivationSwitch.setChecked(manuallyActivated);
@@ -198,7 +196,7 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
     // data persistence
 
     private void loadTriggerToUi() {
-        GeoTrigger trigger = GeoSwitchApp.getPreferences().loadTrigger();
+        GeoTrigger trigger = App.getPreferences().loadTrigger();
         TriggerType triggerType = (trigger != null) ? trigger.getType() : TriggerType.Invalid;
 
         String desc, format;
@@ -246,12 +244,12 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
     }
 
     private void loadActionToUi() {
-        boolean showNotification = GeoSwitchApp.getPreferences().getShowNotification();
-        boolean playSound = GeoSwitchApp.getPreferences().getPlaySound();
-        boolean speakOut = GeoSwitchApp.getPreferences().getSpeakOut();
-        boolean sendPost = GeoSwitchApp.getPreferences().getSendPost();
-        boolean appendSignin = GeoSwitchApp.getPreferences().getAppendToken();
-        String url = GeoSwitchApp.getPreferences().getUrl();
+        boolean showNotification = App.getPreferences().getShowNotification();
+        boolean playSound = App.getPreferences().getPlaySound();
+        boolean speakOut = App.getPreferences().getSpeakOut();
+        boolean sendPost = App.getPreferences().getSendPost();
+        boolean appendSignin = App.getPreferences().getAppendToken();
+        String url = App.getPreferences().getUrl();
 
         String desc = "";
         if (showNotification) {
@@ -278,7 +276,7 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
     }
 
     private void loadGpsActivationToUi() {
-        boolean activateOnCharger = GeoSwitchApp.getPreferences().getActivateOnCharger();
+        boolean activateOnCharger = App.getPreferences().getActivateOnCharger();
 
         String desc = "";
         if (activateOnCharger) {
@@ -314,8 +312,7 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
     // service
 
     private void restartService() {
-        Log.i(TAG, "Starting service");
-        GeoSwitchApp.getLogger().log("Starting service");
+        App.getLogger().info(TAG, "Starting service");
 
         Intent intent = new Intent(this, GeoSwitchGpsService.class);
         startService(intent);
@@ -354,7 +351,7 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
 
         updateStatusUi(date);
 
-        if(GeoSwitchApp.getPreferences().getTriggerType() == TriggerType.Invalid) {
+        if(App.getPreferences().getTriggerType() == TriggerType.Invalid) {
             // First run. Callback most probably with last know location from Fused location API.
             // Set up initial trigger
             if(!Double.isNaN(latitude) && !Double.isNaN(longitude)){
@@ -366,10 +363,10 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
     }
 
     private void createInitialTrigger(double latitude, double longitude) {
-        double radius = GeoSwitchApp.getPreferences().getDefaultRadius();
+        double radius = App.getPreferences().getDefaultRadius();
         GeoArea area = new GeoArea(latitude, longitude, radius);
         ExitAreaTrigger trigger = new ExitAreaTrigger(area);
-        GeoSwitchApp.getPreferences().storeTrigger(trigger);
+        App.getPreferences().storeTrigger(trigger);
     }
 
     // GpsServiceActivationListener implementation

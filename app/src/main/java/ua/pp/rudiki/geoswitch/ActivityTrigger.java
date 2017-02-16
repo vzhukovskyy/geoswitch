@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.RadioGroup;
@@ -26,7 +25,7 @@ import ua.pp.rudiki.geoswitch.trigger.TriggerType;
 
 public class ActivityTrigger extends AppCompatActivity implements RadioGroup.OnCheckedChangeListener {
 
-    final String TAG = getClass().getSimpleName();
+    private final static String TAG = ActivityTrigger.class.getSimpleName();
 
     RadioGroup triggerTypeRadioGroup;
     TextView triggerTypeDescriptionLabel;
@@ -36,6 +35,8 @@ public class ActivityTrigger extends AppCompatActivity implements RadioGroup.OnC
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        App.getLogger().debug(TAG, "onCreate");
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_trigger);
 
@@ -63,6 +64,36 @@ public class ActivityTrigger extends AppCompatActivity implements RadioGroup.OnC
         radiusEditUni.setKeyListener(null);
 
         loadValuesToUi();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        App.getLogger().debug(TAG, "onStart");
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        App.getLogger().debug(TAG, "onResume");
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        App.getLogger().debug(TAG, "onPause");
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        App.getLogger().debug(TAG, "onStop");
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        App.getLogger().debug(TAG, "onDestroy");
     }
 
     // UI handlers
@@ -131,14 +162,14 @@ public class ActivityTrigger extends AppCompatActivity implements RadioGroup.OnC
     // return value from the map activity
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.d(TAG, "onActivityResult requestCode="+requestCode);
         if (requestCode == RequestCode.TRIGGER_COORDINATES_ID && data != null) {
             String latitude = data.getStringExtra(Preferences.latitudeKey);
             String longitude = data.getStringExtra(Preferences.longitudeKey);
             String radius = data.getStringExtra(Preferences.radiusKey);
             String latitudeTo = data.getStringExtra(Preferences.latitudeToKey);
             String longitudeTo = data.getStringExtra(Preferences.longitudeToKey);
-            Log.d(TAG, "Received from map ("+latitude+","+longitude+"), ("+latitudeTo+","+longitudeTo+"), R="+radius);
+
+            App.getLogger().debug(TAG, "Received from map ("+latitude+","+longitude+"), ("+latitudeTo+","+longitudeTo+"), R="+radius);
 
             if(latitude != null && longitude != null) {
                 latitudeEditBi.setText(latitude);
@@ -232,12 +263,12 @@ public class ActivityTrigger extends AppCompatActivity implements RadioGroup.OnC
             trigger = new TransitionTrigger(pointFrom, pointTo);
         }
 
-        GeoSwitchApp.getPreferences().storeTrigger(trigger);
+        App.getPreferences().storeTrigger(trigger);
         return true;
     }
 
     private void loadValuesToUi() {
-        GeoTrigger trigger = GeoSwitchApp.getPreferences().loadTrigger();
+        GeoTrigger trigger = App.getPreferences().loadTrigger();
         TriggerType triggerType = (trigger != null) ? trigger.getType() : TriggerType.Invalid;
 
         int radioId;
@@ -281,7 +312,7 @@ public class ActivityTrigger extends AppCompatActivity implements RadioGroup.OnC
             break;
             default: {
                 radioId = R.id.radioExitArea;
-                setRadiusEditboxValue(GeoSwitchApp.getPreferences().getDefaultRadius());
+                setRadiusEditboxValue(App.getPreferences().getDefaultRadius());
             }
             break;
         }

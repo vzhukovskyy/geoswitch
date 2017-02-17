@@ -1,13 +1,13 @@
 package ua.pp.rudiki.geoswitch.trigger;
 
-public class ExitAreaTrigger extends SmoothingAreaTrigger implements GeoTrigger {
+public class ExitAreaTrigger extends AreaTrigger implements GeoTrigger {
 
     public ExitAreaTrigger(GeoArea area) {
-        super(area, SMOOTHING_COUNT);
+        super(area);
     }
 
     public ExitAreaTrigger(GeoPoint point, double radius) {
-        super(point, radius, SMOOTHING_COUNT);
+        super(point, radius);
     }
 
     @Override

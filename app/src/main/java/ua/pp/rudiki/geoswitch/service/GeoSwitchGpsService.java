@@ -6,9 +6,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.location.LocationManager;
+import android.location.LocationProvider;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -59,6 +61,7 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.e(TAG, intent.toString());
         App.getLogger().debug(TAG, "onStartCommand");
 
         // Called from:
@@ -315,7 +318,21 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
         if(provider.equals(LocationManager.GPS_PROVIDER)) {
-            App.getLogger().info(TAG, "onStatusChanged: " + provider);
+            String statusString;
+            switch(status) {
+                case LocationProvider.OUT_OF_SERVICE:
+                    statusString = "OUT_OF_SERVICE";
+                    break;
+                case LocationProvider.TEMPORARILY_UNAVAILABLE:
+                    statusString = "TEMPORARILY_UNAVAILABLE";
+                    break;
+                case LocationProvider.AVAILABLE:
+                    statusString = "AVAILABLE";
+                    break;
+                default:
+                    statusString = "unknown status "+status;
+            }
+            App.getLogger().info(TAG, "onStatusChanged(" + provider + ") " + statusString);
         }
     }
 

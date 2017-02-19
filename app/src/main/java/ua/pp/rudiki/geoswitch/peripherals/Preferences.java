@@ -201,7 +201,7 @@ public class Preferences {
     }
 
     public int getMaxLogFileSize() {
-        return 1024*1024;
+        return 256*1024;
     }
 
 }

@@ -21,25 +21,25 @@ public class GpsServiceActivator {
     public void connectedToCharger() {
         App.getLogger().info(TAG, "connectedToCharger");
         if(App.getPreferences().getActivateOnCharger())
-            startService(true, true);
+            startService(true, true, GeoSwitchGpsService.START_REASON_START_OR_STOP);
     }
 
     public void disconnectedFromCharger() {
         App.getLogger().info(TAG, "disconnectedFromCharger");
         if(App.getPreferences().getActivateOnCharger())
-            startService(false, true);
+            startService(false, true, GeoSwitchGpsService.START_REASON_START_OR_STOP);
     }
 
     public void switchedOnManually() {
         App.getLogger().info(TAG, "switchedOnManually");
         if(!App.getPreferences().getActivateOnCharger())
-            startService(true, false);
+            startService(true, false, GeoSwitchGpsService.START_REASON_START_OR_STOP);
     }
 
     public void switchedOffManually() {
         App.getLogger().info(TAG, "switchedOffManually");
         if(!App.getPreferences().getActivateOnCharger())
-            startService(false, false);
+            startService(false, false, GeoSwitchGpsService.START_REASON_START_OR_STOP);
     }
 
     public void activationModeChanged() {
@@ -50,17 +50,18 @@ public class GpsServiceActivator {
         // if mode changed to onCharger, de/activate depending on whether connected to charger or not
         // in any case, turn off switch for manual mode
         if(activateOnCharger)
-            startService(PowerReceiver.isCharging(), true);
+            startService(PowerReceiver.isCharging(), true, GeoSwitchGpsService.START_REASON_USER_CHANGED_ACTIVATION);
         else
-            startService(false, false);
+            startService(false, false, GeoSwitchGpsService.START_REASON_USER_CHANGED_ACTIVATION);
 
         App.getPreferences().storeGpsManuallyActivated(false);
     }
 
-    private void startService(boolean on, boolean byCharger) {
+    private void startService(boolean on, boolean byCharger, String reason) {
         Context appContext = App.getAppContext();
 
         Intent serviceIntent = new Intent(appContext, GeoSwitchGpsService.class);
+        serviceIntent.putExtra(GeoSwitchGpsService.START_REASON_KEY, reason);
         appContext.startService(serviceIntent);
 
         if(listener != null) {

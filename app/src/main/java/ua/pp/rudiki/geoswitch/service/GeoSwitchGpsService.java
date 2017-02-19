@@ -28,10 +28,19 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
     private final static String TAG = GeoSwitchGpsService.class.getSimpleName();
 
     public static final String BROADCAST_ACTION = "GPSSERVICE_BROADCAST";
-    public static final String BROADCAST_ISACTIVEMODE_KEY = "MODE_ISACTIVE";
+    //public static final String BROADCAST_ISACTIVEMODE_KEY = "MODE_ISACTIVE";
     public static final String BROADCAST_GPSFIXTIMESTAMP_KEY = "GPS_TIMESTAMP";
     public static final String BROADCAST_LATITUDE_KEY = "GPS_LATITUDE";
     public static final String BROADCAST_LONGITUDE_KEY = "GPS_LONGITUDE";
+;
+    public static final String START_REASON_KEY = "START_REASON";
+    public static final String START_REASON_MAIN_ACTIVITY_CREATED = "MAIN_ACTIVITI_CREATED";
+    public static final String START_REASON_USER_CHANGED_TRIGGER = "USER_CHANGED_TRIGGER";
+    public static final String START_REASON_USER_CHANGED_ACTION = "USER_CHANGED_ACTION";
+    public static final String START_REASON_USER_CHANGED_ACTIVATION = "USER_CHANGED_ACTIVATION";
+    public static final String START_REASON_START_OR_STOP = "START_OR_STOP";
+    public static final String START_REASON_INITIAL_CONFIGURATION_DONE = "INTITIALLY_CONFIGURED";
+
 
     private LocationManager locationManager;
     private DateFormat dateFormat = SimpleDateFormat.getTimeInstance();
@@ -40,7 +49,6 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
     private final Object mutex = new Object();
     private GeoTrigger trigger;
     private Location lastLocation;
-    private boolean activeMode;
     // end of fields protected by mutex
 
 
@@ -52,27 +60,106 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
     public void onCreate() {
         App.getLogger().info(TAG, "Service created");
 
-//        GeoTrigger newTrigger = loadTrigger();
-//        synchronized(mutex) {
-//            trigger = newTrigger;
-//            activeMode = false;
-//        }
+        GeoTrigger newTrigger = loadTrigger();
+        synchronized(mutex) {
+            trigger = newTrigger;
+        }
+
+        if(App.getGpsServiceActivator().isOn()) {
+            requestLastLocation();
+            registerLocationManagerListener();
+            displayStickyNotification();
+        }
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.e(TAG, intent.toString());
-        App.getLogger().debug(TAG, "onStartCommand");
+        String reason = (intent != null) ? intent.getStringExtra(START_REASON_KEY) : null;
 
-        // Called from:
-        // MainActivity
-        // a. when user launches the app
-        // b. upon first run after main activity has configured initial trigger
-        // c. after user modified configuration (gps turn-on, trigger or action)
-        // d. when running app comes to foreground, main activity restarted by OS, screen orientation changed
-        // GpsServiceActivator
-        // e. upon plug in/unplug from charger
+        Log.d(TAG, "onStartCommand reason="+reason);
+        App.getLogger().debug(TAG, "onStartCommand reason="+reason);
 
+        if(reason == null) {
+            // - service restarted by OS
+            // nothing here, everything needed is in onCreate
+        }
+        else if(reason.equals(START_REASON_MAIN_ACTIVITY_CREATED)) {
+            // - if user launched app for the first time then service just created
+            // - if user launched app after full device reboot then service just created
+            // - user started app
+            //       -- if gps monitoring is on then service has been running and still is running
+            //           because of foreground notification which ensures service cannot be killed by OS
+            //       -- if gps monitoring is off and OS killed service then it is just re-created
+            //       -- if gps monitoring is off and OS did not kill the service, then it has been running
+            // - user pulled app from long time being in background
+            // - screen orientation changed from/to portrait/landscape
+            // - Android OS recreated main activity (?)
+
+            // update status on main activity
+
+            if(App.getGpsServiceActivator().isOn()) {
+                Location lastLocationCopy;
+                synchronized (mutex) {
+                    lastLocationCopy = lastLocation;
+                }
+
+                if (lastLocationCopy != null) {
+                    sendMessageToActivity(lastLocationCopy);
+                }
+            }
+        }
+        else if(reason.equals(START_REASON_USER_CHANGED_TRIGGER) ||
+                reason.equals(START_REASON_INITIAL_CONFIGURATION_DONE))
+        {
+            // trigger changed
+            GeoTrigger newTrigger = loadTrigger();
+            synchronized(mutex) {
+                trigger = newTrigger;
+                if(lastLocation != null) {
+                    // let new trigger continue run from the last position
+                    trigger.changeLocation(lastLocation.getLatitude(), lastLocation.getLongitude());
+                }
+            }
+
+            App.getLogger().info(TAG, "Start monitoring new trigger");
+            App.getLogger().logTrigger(trigger);
+        }
+        else if(reason.equals(START_REASON_USER_CHANGED_ACTION)) {
+            // nothing to do
+        }
+        else if(reason.equals(START_REASON_USER_CHANGED_ACTIVATION) ||
+                reason.equals(START_REASON_START_OR_STOP))
+        {
+            // - if user changed activation then need to check if should be turned on/off accordingly to new mode
+            // - plug in/unplug from charger if activation mode is by charger
+            // - manual turn on/off if activation is manual
+
+            App.getLogger().logTrigger(trigger);
+
+            boolean activeMode = App.getGpsServiceActivator().isOn();
+
+            if(activeMode) {
+                requestLastLocation();
+                registerLocationManagerListener();
+                displayStickyNotification();
+            } else {
+                unregisterLocationManagerListener();
+                removeStickyNotification();
+            }
+
+            if(activeMode) {
+                Location lastLocationCopy;
+                synchronized (mutex) {
+                    lastLocationCopy = lastLocation;
+                }
+
+                if (lastLocationCopy != null) {
+                    sendMessageToActivity(lastLocationCopy);
+                }
+            }
+        }
+
+/*
         GeoTrigger newTrigger = loadTrigger();
 
         // copies which can be used outside of synchronized block
@@ -130,10 +217,10 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
         }
 
         // request initial location from Google API
-        if(frozenLastLocation == null/* && frozenActiveMode*/) {
+        if(frozenLastLocation == null) {
             requestLastLocation();
         }
-
+*/
         return START_STICKY;
     }
 
@@ -159,13 +246,9 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
             public void onResult(Location location) {
                 if(location != null) {
                     boolean lastLocationUpdated = false;
-                    boolean frozenActiveMode;
 
                     // may be concurrently updated by location service
                     synchronized (mutex) {
-//                        if (!activeMode)
-//                            return;
-                        frozenActiveMode = activeMode;
 
                         // lastLocation may already be updated by GPS. Drop out in that case
                         if(lastLocation == null) {
@@ -178,10 +261,10 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
                     }
 
                     if(lastLocationUpdated) {
-                        App.getLogger().info(TAG, "Retrieved last known location " + location);
+                        App.getLogger().logLocation(location);
 
-                        sendMessageToActivity(frozenActiveMode, location);
-                        if(frozenActiveMode) {
+                        if(App.getGpsServiceActivator().isOn()) {
+                            sendMessageToActivity(location);
                             updateStickyNotification(location);
                         }
                     } else {
@@ -222,10 +305,9 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
         stopForeground(true);
     }
 
-    private void sendMessageToActivity(boolean isActiveMode, Location location) {
+    private void sendMessageToActivity(Location location) {
         Intent intent = new Intent(BROADCAST_ACTION);
 
-        intent.putExtra(BROADCAST_ISACTIVEMODE_KEY, isActiveMode);
         if(location != null) {
             intent.putExtra(BROADCAST_GPSFIXTIMESTAMP_KEY, location.getTime());
             intent.putExtra(BROADCAST_LATITUDE_KEY, location.getLatitude());
@@ -277,9 +359,6 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
         boolean triggered = false;
         // may be concurrently updated by retrieving last known location from Google Api
         synchronized (mutex) {
-            if (!activeMode)
-                return;
-
             lastLocation = location;
             if(trigger != null) {
                 trigger.changeLocation(location.getLatitude(), location.getLongitude());
@@ -289,7 +368,7 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
 
         App.getLogger().logLocation(location);
         updateStickyNotification(location);
-        sendMessageToActivity(true, location);
+        sendMessageToActivity(location);
 
         if (triggered) {
             App.getLogger().info(TAG, "Trigger fired");

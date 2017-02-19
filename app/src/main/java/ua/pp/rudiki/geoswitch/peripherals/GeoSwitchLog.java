@@ -11,8 +11,11 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 import ua.pp.rudiki.geoswitch.App;
+import ua.pp.rudiki.geoswitch.trigger.GeoTrigger;
+import ua.pp.rudiki.geoswitch.trigger.TriggerType;
 
 public class GeoSwitchLog {
     private final static String TAG = GeoSwitchLog.class.getSimpleName();
@@ -23,6 +26,7 @@ public class GeoSwitchLog {
     private final static Character LOG_LEVEL_ERROR = 'E';
     private final static Character LOG_LEVEL_INFO = 'I';
     private final static Character LOG_LEVEL_LOCATION = 'L';
+    private final static Character LOG_LEVEL_TRIGGER = 'T';
     private final static Character LOG_LEVEL_DEBUG = 'D';
 
     private File fileRoot;
@@ -41,13 +45,18 @@ public class GeoSwitchLog {
     }
 
     public void logLocation(Location location) {
-        String latitude = String.format("%.8f", location.getLatitude());
-        String longitude = String.format("%.8f", location.getLongitude());
+        String latitude = String.format(Locale.US, "%.8f", location.getLatitude());
+        String longitude = String.format(Locale.US, "%.8f", location.getLongitude());
         String accuracy = String.valueOf(Math.round(location.getAccuracy()));
 
         String message = latitude + " " + longitude + " acc " + accuracy;
 
         doLog(LOG_LEVEL_LOCATION, "", message);
+    }
+
+    public void logTrigger(GeoTrigger trigger) {
+        String message = trigger.toString();
+        doLog(LOG_LEVEL_TRIGGER, "", message);
     }
 
     public void error(String tag, String message) {
@@ -138,6 +147,7 @@ public class GeoSwitchLog {
             } else {
                 Log.i(TAG, "log file was not renamed");
             }
+            makeVisibleViaUsb(file);
 
             openFile();
         }

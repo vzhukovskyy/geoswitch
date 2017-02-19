@@ -17,6 +17,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Formatter;
+import java.util.Locale;
 
 import ua.pp.rudiki.geoswitch.service.GpsServiceActivationListener;
 import ua.pp.rudiki.geoswitch.service.GeoSwitchGpsService;
@@ -42,6 +43,7 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         App.getLogger().debug(TAG, "onCreate");
+        App.getLogger().info(TAG, "Locale " + Locale.getDefault());
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -59,12 +61,14 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
         loadTriggerToUi();
         loadActionToUi();
         loadGpsActivationToUi();
+
         updateActivationModeUi();
+        updateStatusUi(null);
 
         App.getGpsServiceActivator().registerListener(this);
         registerServiceMessageReceiver();
 
-        restartService();
+        startService(GeoSwitchGpsService.START_REASON_MAIN_ACTIVITY_CREATED);
     }
 
     @Override
@@ -125,6 +129,7 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
         App.getLogger().debug(TAG, "onGpsActivateButtonClick checked="+checked);
 
         App.getPreferences().storeGpsManuallyActivated(checked);
+        updateStatusUi(null);
 
         if(checked)
             App.getGpsServiceActivator().switchedOnManually();
@@ -137,13 +142,13 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
         if (requestCode == RequestCode.MAIN_TRIGGER_ID) {
             if (resultCode == RESULT_OK) {
                 loadTriggerToUi();
-                passValuesToService();
+                startService(GeoSwitchGpsService.START_REASON_USER_CHANGED_TRIGGER);
             }
         }
         else if (requestCode == RequestCode.MAIN_ACTION_ID) {
             if (resultCode == RESULT_OK) {
                 loadActionToUi();
-                passValuesToService();
+                startService(GeoSwitchGpsService.START_REASON_USER_CHANGED_ACTION);
             }
         }
         else if (requestCode == RequestCode.MAIN_GPSACTIVATION_ID) {
@@ -311,15 +316,12 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
 
     // service
 
-    private void restartService() {
+    private void startService(String reason) {
         App.getLogger().info(TAG, "Starting service");
 
         Intent intent = new Intent(this, GeoSwitchGpsService.class);
+        intent.putExtra(GeoSwitchGpsService.START_REASON_KEY, reason);
         startService(intent);
-    }
-
-    private void passValuesToService() {
-        restartService(); // not really restart, it just passes parameters if service already started
     }
 
     private void registerServiceMessageReceiver() {
@@ -331,7 +333,6 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
         @Override
         public void onReceive(Context context, Intent intent) {
             if(intent.getAction().equals(GeoSwitchGpsService.BROADCAST_ACTION)) {
-                boolean activeMode = intent.getBooleanExtra(GeoSwitchGpsService.BROADCAST_ISACTIVEMODE_KEY, false);
                 Date date = null;
                 long timestamp = intent.getLongExtra(GeoSwitchGpsService.BROADCAST_GPSFIXTIMESTAMP_KEY, 0);
                 if(timestamp != 0) {
@@ -340,12 +341,12 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
                 double latitude = intent.getDoubleExtra(GeoSwitchGpsService.BROADCAST_LATITUDE_KEY, Double.NaN);
                 double longitude = intent.getDoubleExtra(GeoSwitchGpsService.BROADCAST_LONGITUDE_KEY, Double.NaN);
 
-                onServiceUpdateReceived(activeMode, latitude, longitude, date);
+                onServiceUpdateReceived(latitude, longitude, date);
             }
         }
     };
 
-    private void onServiceUpdateReceived(boolean activeMode, double latitude, double longitude, Date date)
+    private void onServiceUpdateReceived(double latitude, double longitude, Date date)
     {
         //Log.e(TAG, "fake message");
 
@@ -357,7 +358,7 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
             if(!Double.isNaN(latitude) && !Double.isNaN(longitude)){
                 createInitialTrigger(latitude, longitude);
                 loadTriggerToUi();
-                passValuesToService();
+                startService(GeoSwitchGpsService.START_REASON_INITIAL_CONFIGURATION_DONE);
             }
         }
     }

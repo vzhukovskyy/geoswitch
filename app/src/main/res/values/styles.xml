@@ -1,11 +1,21 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat">
+    <!--<style name="AppTheme" parent="Theme.AppCompat">-->
+    <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <!--For menu 3 dots color-->
+        <item name="android:textColorSecondary">@android:color/white</item>
     </style>
+
+    <!-- http://stackoverflow.com/questions/35932669/how-do-i-change-the-action-bar-overflow-button-color -->
+
+    <!--<style name="MainMenu" parent="Theme.AppCompat.Light.NoActionBar">-->
+        <!--<item name="android:background">?attr/colorPrimary</item>"-->
+        <!--<item name="android:textColorSecondary">@android:color/white</item>-->
+    <!--</style>-->
 
 </resources>

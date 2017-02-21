@@ -1,133 +1,140 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
+    android:fitsSystemWindows="true"
     tools:context="ua.pp.rudiki.geoswitch.ActivityMain">
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <Button
-            android:text="@string/activity_main_action_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/configureActionButton"
-            android:layout_below="@+id/actionDescriptionEdit"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"
-            android:onClick="onConfigureActionClick"
-            android:layout_alignLeft="@+id/configureTriggerButton"
-            android:layout_alignStart="@+id/configureTriggerButton" />
+        <include
+            layout="@layout/app_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
-        <Button
-            android:text="@string/activity_main_trigger_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/configureTriggerButton"
-            android:layout_below="@+id/triggerDescriptionEdit"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"
-            android:onClick="onConfigureTriggerClick" />
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingBottom="@dimen/activity_vertical_margin"
+            android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:paddingRight="@dimen/activity_horizontal_margin"
+            android:paddingTop="@dimen/activity_vertical_margin">
 
-        <EditText
-            android:text="@string/activity_main_action_not_configured"
-            android:layout_width="wrap_content"
-            android:layout_height="100dp"
-            android:id="@+id/actionDescriptionEdit"
-            android:layout_below="@+id/configureTriggerButton"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"
-            android:singleLine="false"
-            android:gravity="top|left"
-            android:textSize="12sp" />
+            <Button
+                android:id="@+id/configureActionButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignLeft="@+id/configureTriggerButton"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignStart="@+id/configureTriggerButton"
+                android:layout_below="@+id/actionDescriptionEdit"
+                android:onClick="onConfigureActionClick"
+                android:text="@string/activity_main_action_button" />
 
-        <EditText
-            android:layout_width="wrap_content"
-            android:id="@+id/triggerDescriptionEdit"
-            android:layout_height="100dp"
-            android:text="@string/activity_main_trigger_invalid"
-            android:singleLine="false"
-            android:gravity="top|left"
-            android:textSize="12sp"
-            android:layout_below="@+id/configureActivationButton"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true" />
+            <Button
+                android:id="@+id/configureTriggerButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_below="@+id/triggerDescriptionEdit"
+                android:onClick="onConfigureTriggerClick"
+                android:text="@string/activity_main_trigger_button" />
 
-        <TextView
-            android:text="@string/activity_main_status_inactive"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/statusLabel"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:textSize="18sp"
-            android:paddingLeft="4dp"
-            android:layout_toStartOf="@+id/gpsActivationSwitch" />
+            <EditText
+                android:id="@+id/actionDescriptionEdit"
+                android:layout_width="wrap_content"
+                android:layout_height="100dp"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentStart="true"
+                android:layout_below="@+id/configureTriggerButton"
+                android:gravity="top|left"
+                android:singleLine="false"
+                android:text="@string/activity_main_action_not_configured"
+                android:textSize="12sp" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/statusLabel"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:id="@+id/substatusLabel"
-            android:paddingLeft="12dp"
-            android:textSize="12sp"
-            android:paddingTop="3dp"
-            android:layout_toStartOf="@+id/gpsActivationSwitch"
-            android:layout_alignParentEnd="true" />
+            <EditText
+                android:id="@+id/triggerDescriptionEdit"
+                android:layout_width="wrap_content"
+                android:layout_height="100dp"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentStart="true"
+                android:layout_below="@+id/configureActivationButton"
+                android:gravity="top|left"
+                android:singleLine="false"
+                android:text="@string/activity_main_trigger_invalid"
+                android:textSize="12sp" />
 
-        <EditText
-            android:layout_width="wrap_content"
-            android:text="@string/activity_main_gps_manual"
-            android:ems="10"
-            android:layout_below="@+id/openLogButton"
-            android:id="@+id/gpsActivationDescriptionEdit"
-            android:textSize="12sp"
-            android:gravity="top|left"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentStart="true"
-            android:inputType="textMultiLine"
-            android:layout_height="55dp"
-            android:layout_marginTop="10dp" />
+            <TextView
+                android:id="@+id/statusLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_below="@+id/toolbar"
+                android:layout_marginTop="10dp"
+                android:layout_toStartOf="@+id/gpsActivationSwitch"
+                android:paddingLeft="4dp"
+                android:text="@string/activity_main_status_inactive"
+                android:textSize="18sp" />
 
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/configureActivationButton"
-            android:layout_below="@+id/gpsActivationDescriptionEdit"
-            android:layout_alignParentEnd="true"
-            android:onClick="onGpsOptionsClick"
-            android:text="@string/activity_main_gps_button" />
+            <TextView
+                android:id="@+id/substatusLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_below="@+id/statusLabel"
+                android:layout_toStartOf="@+id/gpsActivationSwitch"
+                android:paddingLeft="12dp"
+                android:paddingTop="3dp"
+                android:textSize="12sp" />
 
-        <Switch
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/gpsActivationSwitch"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentEnd="true"
-            android:onClick="onGpsActivateButtonClick" />
+            <EditText
+                android:id="@+id/gpsActivationDescriptionEdit"
+                android:layout_width="wrap_content"
+                android:layout_height="55dp"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentStart="true"
+                android:layout_below="@+id/substatusLabel"
+                android:layout_marginTop="10dp"
+                android:ems="10"
+                android:gravity="top|left"
+                android:inputType="textMultiLine"
+                android:text="@string/activity_main_gps_manual"
+                android:textSize="12sp" />
 
-        <Button
-            android:text="@string/activity_main_log_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/openLogButton"
-            android:onClick="onOpenLogButtonClick"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentStart="true" />
+            <Button
+                android:id="@+id/configureActivationButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_below="@+id/gpsActivationDescriptionEdit"
+                android:onClick="onGpsOptionsClick"
+                android:text="@string/activity_main_gps_button" />
 
-    </RelativeLayout>
+            <Switch
+                android:id="@+id/gpsActivationSwitch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@+id/statusLabel"
+                android:layout_alignBottom="@+id/statusLabel"
+                android:layout_alignParentEnd="true"
+                android:onClick="onGpsActivateButtonClick" />
+
+        </RelativeLayout>
+
+    </LinearLayout>
 </ScrollView>

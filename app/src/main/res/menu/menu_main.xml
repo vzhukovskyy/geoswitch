@@ -1,0 +1,11 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/mi_open_log"
+        app:showAsAction="collapseActionView"
+        android:title="Open log">
+    </item>
+    <item android:title="Export KML"
+        android:id="@+id/mi_export_kml"
+        app:showAsAction="collapseActionView" />
+</menu>

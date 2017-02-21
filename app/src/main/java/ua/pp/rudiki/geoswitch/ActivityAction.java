@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.app.Activity;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -28,6 +30,7 @@ public class ActivityAction extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_action);
+        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
 
         showNotificationCheckbox = (CheckBox)findViewById(R.id.showNotificationCheckbox);
         playSoundCheckbox = (CheckBox)findViewById(R.id.playSoundCheckbox);
@@ -38,7 +41,6 @@ public class ActivityAction extends AppCompatActivity {
         // these two lines replace Enter on multiline editbox keyboard
         urlEdit.setHorizontallyScrolling(false);
         urlEdit.setMaxLines(Integer.MAX_VALUE);
-//        urlEdit.setLines(Integer.MAX_VALUE);
 
         loadValuesToUi();
     }

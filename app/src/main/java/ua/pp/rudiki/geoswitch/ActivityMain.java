@@ -8,6 +8,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Switch;
@@ -47,6 +50,7 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
 
         gpsActivationEdit = (EditText)findViewById(R.id.gpsActivationDescriptionEdit);
         gpsActivationEdit.setKeyListener(null);
@@ -69,6 +73,26 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
         registerServiceMessageReceiver();
 
         startService(GeoSwitchGpsService.START_REASON_MAIN_ACTIVITY_CREATED);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.mi_open_log) {
+            onOpenLogMenuItemSelected();
+            return true;
+        }
+        else if(id == R.id.mi_export_kml) {
+            onExportKmlMenuItemSelected();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -112,7 +136,14 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
         startActivityForResult(intent, RequestCode.MAIN_ACTION_ID);
     }
 
-    public void onOpenLogButtonClick(View view) {
+    public void onOpenLogMenuItemSelected() {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        Uri uri = Uri.parse("file://"+ App.getLogger().getAbsolutePath());
+        intent.setDataAndType(uri, "text/plain");
+        startActivity(intent);
+    }
+
+    public void onExportKmlMenuItemSelected() {
         Intent intent = new Intent(Intent.ACTION_VIEW);
         Uri uri = Uri.parse("file://"+ App.getLogger().getAbsolutePath());
         intent.setDataAndType(uri, "text/plain");

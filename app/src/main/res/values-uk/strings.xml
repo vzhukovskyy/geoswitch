@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="application_name">GeoSwitch</string>
-    <string name="service_notification_title">GeoSwitch</string>
+
     <string name="activity_action_appendtoken">Приєднати Google sign-in токен до URL</string>
     <string name="activity_action_cancel_button">Відмінити</string>
     <string name="activity_action_launch_button">Запустити дію зараз</string>
@@ -79,6 +79,7 @@
     <string name="service_action_failed_no_internet">Дія зазнала невдачу. Немає з\'єднання з інтернетом</string>
     <string name="service_action_failed_refresh_token">Дія зазнала невдачу. Не вдалося встановити з\'єднання з сервером Google</string>
     <string name="service_action_failed_with_error_code" formatted="false">Дія зазнала невдачу. Помилка HTTP %d</string>
+    <string name="service_notification_title">GeoSwitch</string>
     <string name="service_action_started">Дія запущена.</string>
     <string name="service_action_succeeded_with_server_response"  formatted="false">Дія завершилась успішно. Відповідь сервера: %s</string>
     <string name="service_sticky_status_gps_time">"Останні дані про місцезнаходження отримані о "</string>

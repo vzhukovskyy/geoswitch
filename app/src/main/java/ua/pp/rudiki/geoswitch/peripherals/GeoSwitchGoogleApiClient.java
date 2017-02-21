@@ -105,7 +105,7 @@ public class GeoSwitchGoogleApiClient {
             ConnectionResult result = googleApiClientForSilentSignin.blockingConnect();
             if (result.isSuccess()) {
                 GoogleSignInResult signInResult = Auth.GoogleSignInApi.silentSignIn(googleApiClientForSilentSignin).await();
-                if (signInResult != null) {
+//                if (signInResult != null) {
                     GoogleSignInAccount signInAccount = signInResult.getSignInAccount();
                     if (signInAccount != null) {
                         token = signInAccount.getIdToken();
@@ -114,7 +114,7 @@ public class GeoSwitchGoogleApiClient {
 
                         return true; // finally block will be executed before return
                     }
-                }
+//                }
             }
         } finally {
             googleApiClientForSilentSignin.disconnect();
@@ -130,11 +130,16 @@ public class GeoSwitchGoogleApiClient {
 
             ConnectionResult result = googleApiClientForSilentSignin.blockingConnect();
             if (result.isSuccess()) {
-                Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClientForSilentSignin);
-                App.getLogger().info(TAG, "Last location obtained: "+lastLocation);
+                Location lastLocation;
+                lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClientForSilentSignin);
+                App.getLogger().info(TAG, "Last location obtained: " + lastLocation);
                 return lastLocation;
             }
-        } finally {
+        }
+        catch(SecurityException ex) {
+            App.getLogger().exception(TAG, ex);
+        }
+        finally {
             googleApiClientForSilentSignin.disconnect();
         }
 

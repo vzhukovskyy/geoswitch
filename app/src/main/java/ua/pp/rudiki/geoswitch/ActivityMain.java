@@ -283,7 +283,7 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
     private void loadGpsActivationToUi() {
         boolean activateOnCharger = App.getPreferences().getActivateOnCharger();
 
-        String desc = "";
+        String desc;
         if (activateOnCharger) {
             desc = getString(R.string.activity_main_gps_charging);
         } else {

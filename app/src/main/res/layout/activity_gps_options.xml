@@ -44,29 +44,4 @@
             android:text="@string/activity_gps_manual" />
     </RadioGroup>
 
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/gpsOptionsRadioGroup"
-        android:layout_alignParentEnd="true"
-        android:layout_marginTop="10dp">
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/okButton"
-            android:layout_weight="1"
-            android:onClick="onOkClick"
-            android:text="@string/activity_gps_ok" />
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/cancelButton"
-            android:layout_weight="1"
-            android:onClick="onCancelClick"
-            android:text="@string/activity_gps_cancel" />
-    </LinearLayout>
-
 </RelativeLayout>

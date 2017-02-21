@@ -20,6 +20,7 @@ public class ActivityAction extends AppCompatActivity {
 
     CheckBox showNotificationCheckbox, playSoundCheckbox, speakOutCheckbox, sendPostCheckbox, appendSigninCheckbox;
     EditText urlEdit;
+    Toast signInToast;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,7 +73,14 @@ public class ActivityAction extends AppCompatActivity {
         App.getLogger().debug(TAG, "onDestroy");
     }
 
-    public void onOkClick(View view) {
+    @Override
+    public void onBackPressed()
+    {
+        if(!isFormChanged()) {
+            closeActivity(Activity.RESULT_CANCELED);
+            return;
+        }
+
         boolean validatedOk = validateForm();
 
         if(!validatedOk) {
@@ -83,17 +91,13 @@ public class ActivityAction extends AppCompatActivity {
 
         if(signinNeeded()) {
             signIn();
-            // don't close activity until signed in
+            // don't close activity until signed in; it will be closed in sign-in callback
             return;
         }
 
         saveForm();
 
         closeActivity(Activity.RESULT_OK);
-    }
-
-    public void onCancelClick(View view) {
-        closeActivity(Activity.RESULT_CANCELED);
     }
 
     void closeActivity(int resultCode) {
@@ -112,6 +116,17 @@ public class ActivityAction extends AppCompatActivity {
                 appendSigninCheckbox.isChecked(),
                 urlEdit.getText().toString()
         ).execute();
+    }
+
+    private boolean isFormChanged() {
+        boolean changed = false;
+        changed = changed || showNotificationCheckbox.isChecked() != App.getPreferences().getShowNotification();
+        changed = changed || playSoundCheckbox.isChecked() != App.getPreferences().getPlaySound();
+        changed = changed || speakOutCheckbox.isChecked() != App.getPreferences().getSpeakOut();
+        changed = changed || sendPostCheckbox.isChecked() != App.getPreferences().getSendPost();
+        changed = changed || appendSigninCheckbox.isChecked() != App.getPreferences().getAppendToken();
+        changed = changed || !urlEdit.getText().toString().equals(App.getPreferences().getUrl());
+        return changed;
     }
 
     private boolean validateForm() {
@@ -172,6 +187,10 @@ public class ActivityAction extends AppCompatActivity {
 
     // Sign in
     private void signIn() {
+        String message = getString(R.string.activity_action_verifying_signin);
+        signInToast = Toast.makeText(this, message, Toast.LENGTH_SHORT);
+        signInToast.show();
+
         App.getGoogleApiClient().startSigninForResult(this, RequestCode.ACTIVITY_SIGN_IN);
     }
 
@@ -188,6 +207,8 @@ public class ActivityAction extends AppCompatActivity {
 //                String format = getString(R.string.activity_action_greetings);
 //                String message = String.format(format, account.getDisplayName());
 //                Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+
+                signInToast.cancel();
 
                 saveForm();
                 closeActivity(Activity.RESULT_OK);

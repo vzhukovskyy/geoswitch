@@ -32,7 +32,7 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
     public static final String BROADCAST_GPSFIXTIMESTAMP_KEY = "GPS_TIMESTAMP";
     public static final String BROADCAST_LATITUDE_KEY = "GPS_LATITUDE";
     public static final String BROADCAST_LONGITUDE_KEY = "GPS_LONGITUDE";
-;
+
     public static final String START_REASON_KEY = "START_REASON";
     public static final String START_REASON_MAIN_ACTIVITY_CREATED = "MAIN_ACTIVITI_CREATED";
     public static final String START_REASON_USER_CHANGED_TRIGGER = "USER_CHANGED_TRIGGER";

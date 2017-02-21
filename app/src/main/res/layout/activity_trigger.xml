@@ -15,37 +15,6 @@
         android:layout_height="match_parent">
 
 
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_below="@+id/unidirectionalGroup">
-
-            <Button
-                android:text="@string/activity_trigger_ok_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/okButton"
-                android:layout_weight="1"
-                android:layout_alignParentTop="true"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:onClick="onOkClick" />
-
-            <Button
-                android:text="@string/activity_trigger_cancel_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/cancelButton"
-                android:layout_weight="1"
-                android:layout_alignBaseline="@+id/okButton"
-                android:layout_alignBottom="@+id/okButton"
-                android:layout_toRightOf="@+id/okButton"
-                android:layout_toEndOf="@+id/okButton"
-                android:onClick="onCancelClick" />
-
-        </LinearLayout>
-
         <TextView
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"

@@ -54,25 +54,32 @@ public class ActivityGpsOptions extends AppCompatActivity {
         App.getLogger().debug(TAG, "onDestroy");
     }
 
-    public void onOkClick(View view) {
+    @Override
+    public void onBackPressed() {
+        if(!isFormChanged()) {
+            closeActivity(Activity.RESULT_CANCELED);
+            return;
+        }
+
         storeValues();
 
-        Intent resultIndent = new Intent();
-        setResult(Activity.RESULT_OK, resultIndent);
-        finish();
+        closeActivity(Activity.RESULT_OK);
     }
 
-    public void onCancelClick(View view) {
+    private void closeActivity(int result) {
         Intent resultIntent = new Intent();
-        setResult(Activity.RESULT_CANCELED, resultIntent);
+        setResult(result, resultIntent);
         finish();
     }
 
     // data persistence
 
+    private boolean isFormChanged() {
+        return isOnChargeRadioSelected() != App.getPreferences().getActivateOnCharger();
+    }
+
     private void storeValues() {
-        boolean isOnCharge = (gpsOptionsRadioGroup.getCheckedRadioButtonId() == R.id.radioOnCharge);
-        App.getPreferences().storeActivationOptions(isOnCharge);
+        App.getPreferences().storeActivationOptions(isOnChargeRadioSelected());
     }
 
     private void loadValuesToUi() {
@@ -80,4 +87,8 @@ public class ActivityGpsOptions extends AppCompatActivity {
         gpsOptionsRadioGroup.check(isOnCharge ? R.id.radioOnCharge : R.id.radioManual);
     }
 
+    // radio mapping
+    private boolean isOnChargeRadioSelected() {
+        return gpsOptionsRadioGroup.getCheckedRadioButtonId() == R.id.radioOnCharge;
+    }
 }

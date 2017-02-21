@@ -12,8 +12,8 @@
     <string name="activity_action_ok_button">OK</string>
     <string name="activity_action_cancel_button">Cancel</string>
     <string name="activity_action_validation_failed">Configuration is incomplete or invalid</string>
+    <string name="activity_action_verifying_signin">Verifying sign-in...</string>
     <string name="activity_action_signin_failed">Sign-in failed. It will not be possible to append sign-in token.</string>
-    <string name="activity_action_greetings">Greetings %s</string>
 
     <string name="activity_gps_title">GeoSwitch/GPS Options</string>
     <string name="activity_gps_label">GPS sensor consumes much battery power. These options specify when GPS sensor is to be turned on for location tracking.</string>
@@ -71,7 +71,8 @@
     <string name="activity_trigger_map_button">Select on Map</string>
     <string name="activity_trigger_ok_button">OK</string>
     <string name="activity_trigger_cancel_button">Cancel</string>
-    <string name="activity_trigger_validation_failed">Configuration is incomplete or invalid</string>
+    <string name="activity_trigger_area_invalid">Select Area for this trigger</string>
+    <string name="activity_trigger_transition_invalid">Select From and To areas for this trigger</string>
 
     <string name="service_sticky_title">GeoSwitch: monitoring location</string>
     <string name="service_sticky_status_gps_time">"Last location info received at "</string>

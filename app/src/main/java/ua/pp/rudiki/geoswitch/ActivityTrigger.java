@@ -12,6 +12,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Objects;
+
 import ua.pp.rudiki.geoswitch.peripherals.ConversionUtils;
 import ua.pp.rudiki.geoswitch.peripherals.Preferences;
 import ua.pp.rudiki.geoswitch.trigger.ExitAreaTrigger;
@@ -128,21 +130,23 @@ public class ActivityTrigger extends AppCompatActivity implements RadioGroup.OnC
         triggerTypeDescriptionLabel.setText(desc);
     }
 
-    public void onOkClick(View view) {
-        boolean validatedOk = storeValues();
-        if (validatedOk) {
-            Intent resultIndent = new Intent();
-            setResult(Activity.RESULT_OK, resultIndent);
-            finish();
-        } else {
-            String message = getString(R.string.activity_trigger_validation_failed);
-            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    public void onBackPressed() {
+        if(!isFormChanged()) {
+            closeActivity(RESULT_CANCELED);
+            return;
         }
+
+        if(!validateForm()) {
+            return;
+        }
+
+        storeValues();
+        closeActivity(Activity.RESULT_OK);
     }
 
-    public void onCancelClick(View view) {
+    private void closeActivity(int result) {
         Intent resultIntent = new Intent();
-        setResult(Activity.RESULT_CANCELED, resultIntent);
+        setResult(result, resultIntent);
         finish();
     }
 
@@ -229,7 +233,15 @@ public class ActivityTrigger extends AppCompatActivity implements RadioGroup.OnC
 
     // data persistence
 
-    private boolean storeValues() {
+    private boolean isFormChanged() {
+        GeoTrigger currentTrigger = App.getPreferences().loadTrigger();
+        GeoTrigger newTrigger = getSelectedTrigger();
+
+        boolean changed = !Objects.equals(currentTrigger, newTrigger);
+        return changed;
+    }
+
+    private boolean validateForm() {
         TriggerType triggerType = getSelectedTriggerType();
 
         double latitude = ConversionUtils.toDouble(latitudeEditBi.getText().toString());
@@ -238,33 +250,32 @@ public class ActivityTrigger extends AppCompatActivity implements RadioGroup.OnC
         double latitudeTo = ConversionUtils.toDouble(latitudeToEditUni.getText().toString());
         double longitudeTo = ConversionUtils.toDouble(longitudeToEditUni.getText().toString());
 
-        if(Double.isNaN(latitude) || Double.isNaN(longitude) || Double.isNaN(radius)) {
-            return false;
-        }
+        boolean areaDefined = !Double.isNaN(latitude) && !Double.isNaN(longitude) && !Double.isNaN(radius);
+        boolean areaToDefined = !Double.isNaN(latitudeTo) && !Double.isNaN(longitudeTo);
 
-        GeoArea area = new GeoArea(latitude, longitude, radius);
-
-        GeoTrigger trigger;
+        String message = null;
         if(triggerType == TriggerType.EnterArea || triggerType == TriggerType.ExitArea) {
-            if(triggerType == TriggerType.EnterArea) {
-                trigger = new EnterAreaTrigger(area);
-            } else {
-                trigger = new ExitAreaTrigger(area);
+            if(!areaDefined) {
+                message = getString(R.string.activity_trigger_area_invalid);
             }
         }
         else {
-            // triggerType == TriggerType.Transition
-            if(Double.isNaN(latitudeTo) || Double.isNaN(longitudeTo)) {
-                return false;
+            if(!areaDefined || !areaToDefined) {
+                message = getString(R.string.activity_trigger_transition_invalid);
             }
-
-            GeoPoint pointFrom = new GeoPoint(latitude, longitude);
-            GeoPoint pointTo = new GeoPoint(latitudeTo, longitudeTo);
-            trigger = new TransitionTrigger(pointFrom, pointTo);
         }
 
-        App.getPreferences().storeTrigger(trigger);
+        if(message != null) {
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+            return false;
+        }
+
         return true;
+    }
+
+    private void storeValues() {
+        GeoTrigger trigger = getSelectedTrigger();
+        App.getPreferences().storeTrigger(trigger);
     }
 
     private void loadValuesToUi() {
@@ -321,12 +332,51 @@ public class ActivityTrigger extends AppCompatActivity implements RadioGroup.OnC
         onCheckedChanged(triggerTypeRadioGroup, radioId);
     }
 
-    // form field accessors
+    // form to persisted entities conversion
 
-    TriggerType getSelectedTriggerType() {
+    private GeoTrigger getSelectedTrigger() {
+        TriggerType triggerType = getSelectedTriggerType();
+
+        double latitude = ConversionUtils.toDouble(latitudeEditBi.getText().toString());
+        double longitude = ConversionUtils.toDouble(longitudeEditBi.getText().toString());
+        double radius = ConversionUtils.toDouble(radiusEditBi.getText().toString());
+        double latitudeTo = ConversionUtils.toDouble(latitudeToEditUni.getText().toString());
+        double longitudeTo = ConversionUtils.toDouble(longitudeToEditUni.getText().toString());
+
+        if(Double.isNaN(latitude) || Double.isNaN(longitude) || Double.isNaN(radius)) {
+            return null;
+        }
+
+        GeoArea area = new GeoArea(latitude, longitude, radius);
+
+        GeoTrigger trigger;
+        if(triggerType == TriggerType.EnterArea || triggerType == TriggerType.ExitArea) {
+            if(triggerType == TriggerType.EnterArea) {
+                trigger = new EnterAreaTrigger(area);
+            } else {
+                trigger = new ExitAreaTrigger(area);
+            }
+
+            return trigger;
+        }
+        else {
+            // triggerType == TriggerType.Transition
+            if(Double.isNaN(latitudeTo) || Double.isNaN(longitudeTo)) {
+                return null;
+            }
+
+            GeoPoint pointFrom = new GeoPoint(latitude, longitude);
+            GeoPoint pointTo = new GeoPoint(latitudeTo, longitudeTo);
+            return new TransitionTrigger(pointFrom, pointTo);
+        }
+    }
+
+    private TriggerType getSelectedTriggerType() {
         int radioId = triggerTypeRadioGroup.getCheckedRadioButtonId();
         return radioIdToTriggerType(radioId);
     }
+
+    // form field accessors
 
     double getLatitudeEditboxValue() {
         TriggerType type = getSelectedTriggerType();

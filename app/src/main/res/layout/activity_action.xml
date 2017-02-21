@@ -59,42 +59,6 @@
         android:id="@+id/sendPostCheckbox"
         android:onClick="ensureCheckboxesCohere" />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/button"
-        android:layout_below="@+id/urlEdit"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:onClick="onLaunchActionClick"
-        android:text="@string/activity_action_launch_button" />
-
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/button"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginTop="10dp">
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/okButton"
-            android:layout_weight="1"
-            android:onClick="onOkClick"
-            android:text="@string/activity_action_ok_button" />
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/cancelButton"
-            android:layout_weight="1"
-            android:onClick="onCancelClick"
-            android:text="@string/activity_action_cancel_button" />
-    </LinearLayout>
-
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="100dp"
@@ -110,5 +74,14 @@
         android:inputType="text|textUri"
         android:hint="@string/activity_action_url"
         android:imeOptions="actionDone" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/button"
+        android:onClick="onLaunchActionClick"
+        android:text="@string/activity_action_launch_button"
+        android:layout_below="@+id/urlEdit"
+        android:layout_alignParentEnd="true" />
 
 </RelativeLayout>

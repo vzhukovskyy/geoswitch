@@ -35,7 +35,7 @@ public class SmoothingAreaTriggerTest {
     private SmoothingAreaTrigger areaTrigger;
 
     private static GeoPoint areaCenter = new GeoPoint(10, 10);
-    private static int areaRadius = 2;
+    private static final int areaRadius = 2;
 
     private static GeoPoint insideEast = new GeoPoint(9, 10);
     private static GeoPoint insideNorth = new GeoPoint(10, 11);

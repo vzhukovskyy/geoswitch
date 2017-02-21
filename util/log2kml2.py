@@ -31,19 +31,19 @@ with open(logFilename) as inputfile:
             pnt = kml.newpoint(coords=[(lon, lat)])
             pnt.timestamp.when = date+'T'+time
             pnt.description = date+' '+time
-        elif " Start monitoring " in line:
+        elif " T " in line:
             elems = line.split()
-            triggerType = elems[6]
+            triggerType = elems[3]
             if triggerType == 'Exit' or triggerType == 'Enter':
                 # Exit (50.3956463,30.6331508) R=100.0
-                lat, lon = re.findall(r'\d+\.*\d*', elems[7])
-                radius = re.findall(r'\d+\.*\d*', elems[8])[0]
+                lat, lon = re.findall(r'\d+\.*\d*', elems[5])
+                radius = re.findall(r'\d+\.*\d*', elems[6])[0]
                 triggers.append((triggerType, lat, lon, radius))
             if triggerType == 'Transition':
                 # Transition from (50.195372693939575,30.665469020605087) R=76.76939900716145 to (50.19567103468903,30.66701330244541) R=76.76939900716145
-                latFrom, lonFrom = re.findall(r'\d+\.*\d*', elems[8])
-                radius = re.findall(r'\d+\.*\d*', elems[9])[0]
-                latTo, lonTo = re.findall(r'\d+\.*\d*', elems[11])
+                latFrom, lonFrom = re.findall(r'\d+\.*\d*', elems[5])
+                radius = re.findall(r'\d+\.*\d*', elems[6])[0]
+                latTo, lonTo = re.findall(r'\d+\.*\d*', elems[8])
                 triggers.append((triggerType, latFrom, lonFrom, latTo, lonTo, radius))
 
 

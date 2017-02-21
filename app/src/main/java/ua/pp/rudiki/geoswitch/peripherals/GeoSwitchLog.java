@@ -134,6 +134,7 @@ public class GeoSwitchLog {
                 fileStream.close();
             }
             catch(IOException e) {
+                Log.e(TAG, "exception when closing log file");
             }
 
             File archiveFile = new File(fileRoot, ARCHIVE_FILENAME);

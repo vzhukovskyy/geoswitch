@@ -13,14 +13,16 @@
     <string name="activity_action_title">Дія</string>
     <string name="activity_action_url">HTTP URL</string>
     <string name="activity_action_validation_failed">Конфігурація неповна або помилкова</string>
+    <string name="activity_action_verifying_signin">Перевіряю обліковий запис...</string>
     <string name="activity_action_signin_failed">Вхід до облікового запису завершився невдало. Приєднати токен буде неможливо.</string>
-    <string name="activity_action_greetings" formatted="false">Вітання, %s</string>
+
     <string name="activity_gps_cancel">Відмінити</string>
     <string name="activity_gps_charger">Автоматично включати при приєднанні до зарядного пристрою та вимикати при від\'єднанні (рекомендується для використання в авто)</string>
     <string name="activity_gps_label">GPS датчик в значній мірі споживає заряд батареї. Ці опції визначають, коли датчик повинен включатись для відслідковування положення.</string>
     <string name="activity_gps_manual">Включати та виключати GPS вручну</string>
     <string name="activity_gps_ok">Гаразд</string>
     <string name="activity_gps_title">Налаштування вмикання GPS</string>
+
     <string name="activity_main_action_button">Налаштувати дію</string>
     <string name="activity_main_action_display_notification">Відобразити нотифікацію</string>
     <string name="activity_main_action_not_configured">Дія не зазначена</string>
@@ -44,10 +46,12 @@
     <string name="activity_main_trigger_desc_exit_area" formatted="false">Спрацьовує при виході із кола радіусом %d метрів з центром в (%s,%s)</string>
     <string name="activity_main_trigger_desc_transition" formatted="false">Спрацьовує при переміщенні з кола радіусом %d метрів з центром в (%s,%s) до кола радіусом %d метрів з центром в (%s,%s)</string>
     <string name="activity_main_trigger_invalid">Тригер не заданий</string>
+
     <string name="activity_map_area">Ділянка</string>
     <string name="activity_map_from">Звідки</string>
     <string name="activity_map_to">Куди</string>
     <string name="activity_map_title">Карта</string>
+
     <string name="activity_trigger_area_section">Ділянка</string>
     <string name="activity_trigger_cancel_button">Відмінити</string>
     <string name="activity_trigger_enter_desc">Входження до ділянки</string>
@@ -63,12 +67,15 @@
     <string name="activity_trigger_ok_button">Гаразд</string>
     <string name="activity_trigger_radius_hint">Радіус в метрах</string>
     <string name="activity_trigger_radius_label">Радіус</string>
+    <string name="activity_trigger_radius_tip"><![CDATA[>100m рекомендується]]></string>
     <string name="activity_trigger_title">Тригер</string>
     <string name="activity_trigger_to_section">Куди</string>
     <string name="activity_trigger_transition_desc">Переміщення за однієї ділянки до іншої</string>
     <string name="activity_trigger_transition_radio">Переміщення</string>
     <string name="activity_trigger_type">Тип</string>
-    <string name="activity_trigger_validation_failed">Конфігурація неповна або помилкова</string>
+    <string name="activity_trigger_area_invalid">Виберіть ділянку для цього тригера</string>
+    <string name="activity_trigger_transition_invalid">Виберіть ділянки \"звідки\" та \"куди\" для цього тригера"</string>
+
     <string name="service_action_failed_no_internet">Дія зазнала невдачу. Немає з\'єднання з інтернетом</string>
     <string name="service_action_failed_refresh_token">Дія зазнала невдачу. Не вдалося встановити з\'єднання з сервером Google</string>
     <string name="service_action_failed_with_error_code" formatted="false">Дія зазнала невдачу. Помилка HTTP %d</string>
@@ -79,5 +86,4 @@
     <string name="service_sticky_title">GeoSwitch: спостереження</string>
     <string name="service_trigger_fired">Спрацював геолокаційний тригер.</string>
     <string name="service_action_succeeded">Дія завершилась успішно.</string>
-    <string name="activity_trigger_radius_tip"><![CDATA[>100m рекомендується]]></string>
 </resources>

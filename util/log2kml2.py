@@ -2,7 +2,7 @@ import sys
 import re
 import simplekml
 from polycircles import polycircles
-
+import datetime
 
 
 def addCircleToKml(kml, lat, lon, radius, name, color):
@@ -14,6 +14,21 @@ def addCircleToKml(kml, lat, lon, radius, name, color):
     pol.style.polystyle.color = simplekml.Color.changealphaint(100, color)
     kml.newpoint(name=name, coords=[(float(lon), float(lat))])
 
+def addLineStringtoKml(coordinates_arr, begin, end):
+    ls = kml.newlinestring()
+    ls.coords = coordinates_arr
+    ls.style.linestyle.width = 5
+    ls.style.linestyle.color = simplekml.Color.red
+    ls.timespan.begin = begin.isoformat('T')
+    ls.timespan.end = end.isoformat('T')
+    ls.description = begin.isoformat(' ')+'\n-\n'+end.isoformat(' ')
+
+    # pnt = kml.newpoint(coords=[coordinates_arr[0]])
+    # pnt.timestamp.when = begin.isoformat('T')
+    # pnt.description = str(begin)
+    # pnt = kml.newpoint(coords=[coordinates_arr[-1]])
+    # pnt.timestamp.when = end.isoformat('T')
+    # pnt.description = str(end)
 
 
 kml = simplekml.Kml()
@@ -23,14 +38,32 @@ dotPos = logFilename.rfind(".")
 kmlfilename = logFilename[:dotPos]+'.kml'
 
 triggers = []
+coordinates_arr = []
+start_dt = None
+prev_dt = None
 
 with open(logFilename) as inputfile:
     for line in inputfile:
         if " L " in line:
             date, time, tagL, lat, lon, tagAcc, acc = line.split()
-            pnt = kml.newpoint(coords=[(lon, lat)])
-            pnt.timestamp.when = date+'T'+time
-            pnt.description = date+' '+time
+            
+            dt = datetime.datetime.strptime(str(date)+" "+time, "%Y-%m-%d %H:%M:%S.%f")
+            if prev_dt is None:
+                start_dt = dt
+                prev_dt = dt
+            else:
+                delta = dt-prev_dt
+                if delta < datetime.timedelta(seconds=3):
+                    coordinates_arr.append((lon,lat))
+                else:
+                    addLineStringtoKml(coordinates_arr, start_dt, prev_dt)
+                    coordinates_arr = [(lon,lat)]
+                    start_dt = dt
+                prev_dt = dt
+                #print(delta)
+            # pnt = kml.newpoint(coords=[(lon, lat)])
+            # pnt.timestamp.when = date+'T'+time
+            # pnt.description = date+' '+time
         elif " T " in line:
             elems = line.split()
             triggerType = elems[3]
@@ -47,6 +80,7 @@ with open(logFilename) as inputfile:
                 latTo, lonTo = re.findall(r'\d+\.*\d*', elems[8])
                 triggers.append((triggerType, latFrom, lonFrom, latTo, lonTo, radius))
 
+addLineStringtoKml(coordinates_arr, start_dt, prev_dt)
 
 triggers = list(set(triggers))
 print(triggers)

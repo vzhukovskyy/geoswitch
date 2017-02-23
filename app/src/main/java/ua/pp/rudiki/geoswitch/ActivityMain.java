@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -16,12 +17,14 @@ import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Formatter;
 import java.util.Locale;
 
+import ua.pp.rudiki.geoswitch.kml.Log2Kml;
 import ua.pp.rudiki.geoswitch.service.GpsServiceActivationListener;
 import ua.pp.rudiki.geoswitch.service.GeoSwitchGpsService;
 import ua.pp.rudiki.geoswitch.trigger.EnterAreaTrigger;
@@ -144,9 +147,13 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
     }
 
     public void onExportKmlMenuItemSelected() {
+        File f = new File(Environment.getExternalStorageDirectory(), "geoswitch.kml");
+
+        Log2Kml.log2kml(f);
+
         Intent intent = new Intent(Intent.ACTION_VIEW);
-        Uri uri = Uri.parse("file://"+ App.getLogger().getAbsolutePath());
-        intent.setDataAndType(uri, "text/plain");
+        Uri uri = Uri.parse("file://"+ f.getAbsolutePath());
+        intent.setDataAndType(uri, "application/vnd.google-earth.kml+xml");
         startActivity(intent);
     }
 

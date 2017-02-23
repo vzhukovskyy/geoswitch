@@ -82,9 +82,16 @@ public class GeoSwitchLog {
         return file.getAbsolutePath();
     }
 
+    public File[] getLogFiles() {
+        File[] files = new File[2];
+        files[0] = new File(fileRoot, ARCHIVE_FILENAME);
+        files[1] = new File(fileRoot, LOG_FILENAME);
+        return files;
+    }
+
     // **************************** Private *****************************
 
-    // may be called from different threads simultaneously
+    // may be called from different threads at the same time
     private synchronized void doLog(Character logLevel, String tag, String message) {
         rotateFileIfNeeded();
 
@@ -120,12 +127,9 @@ public class GeoSwitchLog {
             e.printStackTrace();
         }
 
-        makeVisibleViaUsb(file);
+        FileUtils.makeVisibleViaUsb(file);
     }
 
-    private void makeVisibleViaUsb(File file) {
-        MediaScannerConnection.scanFile(App.getAppContext(), new String[] {file.getAbsolutePath()}, null, null);
-    }
 
     private void rotateFileIfNeeded() {
         if(file.length() > App.getPreferences().getMaxLogFileSize()) {
@@ -148,7 +152,8 @@ public class GeoSwitchLog {
             } else {
                 Log.i(TAG, "log file was not renamed");
             }
-            makeVisibleViaUsb(file);
+
+            FileUtils.makeVisibleViaUsb(file);
 
             openFile();
         }

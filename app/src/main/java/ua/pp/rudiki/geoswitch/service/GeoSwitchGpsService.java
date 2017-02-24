@@ -159,68 +159,6 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
             }
         }
 
-/*
-        GeoTrigger newTrigger = loadTrigger();
-
-        // copies which can be used outside of synchronized block
-        boolean frozenActiveMode = App.getGpsServiceActivator().isOn();
-        Location frozenLastLocation;
-
-        boolean switchToNewTrigger = false;
-        synchronized(mutex) {
-            activeMode = frozenActiveMode;
-            frozenLastLocation = lastLocation;
-
-            if (trigger != null) {
-                // there is already configured trigger
-                if (newTrigger != null && !trigger.equals(newTrigger)) {
-                    // there is different area to monitor
-                    switchToNewTrigger = true;
-                }
-            } else {
-                // no trigger being monitored yet
-                if (newTrigger != null) {
-                    // and there is area to monitor
-                    switchToNewTrigger = true;
-                }
-            }
-
-            if (switchToNewTrigger) {
-                trigger = newTrigger;
-                if (lastLocation != null) {
-                    trigger.changeLocation(lastLocation.getLatitude(), lastLocation.getLongitude());
-                    // trigger cannot fire here because it needs at least 2 fixes
-                }
-            }
-        }
-
-        App.getLogger().info(TAG, "activeMode="+frozenActiveMode+", lastLocation="+frozenLastLocation);
-
-        if (switchToNewTrigger) {
-            App.getLogger().info(TAG, "Start monitoring " + newTrigger);
-        } else {
-            App.getLogger().info(TAG, "Continue monitoring " + newTrigger);
-        }
-
-        // for simplicity always unsubscribe and resubscribe if needed
-        unregisterLocationManagerListener();
-        removeStickyNotification();
-        if(frozenActiveMode) {
-            registerLocationManagerListener();
-            displayStickyNotification();
-        }
-
-        // update UIs
-        sendMessageToActivity(frozenActiveMode, frozenLastLocation);
-        if(frozenLastLocation != null && frozenActiveMode) {
-            updateStickyNotification(frozenLastLocation);
-        }
-
-        // request initial location from Google API
-        if(frozenLastLocation == null) {
-            requestLastLocation();
-        }
-*/
         return START_STICKY;
     }
 

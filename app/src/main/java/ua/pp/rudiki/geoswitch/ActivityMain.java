@@ -149,7 +149,8 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
     public void onExportKmlMenuItemSelected() {
         File f = new File(Environment.getExternalStorageDirectory(), "geoswitch.kml");
 
-        Log2Kml.log2kml(f);
+        final int LAST_N_HOURS = 3*60*1000;
+        Log2Kml.log2kml(-1, f);
 
         Intent intent = new Intent(Intent.ACTION_VIEW);
         Uri uri = Uri.parse("file://"+ f.getAbsolutePath());

@@ -150,7 +150,8 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
         File f = new File(Environment.getExternalStorageDirectory(), "geoswitch.kml");
 
         final int LAST_N_HOURS = 3*60*1000;
-        Log2Kml.log2kml(-1, f);
+        final int NO_LIMIT = -1;
+        Log2Kml.log2kml(LAST_N_HOURS, f);
 
         Intent intent = new Intent(Intent.ACTION_VIEW);
         Uri uri = Uri.parse("file://"+ f.getAbsolutePath());

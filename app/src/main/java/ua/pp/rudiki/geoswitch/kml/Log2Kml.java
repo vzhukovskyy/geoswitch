@@ -18,6 +18,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -25,6 +26,7 @@ import java.util.regex.Pattern;
 
 import ua.pp.rudiki.geoswitch.App;
 import ua.pp.rudiki.geoswitch.peripherals.FileUtils;
+import ua.pp.rudiki.geoswitch.trigger.TransitionTrigger;
 
 public class Log2Kml {
     private static final String TAG = Log2Kml.class.getSimpleName();
@@ -59,6 +61,21 @@ public class Log2Kml {
         Date date;
         LatLng center;
         double radius;
+
+        public boolean equals(Object object) {
+            if(this == object)
+                return true;
+
+            if(object == null)
+                return false;
+
+            if(!object.getClass().equals(this.getClass()))
+                return false;
+
+            AreaTriggerData areaTriggerData = (AreaTriggerData)object;
+            return this.radius == areaTriggerData.radius &&
+                   this.center.equals(areaTriggerData.center);
+        }
     }
 
     private static class TransitionTriggerData {
@@ -66,6 +83,22 @@ public class Log2Kml {
         LatLng from;
         LatLng to;
         double radius;
+
+        public boolean equals(Object object) {
+            if(this == object)
+                return true;
+
+            if(object == null)
+                return false;
+
+            if(!object.getClass().equals(this.getClass()))
+                return false;
+
+            TransitionTriggerData transitionTriggerData = (TransitionTriggerData)object;
+            return this.radius == transitionTriggerData.radius &&
+                   this.from.equals(transitionTriggerData.from) &&
+                   this.to.equals(transitionTriggerData.to);
+        }
     }
 
     private static LogParserResult extractGeoDataFromLog(File logFile, int timePeriodMillis) {
@@ -156,13 +189,23 @@ public class Log2Kml {
 
     private static void removeDuplicateTriggers(LogParserResult logParserResult) {
 
-        // final ordering does not matter
+        // equal triggers appear in log one by one only therefore its enough to remove subsequent duplicates
 
-        Set<AreaTriggerData> areaTriggerSet = new HashSet<>(logParserResult.areaTriggerData);
-        logParserResult.areaTriggerData = new ArrayList<>(areaTriggerSet);
+        removeSubsequentDuplicates(logParserResult.areaTriggerData);
+        removeSubsequentDuplicates(logParserResult.transitionTriggerData);
+    }
 
-        Set<TransitionTriggerData> transitionTriggerSet = new HashSet<>(logParserResult.transitionTriggerData);
-        logParserResult.transitionTriggerData = new ArrayList<>(transitionTriggerSet);
+    private static <T extends Object> void removeSubsequentDuplicates(List<T> list) {
+        T previous_t = null;
+        for (Iterator<T> iterator = list.iterator(); iterator.hasNext();) {
+            T t = iterator.next();
+            if(previous_t == null) {
+                previous_t = t;
+            }
+            else if(previous_t.equals(t)) {
+                iterator.remove();
+            }
+        }
     }
 
     private static void generateKml(LogParserResult logParserResult, File kmlFile) {
@@ -172,7 +215,7 @@ public class Log2Kml {
         ){
             for(AreaTriggerData areaTriggerData: logParserResult.areaTriggerData) {
                 kml.addCircle(areaTriggerData.center, areaTriggerData.radius, 0x6400ffff);
-                kml.addPoint(areaTriggerData.center, "");
+                kml.addPoint(areaTriggerData.center, "Area");
             }
 
             for(TransitionTriggerData transitionTriggerData: logParserResult.transitionTriggerData) {

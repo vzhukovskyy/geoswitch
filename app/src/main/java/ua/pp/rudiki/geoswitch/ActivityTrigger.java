@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.RadioGroup;
@@ -169,7 +168,7 @@ public class ActivityTrigger extends AppCompatActivity implements RadioGroup.OnC
     // return value from the map activity
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == RequestCode.TRIGGER_COORDINATES_ID && data != null) {
+        if (requestCode == RequestCode.TRIGGER_COORDINATES_ID && resultCode == RESULT_OK && data != null) {
             String latitude = data.getStringExtra(Preferences.latitudeKey);
             String longitude = data.getStringExtra(Preferences.longitudeKey);
             String radius = data.getStringExtra(Preferences.radiusKey);
@@ -191,6 +190,16 @@ public class ActivityTrigger extends AppCompatActivity implements RadioGroup.OnC
                 latitudeToEditUni.setText(latitudeTo);
                 longitudeToEditUni.setText(longitudeTo);
             }
+
+            String message;
+            if(getSelectedTriggerType() == TriggerType.Transition) {
+                message = getString(R.string.activity_trigger_transition_updated);
+            }
+            else {
+                message = getString(R.string.activity_trigger_area_updated);
+            }
+
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
         }
     }
 

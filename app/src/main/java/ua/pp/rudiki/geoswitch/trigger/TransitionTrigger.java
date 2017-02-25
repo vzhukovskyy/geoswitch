@@ -6,6 +6,8 @@ package ua.pp.rudiki.geoswitch.trigger;
 
 import java.util.Objects;
 
+import ua.pp.rudiki.geoswitch.peripherals.HashUtils;
+
 public class TransitionTrigger implements GeoTrigger {
     private AreaTrigger aTrigger;
     private AreaTrigger bTrigger;
@@ -47,7 +49,7 @@ public class TransitionTrigger implements GeoTrigger {
     }
 
     public static double calculateRadius(GeoPoint a, GeoPoint b) {
-        return 2.0/3 * a.distanceTo(b);
+        return Math.ceil(2.0/3 * a.distanceTo(b));
     }
 
     public static double calculateRadius(double latitude1, double longitude1,
@@ -61,18 +63,28 @@ public class TransitionTrigger implements GeoTrigger {
 
     // Java methods override
 
-    public boolean equals(Object o) {
-        if (this == o)
+    @Override
+    public boolean equals(Object object) {
+        if(this == object)
             return true;
-        if (o == null)
+        if(object == null)
             return false;
-        if (getClass() != o.getClass())
+        if(getClass() != object.getClass())
             return false;
-        TransitionTrigger transitionTrigger = (TransitionTrigger)o;
+
+        TransitionTrigger transitionTrigger = (TransitionTrigger)object;
         return Objects.equals(aTrigger, transitionTrigger.aTrigger) &&
                Objects.equals(bTrigger, transitionTrigger.bTrigger);
     }
 
+    @Override
+    public int hashCode() {
+        int hash = HashUtils.combineHashCode(1, aTrigger);
+        hash = HashUtils.combineHashCode(hash, bTrigger);
+        return hash;
+    }
+
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Transition from ");

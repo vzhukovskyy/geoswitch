@@ -2,6 +2,9 @@
 <resources>
     <string name="application_name">GeoSwitch</string>
 
+    <string name="menu_open_log">Відкрити лог</string>
+    <string name="menu_export_kml">Відкрити в Google Earth</string>
+
     <string name="activity_action_appendtoken">Приєднати Google sign-in токен до URL</string>
     <string name="activity_action_cancel_button">Відмінити</string>
     <string name="activity_action_launch_button">Запустити дію зараз</string>
@@ -46,6 +49,11 @@
     <string name="activity_main_trigger_desc_exit_area" formatted="false">Спрацьовує при виході із кола радіусом %d метрів з центром в (%s,%s)</string>
     <string name="activity_main_trigger_desc_transition" formatted="false">Спрацьовує при переміщенні з кола радіусом %d метрів з центром в (%s,%s) до кола радіусом %d метрів з центром в (%s,%s)</string>
     <string name="activity_main_trigger_invalid">Тригер не заданий</string>
+    <string name="activity_main_action_updated">Дія оновлена.</string>
+    <string name="activity_main_activation_mode_updated">Режим активізації оновлений.</string>
+    <string name="activity_main_trigger_updated">Тригер оновлений.</string>
+    <string name="activity_main_trigger_updated_and_applied">Тригер оновлений. Його моніторинг розпочався.</string>
+    <string name="activity_main_please_wait">Створюється KML файл</string>
 
     <string name="activity_map_area">Ділянка</string>
     <string name="activity_map_from">Звідки</string>
@@ -75,6 +83,8 @@
     <string name="activity_trigger_type">Тип</string>
     <string name="activity_trigger_area_invalid">Виберіть ділянку для цього тригера</string>
     <string name="activity_trigger_transition_invalid">Виберіть ділянки \"звідки\" та \"куди\" для цього тригера"</string>
+    <string name="activity_trigger_area_updated">Розташування ділянки оновлене.</string>
+    <string name="activity_trigger_transition_updated">Розташування ділянок оновлене.</string>
 
     <string name="service_action_failed_no_internet">Дія зазнала невдачу. Немає з\'єднання з інтернетом</string>
     <string name="service_action_failed_refresh_token">Дія зазнала невдачу. Не вдалося встановити з\'єднання з сервером Google</string>
@@ -87,4 +97,5 @@
     <string name="service_sticky_title">GeoSwitch: спостереження</string>
     <string name="service_trigger_fired">Спрацював геолокаційний тригер.</string>
     <string name="service_action_succeeded">Дія завершилась успішно.</string>
+
 </resources>

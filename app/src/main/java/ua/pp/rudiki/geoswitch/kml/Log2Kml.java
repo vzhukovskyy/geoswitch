@@ -10,7 +10,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -18,7 +17,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -26,14 +24,16 @@ import java.util.regex.Pattern;
 
 import ua.pp.rudiki.geoswitch.App;
 import ua.pp.rudiki.geoswitch.peripherals.FileUtils;
-import ua.pp.rudiki.geoswitch.trigger.TransitionTrigger;
+import ua.pp.rudiki.geoswitch.peripherals.HashUtils;
 
 public class Log2Kml {
     private static final String TAG = Log2Kml.class.getSimpleName();
 
     private final static int COPY_BUFFER_SIZE = 4096;
 
-    public static void log2kml(int timePeriodMillis, File kmlFile) {
+    private static DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+
+    public static void log2kml(long timePeriodMillis, File kmlFile) {
         File tempLogFile = createTempFile();
         concatLogFiles(tempLogFile);
 
@@ -50,6 +50,7 @@ public class Log2Kml {
         List<PointData> pointData = new ArrayList<>();
         List<AreaTriggerData> areaTriggerData = new ArrayList<>();
         List<TransitionTriggerData> transitionTriggerData = new ArrayList<>();
+        List<PointData> actionData = new ArrayList<>();
     }
 
     private static class PointData {
@@ -62,19 +63,23 @@ public class Log2Kml {
         LatLng center;
         double radius;
 
+        @Override
         public boolean equals(Object object) {
             if(this == object)
                 return true;
-
             if(object == null)
                 return false;
-
             if(!object.getClass().equals(this.getClass()))
                 return false;
 
             AreaTriggerData areaTriggerData = (AreaTriggerData)object;
             return this.radius == areaTriggerData.radius &&
                    this.center.equals(areaTriggerData.center);
+        }
+
+        @Override
+        public int hashCode() {
+            return HashUtils.combineHashCode(center.hashCode(), radius);
         }
     }
 
@@ -84,6 +89,7 @@ public class Log2Kml {
         LatLng to;
         double radius;
 
+        @Override
         public boolean equals(Object object) {
             if(this == object)
                 return true;
@@ -99,15 +105,27 @@ public class Log2Kml {
                    this.from.equals(transitionTriggerData.from) &&
                    this.to.equals(transitionTriggerData.to);
         }
+
+        @Override
+        public int hashCode() {
+            int hash = HashUtils.combineHashCode(1, from.hashCode());
+            hash = HashUtils.combineHashCode(hash, to.hashCode());
+            hash = HashUtils.combineHashCode(hash, radius);
+            return hash;
+        }
+
     }
 
-    private static LogParserResult extractGeoDataFromLog(File logFile, int timePeriodMillis) {
+    /**
+     *
+     * @param logFile
+     * @param timePeriodMillis time period of interest from the time of last location fix
+     * @return
+     */
+    private static LogParserResult extractGeoDataFromLog(File logFile, long timePeriodMillis) {
         LogParserResult result = new LogParserResult();
 
         Date startDate = null;
-        if(timePeriodMillis > 0){
-            startDate = new Date(new Date().getTime()-timePeriodMillis);
-        }
 
         try (
                 FileReader fileReader = new FileReader(logFile);
@@ -132,8 +150,19 @@ public class Log2Kml {
                 String tag = parts[2];
 
                 if(tag.equals("L")) {
-                    if(startDate != null && date.before(startDate))
+                    if(startDate == null) {
+                        if(timePeriodMillis > 0) {
+                            startDate = new Date(date.getTime() - timePeriodMillis);
+                        }
+                        else {
+                            startDate = date;
+                        }
+                    }
+
+                    if(date.before(startDate)) {
+                        // skip the line, it's too old
                         continue;
+                    }
 
                     double latitude = 0, longitude = 0;
                     try {
@@ -177,6 +206,15 @@ public class Log2Kml {
                         result.transitionTriggerData.add(transitionTriggerData);
                     }
                 }
+                else if (tag.equals("A")) {
+                    LatLng ll = parseLatitudeLongitudeTuple(parts[6]);
+
+                    PointData pointData = new PointData();
+                    pointData.date = date;
+                    pointData.position = ll;
+
+                    result.actionData.add(pointData);
+                }
             }
         }
         catch(Exception e) {
@@ -189,41 +227,29 @@ public class Log2Kml {
 
     private static void removeDuplicateTriggers(LogParserResult logParserResult) {
 
-        // equal triggers appear in log one by one only therefore its enough to remove subsequent duplicates
+        Set<AreaTriggerData> areaTriggerDataSet = new HashSet<>(logParserResult.areaTriggerData);
+        logParserResult.areaTriggerData = new ArrayList<AreaTriggerData>(areaTriggerDataSet);
 
-        removeSubsequentDuplicates(logParserResult.areaTriggerData);
-        removeSubsequentDuplicates(logParserResult.transitionTriggerData);
-    }
-
-    private static <T extends Object> void removeSubsequentDuplicates(List<T> list) {
-        T previous_t = null;
-        for (Iterator<T> iterator = list.iterator(); iterator.hasNext();) {
-            T t = iterator.next();
-            if(previous_t == null) {
-                previous_t = t;
-            }
-            else if(previous_t.equals(t)) {
-                iterator.remove();
-            }
-        }
+        Set<TransitionTriggerData> transitionTriggerDataSet = new HashSet<>(logParserResult.transitionTriggerData);
+        logParserResult.transitionTriggerData = new ArrayList<TransitionTriggerData>(transitionTriggerDataSet);
     }
 
     private static void generateKml(LogParserResult logParserResult, File kmlFile) {
         try (
-                FileWriter fileWriter = new FileWriter(kmlFile, false);
-                Kml kml = new Kml(kmlFile, "GeoSwitch");
+                GeoSwitchKml kml = new GeoSwitchKml(kmlFile);
         ){
             for(AreaTriggerData areaTriggerData: logParserResult.areaTriggerData) {
-                kml.addCircle(areaTriggerData.center, areaTriggerData.radius, 0x6400ffff);
-                kml.addPoint(areaTriggerData.center, "Area");
+                kml.addAreaTrigger(areaTriggerData.center, areaTriggerData.radius);
             }
 
             for(TransitionTriggerData transitionTriggerData: logParserResult.transitionTriggerData) {
-                kml.addCircle(transitionTriggerData.from, transitionTriggerData.radius, 0x6400ffff);
-                kml.addPoint(transitionTriggerData.from, "From");
-                kml.addCircle(transitionTriggerData.to, transitionTriggerData.radius, 0x64ff00ff);
-                kml.addPoint(transitionTriggerData.to, "To");
+                kml.addTransitionTrigger(transitionTriggerData.from, transitionTriggerData.to, transitionTriggerData.radius);
             }
+
+            for(PointData pointData: logParserResult.actionData) {
+                kml.addActionFire(pointData.position, pointData.date);
+            }
+
 
             List<LatLng> coordinates = new ArrayList<>();
             Date startDate = null, prevDate = null;
@@ -238,7 +264,7 @@ public class Log2Kml {
                         coordinates.add(pointData.position);
                     }
                     else {
-                        kml.addLineString(coordinates, startDate, prevDate);
+                        kml.addPath(coordinates, startDate, prevDate);
                         startDate = pointData.date;
                         coordinates.clear();
                         coordinates.add(pointData.position);
@@ -248,7 +274,7 @@ public class Log2Kml {
             }
 
             if(coordinates.size() > 0) {
-                kml.addLineString(coordinates, startDate, prevDate);
+                kml.addPath(coordinates, startDate, prevDate);
             }
         }
         catch(Exception e) {
@@ -293,28 +319,27 @@ public class Log2Kml {
         return 0;
     }
 
-    private static void generateSampleKml(File f) {
-        final Kml kml = new Kml(f, "GeoSwitch");
-
-        Date beginTime = null, endTime = null;
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-        try {
-            beginTime = df.parse("2017-02-21 10:56:10.369");
-            endTime = df.parse("2017-02-21 10:57:10.370");
-        } catch (ParseException e) {
-        }
-
-        List<LatLng> coordinates = new ArrayList<>();
-        coordinates.add(new LatLng(30.63652993,50.23638183));
-        coordinates.add(new LatLng(30.637,50.23638183));
-        coordinates.add(new LatLng(30.638,50.23638183));
-
-        kml.addLineString(coordinates, beginTime, endTime);
-        kml.addPoint(new LatLng(50.19542742565555, 30.666), "Test");
-        kml.addCircle(new LatLng(50.19542742565555, 30.666), 100, 0x6400ffff);
-        kml.addCircle(new LatLng(50.19542742565555, 30.667), 100, 0x64ff00ff);
-        kml.finish();
-    }
+//    private static void generateSampleKml(File f) {
+//        final Kml kml = new Kml(f, "GeoSwitch");
+//
+//        Date beginTime = null, endTime = null;
+//        try {
+//            beginTime = dateFormat.parse("2017-02-21 10:56:10.369");
+//            endTime = dateFormat.parse("2017-02-21 10:57:10.370");
+//        } catch (ParseException e) {
+//        }
+//
+//        List<LatLng> coordinates = new ArrayList<>();
+//        coordinates.add(new LatLng(30.63652993,50.23638183));
+//        coordinates.add(new LatLng(30.637,50.23638183));
+//        coordinates.add(new LatLng(30.638,50.23638183));
+//
+//        kml.addLineString(coordinates, beginTime, endTime);
+//        kml.addPlacemark("Test", new LatLng(50.19542742565555, 30.666), "Test description");
+//        kml.addCircle("Circle1", new LatLng(50.19542742565555, 30.666), 100, Kml.KML_COLOR_YELLOW);
+//        kml.addCircle("Circle2", new LatLng(50.19542742565555, 30.667), 100, Kml.KML_COLOR_CORAL);
+//        kml.finish();
+//    }
 
     private static void concatLogFiles(File tempFile) {
         File[] logFiles = App.getLogger().getLogFiles();
@@ -333,7 +358,6 @@ public class Log2Kml {
             }
             catch (FileNotFoundException e) {
                 // it's OK, proceed to the next file
-                continue;
             }
             catch (IOException e) {
                 App.getLogger().exception(TAG, e);

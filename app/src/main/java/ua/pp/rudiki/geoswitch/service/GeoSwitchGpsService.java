@@ -309,7 +309,7 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
         sendMessageToActivity(location);
 
         if (triggered) {
-            App.getLogger().info(TAG, "Trigger fired");
+            App.getLogger().logTriggerFired(location);
             new ActionExecutor().execute();
         }
     }

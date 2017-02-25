@@ -21,7 +21,7 @@ public class SmoothingAreaTrigger {
         this.area = area;
 
         historySize = 2*fixesCount;
-        locationHistory = new ArrayDeque<Boolean>(historySize);
+        locationHistory = new ArrayDeque<>(historySize);
     }
 
     public SmoothingAreaTrigger(GeoPoint point, double radius, int fixesCount) {
@@ -102,15 +102,15 @@ public class SmoothingAreaTrigger {
 
     // Java methods override
 
-    public boolean equals(Object o) {
-        if (this == o)
+    public boolean equals(Object object) {
+        if (this == object)
             return true;
-        if (o == null)
+        if (object == null)
             return false;
-        if (getClass() != o.getClass())
+        if (getClass() != object.getClass())
             return false;
 
-        SmoothingAreaTrigger trigger = (SmoothingAreaTrigger)o;
+        SmoothingAreaTrigger trigger = (SmoothingAreaTrigger)object;
 
         return Objects.equals(area, trigger.getArea()) && historySize == trigger.historySize;
     }

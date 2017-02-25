@@ -1,6 +1,8 @@
 <resources>
     <string name="application_name">GeoSwitch</string>
-    <string name="vertical_ellipsis">&#8942;</string>
+
+    <string name="menu_open_log">Open log</string>
+    <string name="menu_export_kml">Open in Google Earth</string>
 
     <string name="activity_action_title">GeoSwitch/Action</string>
     <string name="activity_action_notification">Display notification</string>
@@ -46,6 +48,10 @@
     <string name="activity_main_action_not_configured">Action not configured</string>
     <string name="activity_main_action_button">Configure action</string>
     <string name="activity_main_log_button">Open log</string>
+    <string name="activity_main_trigger_updated_and_applied">Trigger updated and now is being monitored.</string>
+    <string name="activity_main_trigger_updated">Trigger updated.</string>
+    <string name="activity_main_action_updated">Action updated.</string>
+    <string name="activity_main_activation_mode_updated">Activation mode updated.</string>
 
     <string name="activity_map_title">GeoSwitch/Map</string>
     <string name="activity_map_area">Area</string>
@@ -87,5 +93,8 @@
     <string name="service_action_succeeded">Action succeeded.</string>
     <string name="service_action_succeeded_with_server_response" formatted="false">Action succeeded. Server response: %s</string>
     <string name="activity_trigger_radius_tip"><![CDATA[>100m recommended]]></string>
+    <string name="activity_trigger_area_updated">Trigger area updated.</string>
+    <string name="activity_trigger_transition_updated">Trigger areas updated.</string>
+    <string name="activity_main_please_wait">Generating KML file</string>
 
 </resources>

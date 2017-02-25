@@ -1,5 +1,7 @@
 package ua.pp.rudiki.geoswitch.trigger;
 
+import ua.pp.rudiki.geoswitch.peripherals.HashUtils;
+
 public class GeoArea {
     private GeoPoint center;
     private double radius;
@@ -51,13 +53,27 @@ public class GeoArea {
         this.radius = radius;
     }
 
-    public boolean equals(GeoArea area) {
-        if(area == null)
+    @Override
+    public boolean equals(Object object) {
+        if(this == object)
+            return true;
+        if(object == null)
+            return false;
+        if(getClass() != object.getClass())
             return false;
 
+        GeoArea area = (GeoArea)object;
         return center.equals(area.center) && radius == area.radius;
     }
 
+    @Override
+    public int hashCode() {
+        int hash = HashUtils.combineHashCode(1, center);
+        hash = HashUtils.combineHashCode(hash, radius);
+        return hash;
+    }
+
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(center.toString());

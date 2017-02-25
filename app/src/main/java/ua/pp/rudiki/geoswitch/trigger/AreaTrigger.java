@@ -2,6 +2,8 @@ package ua.pp.rudiki.geoswitch.trigger;
 
 import java.util.Objects;
 
+import ua.pp.rudiki.geoswitch.peripherals.HashUtils;
+
 // Base class for Enter Area and Exit Area triggers
 // Also used as is in Transition trigger
 
@@ -14,8 +16,8 @@ public class AreaTrigger {
     }
 
     protected GeoArea area;
-    protected Location locationAtThisTick = Location.INVALID;
-    protected Location locationAtPreviousTick = Location.INVALID;
+    protected transient Location locationAtThisTick = Location.INVALID;
+    protected transient Location locationAtPreviousTick = Location.INVALID;
 
     public AreaTrigger(GeoArea area) {
         this.area = area;
@@ -59,15 +61,22 @@ public class AreaTrigger {
 
     // Java methods override
 
-    public boolean equals(Object o) {
-        if (this == o)
+    @Override
+    public boolean equals(Object object) {
+        if(this == object)
             return true;
-        if (o == null)
+        if(object == null)
             return false;
-        if (getClass() != o.getClass())
+        if (getClass() != object.getClass())
             return false;
-        AreaTrigger areaTrigger = (AreaTrigger)o;
+
+        AreaTrigger areaTrigger = (AreaTrigger)object;
         return Objects.equals(area, areaTrigger.getArea());
+    }
+
+    @Override
+    public int hashCode() {
+        return area.hashCode();
     }
 
 }

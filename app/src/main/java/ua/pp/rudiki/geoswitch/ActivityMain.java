@@ -1,10 +1,12 @@
 package ua.pp.rudiki.geoswitch;
 
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.content.LocalBroadcastManager;
@@ -16,6 +18,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.text.DateFormat;
@@ -147,16 +150,33 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
     }
 
     public void onExportKmlMenuItemSelected() {
-        File f = new File(Environment.getExternalStorageDirectory(), "geoswitch.kml");
+        final File f = new File(Environment.getExternalStorageDirectory(), "geoswitch.kml");
 
-        final int LAST_N_HOURS = 3*60*1000;
-        final int NO_LIMIT = -1;
-        Log2Kml.log2kml(LAST_N_HOURS, f);
+        final ProgressDialog pd = new ProgressDialog(this);
+        pd.setMessage(getString(R.string.activity_main_please_wait));
+        pd.setCanceledOnTouchOutside(false);
+        pd.show();
 
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        Uri uri = Uri.parse("file://"+ f.getAbsolutePath());
-        intent.setDataAndType(uri, "application/vnd.google-earth.kml+xml");
-        startActivity(intent);
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... args) {
+                final long timePeriod = App.getPreferences().getDefaultTimePeriodForKml();
+                Log2Kml.log2kml(timePeriod, f);
+
+                return null;
+            }
+
+            protected void onPostExecute(Void result) {
+                pd.dismiss();
+
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                Uri uri = Uri.parse("file://"+ f.getAbsolutePath());
+                intent.setDataAndType(uri, "application/vnd.google-earth.kml+xml");
+                startActivity(intent);
+
+            }
+
+        }.execute();
     }
 
     public void onGpsOptionsClick(View view) {
@@ -198,6 +218,35 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
                 updateStatusUi(null);
 
                 App.getGpsServiceActivator().activationModeChanged(); // starts service
+            }
+        }
+
+        showToastFromActivityResult(requestCode, resultCode);
+    }
+
+    private void showToastFromActivityResult(int requestCode, int resultCode) {
+        if (requestCode == RequestCode.MAIN_TRIGGER_ID) {
+            if (resultCode == RESULT_OK) {
+                String message;
+                if(App.getGpsServiceActivator().isOn()) {
+                    message = getString(R.string.activity_main_trigger_updated_and_applied);
+                    Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+                } else {
+                    message = getString(R.string.activity_main_trigger_updated);
+                    Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+        else if (requestCode == RequestCode.MAIN_ACTION_ID) {
+            if (resultCode == RESULT_OK) {
+                String message = getString(R.string.activity_main_action_updated);
+                Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+            }
+        }
+        else if (requestCode == RequestCode.MAIN_GPSACTIVATION_ID) {
+            if (resultCode == RESULT_OK) {
+                String message = getString(R.string.activity_main_activation_mode_updated);
+                Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
             }
         }
     }

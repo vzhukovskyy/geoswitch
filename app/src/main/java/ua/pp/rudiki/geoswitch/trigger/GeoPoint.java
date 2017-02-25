@@ -2,6 +2,8 @@ package ua.pp.rudiki.geoswitch.trigger;
 
 import android.location.Location;
 
+import ua.pp.rudiki.geoswitch.peripherals.HashUtils;
+
 import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
 
@@ -24,12 +26,6 @@ public class GeoPoint {
         return distanceInMeters;
     }
 
-    public boolean equals(GeoPoint point) {
-        if(point == null)
-            return false;
-
-        return latitude == point.latitude && longitude == point.longitude;
-    }
 
     public double getLatitude() {
         return latitude;
@@ -39,6 +35,27 @@ public class GeoPoint {
         return longitude;
     }
 
+    @Override
+    public boolean equals(Object object) {
+        if(this == object)
+            return true;
+        if(object == null)
+            return false;
+        if(getClass() != object.getClass())
+            return false;
+
+        GeoPoint point = (GeoPoint)object;
+        return latitude == point.latitude && longitude == point.longitude;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = HashUtils.combineHashCode(1, latitude);
+        hash = HashUtils.combineHashCode(hash, longitude);
+        return hash;
+    }
+
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("(");

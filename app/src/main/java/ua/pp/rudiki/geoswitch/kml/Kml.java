@@ -1,12 +1,7 @@
 package ua.pp.rudiki.geoswitch.kml;
 
-import android.graphics.Color;
-import android.media.MediaScannerConnection;
-import android.support.annotation.ColorInt;
-
 import com.google.android.gms.maps.model.LatLng;
 
-import java.io.Closeable;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -22,18 +17,23 @@ import java.util.TreeMap;
 
 import ua.pp.rudiki.geoswitch.App;
 
-public class Kml implements Closeable {
+public class Kml {
+    public final static String KML_COLOR_RED = "FF0000FF"; // aabbggrr
+    public final static String KML_COLOR_BLUE = "FFFF0000";
+    public final static String KML_COLOR_YELLOW = "4F00FFFF";
+    public final static String KML_COLOR_CORAL = "7F7F7FFF";
+
+    public final static String URL_YELLOW_PIN = "http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png";
+    public final static String URL_RED_PIN = "http://maps.google.com/mapfiles/kml/pushpin/red-pushpin.png";
+
     final static String TAG = Kml.class.getSimpleName();
 
     private File file;
     private FileOutputStream stream;
     private OutputStreamWriter writer;
     private DateFormat isoDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-    private DateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd' 'HH:mm:ss.SSS");
 
     private Map<String, Integer> mapId = new TreeMap<>();
-
-    final private String lineStyle = "line_style0";
 
     public Kml(File file, String documentName) {
         this.file = file;
@@ -47,14 +47,55 @@ public class Kml implements Closeable {
 
         startXml();
         startDocument(documentName);
-        addLineStyle();
     }
 
-    public void addLineString(List<LatLng> coordinates, Date begin, Date end) {
-        String desc = simpleDateFormat.format(begin) + "\n-\n" + simpleDateFormat.format(end);
+    public void finish() {
+        endDocument();
+        endXml();
+        closeStream();
+    }
+
+    public void addLineStyle(String styleName, String color, int lineWidth) {
+        String style =
+                "        <Style id=\""+styleName+"\">\n" +
+                "            <LineStyle id=\"" + newId("LineSubStyle") + "\">\n" +
+                "                <color>" + color + "</color>\n" +
+                "                <colorMode>normal</colorMode>\n" +
+                "                <width>" + lineWidth + "</width>\n" +
+                "            </LineStyle>\n" +
+                "        </Style>\n";
+        write(style);
+    }
+
+    public void addCircleStyle(String styleName, String color) {
+        String style =
+                "        <Style id=\"" + styleName + "\">\n" +
+                "            <PolyStyle id=\"" + newId("PolySubStyle") + "\">\n" +
+                "                <color>" + color + "</color>\n" +
+                "                <colorMode>normal</colorMode>\n" +
+                "                <fill>1</fill>\n" +
+                "                <outline>1</outline>\n" +
+                "            </PolyStyle>\n" +
+                "        </Style>\n";
+        write(style);
+    }
+
+    public void addIconStyle(String styleName, String iconUrl) {
+        String style =
+                "        <Style id=\""+styleName+"\">\n" +
+                "            <IconStyle>\n" +
+                "                <Icon>\n" +
+                "                   <href>" + iconUrl + "</href>\n" +
+                "                </Icon>\n" +
+                "            </IconStyle>\n" +
+                "        </Style>\n";
+        write(style);
+    }
+
+    public void addLineString(List<LatLng> coordinates, Date begin, Date end, String description, String lineStyle) {
         String placemarkHeader =
                 "        <Placemark id=\"" + newId("Placemark") + "\">\n" +
-                "            <description>" + desc + "</description>\n" +
+                "            <description>" + description + "</description>\n" +
                 "            <TimeSpan id=\"" + newId("Timespan") + "\">\n" +
                 "                <begin>" + isoDateFormat.format(begin) + "</begin>\n" +
                 "                <end>" + isoDateFormat.format(end) + "</end>\n" +
@@ -76,10 +117,12 @@ public class Kml implements Closeable {
         writeLine(placemarkFooter);
     }
 
-    public void addPoint(LatLng ll, String name) {
+    public void addPlacemark(String name, LatLng ll, String description, String iconStyle) {
         String placemark =
                 "        <Placemark id=\"" + newId("Placemark") + "\">\n" +
                 "            <name>" + name + "</name>\n" +
+                "            <styleUrl>#" + iconStyle + "</styleUrl>\n" +
+                "            <description>" + description + "</description>\n" +
                 "            <Point id=\"" + newId("Point") + "\">\n" +
                 "                <coordinates>" + formatDouble(ll.longitude) + "," + formatDouble(ll.latitude) + ",0.0</coordinates>\n" +
                 "            </Point>\n" +
@@ -87,12 +130,11 @@ public class Kml implements Closeable {
         writeLine(placemark);
     }
 
-    public void addCircle(LatLng center, double radius, @ColorInt int color) {
-        String styleId = addCirleStyle(color);
-
+    public void addCircle(String name, LatLng center, double radius, String circleStyle) {
         String placemarkHeader =
                 "        <Placemark id=\"" + newId("Placemark") + "\">\n" +
-                "            <styleUrl>#" + styleId + "</styleUrl>\n" +
+                "            <name>" + name + "</name>\n" +
+                "            <styleUrl>#" + circleStyle + "</styleUrl>\n" +
                 "            <Polygon id=\"" + newId("Polygon") + "\">\n" +
                 "                <outerBoundaryIs>\n" +
                 "                    <LinearRing id=\"" + newId("Ring") + "\">\n" +
@@ -113,20 +155,6 @@ public class Kml implements Closeable {
                 "        </Placemark>";
         writeLine(placemarkFooter);
 
-    }
-
-    public void finish() {
-        endDocument();
-        endXml();
-        closeStream();
-
-        MediaScannerConnection.scanFile(App.getAppContext(), new String[] {file.getAbsolutePath()}, null, null);
-    }
-
-
-    @Override
-    public void close() throws IOException {
-        finish();
     }
 
     private List<LatLng> generateCircularPolygon(LatLng center, double radius) {
@@ -156,55 +184,26 @@ public class Kml implements Closeable {
     }
 
     private String newId(String prefix) {
-        int id = 0;
+        int id = 1;
         if(mapId.containsKey(prefix)) {
             id = mapId.get(prefix);
             id++;
         }
         mapId.put(prefix, id);
 
-        return prefix + "_" + id;
+        return prefix + id;
     }
 
     private String formatDouble(double d) {
         return String.format(Locale.US, "%f", d);
     }
 
-    private void addLineStyle() {
-        String style =
-                "        <Style id=\""+lineStyle+"\">\n" +
-                "            <LineStyle id=\"lineSubStyle0\">\n" +
-                "                <color>ff0000ff</color>\n" +
-                "                <colorMode>normal</colorMode>\n" +
-                "                <width>5</width>\n" +
-                "            </LineStyle>\n" +
-                "        </Style>\n";
-        write(style);
-    }
-
-    private String addCirleStyle(@ColorInt int color) {
-        String styleId = newId("circleStyle");
-
-        String style =
-                 "        <Style id=\"" + styleId + "\">\n" +
-                "            <PolyStyle id=\"polySubStyle1\">\n" +
-                "                <color>" + String.format("%x", color) + "</color>\n" +
-                "                <colorMode>normal</colorMode>\n" +
-                "                <fill>1</fill>\n" +
-                "                <outline>1</outline>\n" +
-                "            </PolyStyle>\n" +
-                "        </Style>\n";
-        write(style);
-
-        return styleId;
-    }
-
-    private void startXml() {
+    public void startXml() {
         writeLine("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
         writeLine("<kml xmlns=\"http://www.opengis.net/kml/2.2\" xmlns:gx=\"http://www.google.com/kml/ext/2.2\">");
     }
 
-    private void endXml() {
+    public void endXml() {
         writeLine("</kml>");
     }
 
@@ -240,8 +239,9 @@ public class Kml implements Closeable {
         }
 
         try {
-            if(stream != null)
+            if(stream != null) {
                 stream.close();
+            }
         } catch (IOException e) {
             App.getLogger().exception(TAG, e);
         }

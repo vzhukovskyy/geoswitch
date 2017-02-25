@@ -188,7 +188,7 @@ public class ActivityMap extends FragmentActivity implements OnMapReadyCallback,
             GeoArea area = params.getArea();
             if (area != null) {
                 newArea(area);
-                updateActivityResult();
+//                updateActivityResult();
             }
         }
 
@@ -268,11 +268,11 @@ public class ActivityMap extends FragmentActivity implements OnMapReadyCallback,
             GeoArea area = params.getArea();
             if (area != null) {
                 newArea(area);
-                updateActivityResult();
+//                updateActivityResult();
                 area = params.getAreaTo();
                 if (area != null) {
                     newArea(area);
-                    updateActivityResult();
+//                    updateActivityResult();
                 }
             }
         }

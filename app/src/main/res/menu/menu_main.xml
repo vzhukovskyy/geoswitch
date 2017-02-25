@@ -3,9 +3,10 @@
     <item
         android:id="@+id/mi_open_log"
         app:showAsAction="collapseActionView"
-        android:title="Open log">
+        android:title="@string/menu_open_log">
     </item>
-    <item android:title="Export KML"
+    <item
         android:id="@+id/mi_export_kml"
-        app:showAsAction="collapseActionView" />
+        app:showAsAction="collapseActionView"
+        android:title="@string/menu_export_kml" />
 </menu>

@@ -27,6 +27,7 @@ public class GeoSwitchLog {
     private final static Character LOG_LEVEL_INFO = 'I';
     private final static Character LOG_LEVEL_LOCATION = 'L';
     private final static Character LOG_LEVEL_TRIGGER = 'T';
+    private final static Character LOG_LEVEL_ACTION = 'A';
     private final static Character LOG_LEVEL_DEBUG = 'D';
 
     private File fileRoot;
@@ -57,6 +58,14 @@ public class GeoSwitchLog {
     public void logTrigger(GeoTrigger trigger) {
         String message = trigger.toString();
         doLog(LOG_LEVEL_TRIGGER, "", message);
+    }
+
+    public void logTriggerFired(Location location) {
+        String latitude = String.format(Locale.US, "%.8f", location.getLatitude());
+        String longitude = String.format(Locale.US, "%.8f", location.getLongitude());
+        String message = "Trigger fired at ("+ latitude + "," + longitude + ")";
+
+        doLog(LOG_LEVEL_ACTION, "", message);
     }
 
     public void error(String tag, String message) {

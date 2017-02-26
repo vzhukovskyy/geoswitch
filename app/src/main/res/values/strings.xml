@@ -2,7 +2,7 @@
     <string name="application_name">GeoSwitch</string>
 
     <string name="menu_open_log">Open log</string>
-    <string name="menu_export_kml">Open in Google Earth</string>
+    <string name="menu_export_kml">View history in Google Earth</string>
 
     <string name="activity_action_title">GeoSwitch/Action</string>
     <string name="activity_action_notification">Display notification</string>
@@ -31,7 +31,7 @@
     <string name="activity_main_substatus_waiting_gps">Waiting for GPS fix</string>
     <string name="activity_main_substatus_bycharger_inactive">Connect to charger to activate</string>
     <string name="activity_main_substatus_gps_time">"Last location info received at "</string>
-    <string name="activity_main_substatus_manual_inactive">Tap switch to activate</string>
+    <string name="activity_main_substatus_manual_inactive">Tap switch to start monitoring location</string>
     <string name="activity_main_gps_charging">GPS sensor is only turned on when the device is connected to charger</string>
     <string name="activity_main_gps_manual">GPS sensor activation is controlled manually</string>
     <string name="activity_main_gps_button">GPS activation</string>
@@ -52,6 +52,10 @@
     <string name="activity_main_trigger_updated">Trigger updated.</string>
     <string name="activity_main_action_updated">Action updated.</string>
     <string name="activity_main_activation_mode_updated">Activation mode updated.</string>
+    <string name="activity_main_generating_kml">Generating KML file</string>
+    <string name="activity_main_initial_config_done">A demo trigger has been created based on your location info. You are encouraged to see it on the map (Configure trigger->Select on Map) and give it a try.</string>
+    <string name="activity_main_initial_config_failed">We were unable to determine your current location and did not create a demo trigger. Please configure a trigger by yourself!</string>
+    <string name="activity_main_welcome_title">Welcome</string>
 
     <string name="activity_map_title">GeoSwitch/Map</string>
     <string name="activity_map_area">Area</string>
@@ -78,8 +82,14 @@
     <string name="activity_trigger_map_button">Select on Map</string>
     <string name="activity_trigger_ok_button">OK</string>
     <string name="activity_trigger_cancel_button">Cancel</string>
-    <string name="activity_trigger_area_invalid">Select Area for this trigger</string>
-    <string name="activity_trigger_transition_invalid">Select From and To areas for this trigger</string>
+    <string name="activity_trigger_area_invalid">Select Area for this trigger.</string>
+    <string name="activity_trigger_transition_invalid">Select From and To areas for this trigger.</string>
+    <string name="activity_trigger_radius_tip"><![CDATA[>100m recommended]]></string>
+    <string name="activity_trigger_area_updated">Trigger area updated.</string>
+    <string name="activity_trigger_transition_updated">Trigger areas updated.</string>
+    <string name="activity_trigger_revert1">"Values modified. You might wish to "</string>
+    <string name="activity_trigger_revert2"><u>revert</u></string>
+    <string name="activity_trigger_values_reverted">Values reverted.</string>
 
     <string name="service_sticky_title">GeoSwitch: monitoring location</string>
     <string name="service_sticky_status_gps_time">"Last location info received at "</string>
@@ -92,11 +102,5 @@
     <string name="service_action_failed_with_error_code" formatted="false">Action failed. HTTP error code %d</string>
     <string name="service_action_succeeded">Action succeeded.</string>
     <string name="service_action_succeeded_with_server_response" formatted="false">Action succeeded. Server response: %s</string>
-    <string name="activity_trigger_radius_tip"><![CDATA[>100m recommended]]></string>
-    <string name="activity_trigger_area_updated">Trigger area updated.</string>
-    <string name="activity_trigger_transition_updated">Trigger areas updated.</string>
-    <string name="activity_main_please_wait">Generating KML file</string>
-    <string name="activity_trigger_revert1">"Values modified. You might wish to "</string>
-    <string name="activity_trigger_revert2"><u>revert</u></string>
 
 </resources>

@@ -1,10 +1,15 @@
 package ua.pp.rudiki.geoswitch;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -28,6 +33,8 @@ import java.util.Formatter;
 import java.util.Locale;
 
 import ua.pp.rudiki.geoswitch.kml.Log2Kml;
+import ua.pp.rudiki.geoswitch.peripherals.AsyncResultCallback;
+import ua.pp.rudiki.geoswitch.peripherals.ScreenOrientationUtils;
 import ua.pp.rudiki.geoswitch.service.GpsServiceActivationListener;
 import ua.pp.rudiki.geoswitch.service.GeoSwitchGpsService;
 import ua.pp.rudiki.geoswitch.trigger.EnterAreaTrigger;
@@ -105,6 +112,10 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
     public void onStart() {
         super.onStart();
         App.getLogger().debug(TAG, "onStart");
+
+        if(App.getPreferences().getTriggerType() == TriggerType.Invalid) {
+            performInitialSetup();
+        }
     }
 
     @Override
@@ -150,30 +161,38 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
     }
 
     public void onExportKmlMenuItemSelected() {
-        final File f = new File(Environment.getExternalStorageDirectory(), "geoswitch.kml");
-
-        final ProgressDialog pd = new ProgressDialog(this);
-        pd.setMessage(getString(R.string.activity_main_please_wait));
-        pd.setCanceledOnTouchOutside(false);
-        pd.show();
 
         new AsyncTask<Void, Void, Void>() {
+            private ProgressDialog progressDialog;
+            private File kmlFile;
+
+            @Override
+            public void onPreExecute() {
+                ScreenOrientationUtils.lockScreenOrientation(ActivityMain.this);
+
+                progressDialog = new ProgressDialog(ActivityMain.this);
+                progressDialog.setCanceledOnTouchOutside(false);
+                progressDialog.setMessage(getString(R.string.activity_main_generating_kml));
+                progressDialog.show();
+            }
+
             @Override
             protected Void doInBackground(Void... args) {
+                kmlFile = new File(Environment.getExternalStorageDirectory(), "geoswitch.kml");
                 final long timePeriod = App.getPreferences().getDefaultTimePeriodForKml();
-                Log2Kml.log2kml(timePeriod, f);
+                Log2Kml.log2kml(timePeriod, kmlFile);
 
                 return null;
             }
 
             protected void onPostExecute(Void result) {
-                pd.dismiss();
+                progressDialog.dismiss();
+                ScreenOrientationUtils.unlockScreenOrientation(ActivityMain.this);
 
                 Intent intent = new Intent(Intent.ACTION_VIEW);
-                Uri uri = Uri.parse("file://"+ f.getAbsolutePath());
+                Uri uri = Uri.parse("file://"+ kmlFile.getAbsolutePath());
                 intent.setDataAndType(uri, "application/vnd.google-earth.kml+xml");
                 startActivity(intent);
-
             }
 
         }.execute();
@@ -435,29 +454,10 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
         }
     };
 
-    private void onServiceUpdateReceived(double latitude, double longitude, Date date)
-    {
-        //Log.e(TAG, "fake message");
-
+    private void onServiceUpdateReceived(double latitude, double longitude, Date date) {
         updateStatusUi(date);
-
-        if(App.getPreferences().getTriggerType() == TriggerType.Invalid) {
-            // First run. Callback most probably with last know location from Fused location API.
-            // Set up initial trigger
-            if(!Double.isNaN(latitude) && !Double.isNaN(longitude)){
-                createInitialTrigger(latitude, longitude);
-                loadTriggerToUi();
-                startService(GeoSwitchGpsService.START_REASON_INITIAL_CONFIGURATION_DONE);
-            }
-        }
     }
 
-    private void createInitialTrigger(double latitude, double longitude) {
-        double radius = App.getPreferences().getDefaultRadius();
-        GeoArea area = new GeoArea(latitude, longitude, radius);
-        ExitAreaTrigger trigger = new ExitAreaTrigger(area);
-        App.getPreferences().storeTrigger(trigger);
-    }
 
     // GpsServiceActivationListener implementation
 
@@ -469,5 +469,66 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
     @Override
     public void onDeactivated() {
         updateActivationModeUi();
+    }
+
+
+    // Initial configuration
+
+    private void performInitialSetup() {
+        App.getGoogleApiClient().requestLastLocation(new AsyncResultCallback<Location>() {
+            @Override
+            public void onResult(Location location) {
+                if(location != null){
+                    createInitialTrigger(location.getLatitude(), location.getLongitude());
+                    startService(GeoSwitchGpsService.START_REASON_INITIAL_CONFIGURATION_DONE);
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            loadTriggerToUi();
+
+                            displayWelcomeMessage(getString(R.string.activity_main_initial_config_done));
+                        }
+                    });
+                }
+                else {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            displayWelcomeMessage(getString(R.string.activity_main_initial_config_failed));
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    private void createInitialTrigger(double latitude, double longitude) {
+        double radius = App.getPreferences().getDefaultRadius();
+        GeoArea area = new GeoArea(latitude, longitude, radius);
+        ExitAreaTrigger trigger = new ExitAreaTrigger(area);
+        App.getPreferences().storeTrigger(trigger);
+    }
+
+    private void displayWelcomeMessage(String message) {
+
+        ScreenOrientationUtils.lockScreenOrientation(this);
+
+        new AlertDialog.Builder(this)
+            .setTitle(getString(R.string.activity_main_welcome_title))
+            .setMessage(message)
+            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.cancel();
+                }
+            })
+            .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                @Override
+                public void onDismiss(DialogInterface dialog) {
+                    ScreenOrientationUtils.unlockScreenOrientation(ActivityMain.this);
+                }
+            })
+            .create()
+            .show();
     }
 }

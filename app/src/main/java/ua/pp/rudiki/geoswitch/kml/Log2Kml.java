@@ -17,6 +17,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -37,7 +38,8 @@ public class Log2Kml {
         File tempLogFile = createTempFile();
         concatLogFiles(tempLogFile);
 
-        LogParserResult parserResult = extractGeoDataFromLog(tempLogFile, timePeriodMillis);
+        LogParserResult parserResult = extractGeoDataFromLog(tempLogFile);
+        removeOutdatedFixes(parserResult, timePeriodMillis);
         removeDuplicateTriggers(parserResult);
         generateKml(parserResult, kmlFile);
 
@@ -116,13 +118,7 @@ public class Log2Kml {
 
     }
 
-    /**
-     *
-     * @param logFile
-     * @param timePeriodMillis time period of interest from the time of last location fix
-     * @return
-     */
-    private static LogParserResult extractGeoDataFromLog(File logFile, long timePeriodMillis) {
+    private static LogParserResult extractGeoDataFromLog(File logFile) {
         LogParserResult result = new LogParserResult();
 
         Date startDate = null;
@@ -150,20 +146,6 @@ public class Log2Kml {
                 String tag = parts[2];
 
                 if(tag.equals("L")) {
-                    if(startDate == null) {
-                        if(timePeriodMillis > 0) {
-                            startDate = new Date(date.getTime() - timePeriodMillis);
-                        }
-                        else {
-                            startDate = date;
-                        }
-                    }
-
-                    if(date.before(startDate)) {
-                        // skip the line, it's too old
-                        continue;
-                    }
-
                     double latitude = 0, longitude = 0;
                     try {
                         latitude = Double.parseDouble(parts[3]);
@@ -225,8 +207,25 @@ public class Log2Kml {
         return result;
     }
 
-    private static void removeDuplicateTriggers(LogParserResult logParserResult) {
+    // removes GPS fixes outside of time period [TimeOfLastFix-timePeriodMillis, TimeOfLastFix]
+    private static void removeOutdatedFixes(LogParserResult parserResult, long timePeriodMillis) {
+        Date startDate;
+        if(timePeriodMillis > 0 && parserResult.pointData.size() > 0) {
+            Date dateOfLastFix = parserResult.pointData.get(parserResult.pointData.size()-1).date;
+            startDate= new Date(dateOfLastFix.getTime() - timePeriodMillis);
+        } else {
+            startDate = new Date(0);
+        }
 
+        for(Iterator<PointData> it = parserResult.pointData.iterator(); it.hasNext();) {
+            PointData pointData = it.next();
+            if(pointData.date.before(startDate)) {
+                it.remove();
+            }
+        }
+    }
+
+    private static void removeDuplicateTriggers(LogParserResult logParserResult) {
         Set<AreaTriggerData> areaTriggerDataSet = new HashSet<>(logParserResult.areaTriggerData);
         logParserResult.areaTriggerData = new ArrayList<AreaTriggerData>(areaTriggerDataSet);
 

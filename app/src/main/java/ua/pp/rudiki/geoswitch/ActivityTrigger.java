@@ -192,7 +192,7 @@ public class ActivityTrigger extends AppCompatActivity implements RadioGroup.OnC
     public void onRevertClick(View view) {
         loadValuesToUi();
         updateRevertButtonVisibility();
-        Toast.makeText(this, "Values reverted", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.activity_trigger_values_reverted, Toast.LENGTH_SHORT).show();
     }
 
     // return value from the map activity

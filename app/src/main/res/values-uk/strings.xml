@@ -24,7 +24,7 @@
     <string name="activity_gps_label">GPS датчик в значній мірі споживає заряд батареї. Ці опції визначають, коли датчик повинен включатись для відслідковування положення.</string>
     <string name="activity_gps_manual">Включати та виключати GPS вручну</string>
     <string name="activity_gps_ok">Гаразд</string>
-    <string name="activity_gps_title">Налаштування вмикання GPS</string>
+    <string name="activity_gps_title">GeoSwitch/Вмикання GPS</string>
 
     <string name="activity_main_action_button">Налаштувати дію</string>
     <string name="activity_main_action_display_notification">Відобразити нотифікацію</string>
@@ -33,7 +33,7 @@
     <string name="activity_main_action_post"  formatted="false">Відіслати HTTP POST запит на %s</string>
     <string name="activity_main_action_post_with_token" formatted="false">Відіслати HTTP POST запит включаючи Google Sign-in токен на %s</string>
     <string name="activity_main_action_speak_out">Промовити</string>
-    <string name="activity_main_gps_button">Налаштувати вмикання GPS</string>
+    <string name="activity_main_gps_button">Вмикання GPS</string>
     <string name="activity_main_gps_charging">GPS датчик включений лише коли прилад під\'єднаний до зарядного пристрою</string>
     <string name="activity_main_gps_manual">Активація GPS датчика контролюється вручну</string>
     <string name="activity_main_log_button">Відкрити лог</string>

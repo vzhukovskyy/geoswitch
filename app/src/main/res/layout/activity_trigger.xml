@@ -159,7 +159,6 @@
                 android:layout_alignParentStart="true"
                 android:layout_marginTop="12dp" />
 
-
         </RelativeLayout>
 
         <RelativeLayout
@@ -399,6 +398,28 @@
             android:gravity="center_horizontal"
             android:layout_alignParentStart="true" />
 
+        <TextView
+            android:text="@string/activity_trigger_revert1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/unidirectionalGroup"
+            android:layout_alignParentStart="true"
+            android:id="@+id/revertPrefixLabel"
+            android:layout_marginTop="16dp"
+            android:textStyle="italic"
+            android:textColor="?android:attr/textColorHint" />
+
+        <TextView
+            android:text="@string/activity_trigger_revert2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/revertLabel"
+            android:clickable="true"
+            android:layout_alignParentBottom="true"
+            android:layout_toEndOf="@+id/revertPrefixLabel"
+            android:textColor="?android:attr/textColorLink"
+            android:onClick="onRevertClick"
+            android:textStyle="normal|italic" />
 
 
     </RelativeLayout>

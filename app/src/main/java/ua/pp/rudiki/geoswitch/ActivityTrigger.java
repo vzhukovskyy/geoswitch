@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.RadioGroup;
@@ -31,7 +33,7 @@ public class ActivityTrigger extends AppCompatActivity implements RadioGroup.OnC
     private final static String TAG = ActivityTrigger.class.getSimpleName();
 
     RadioGroup triggerTypeRadioGroup;
-    TextView triggerTypeDescriptionLabel;
+    TextView triggerTypeDescriptionLabel, revertLabel, revertPrefixLabel;
     RelativeLayout bidirectionalLayout, unidirectionalLayout;
     EditText latitudeEditBi, longitudeEditBi, radiusEditBi;
     EditText latitudeFromEditUni, longitudeFromEditUni, latitudeToEditUni, longitudeToEditUni, radiusEditUni;
@@ -55,6 +57,7 @@ public class ActivityTrigger extends AppCompatActivity implements RadioGroup.OnC
         longitudeEditBi = (EditText) findViewById(R.id.longitudeEditBi);
         longitudeEditBi.setKeyListener(null);
         radiusEditBi = (EditText) findViewById(R.id.radiusEditBi);
+        radiusEditBi.addTextChangedListener(textWatcher);
 
         latitudeFromEditUni = (EditText) findViewById(R.id.latitudeFromEditUni);
         latitudeFromEditUni.setKeyListener(null);
@@ -66,6 +69,9 @@ public class ActivityTrigger extends AppCompatActivity implements RadioGroup.OnC
         longitudeToEditUni.setKeyListener(null);
         radiusEditUni = (EditText) findViewById(R.id.radiusEditUni);
         radiusEditUni.setKeyListener(null);
+
+        revertPrefixLabel = (TextView) findViewById(R.id.revertPrefixLabel);
+        revertLabel = (TextView) findViewById(R.id.revertLabel);
 
         loadValuesToUi();
     }
@@ -130,7 +136,25 @@ public class ActivityTrigger extends AppCompatActivity implements RadioGroup.OnC
         unidirectionalLayout.setVisibility(isBidirectionalLayout ? View.GONE : View.VISIBLE);
 
         triggerTypeDescriptionLabel.setText(desc);
+
+        updateRevertButtonVisibility();
     }
+
+    private TextWatcher textWatcher = new TextWatcher() {
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            updateRevertButtonVisibility();
+        }
+    };
 
     public void onBackPressed() {
         if(!isFormChanged()) {
@@ -165,6 +189,12 @@ public class ActivityTrigger extends AppCompatActivity implements RadioGroup.OnC
         startActivityForResult(intent, RequestCode.TRIGGER_COORDINATES_ID);
     }
 
+    public void onRevertClick(View view) {
+        loadValuesToUi();
+        updateRevertButtonVisibility();
+        Toast.makeText(this, "Values reverted", Toast.LENGTH_SHORT).show();
+    }
+
     // return value from the map activity
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -190,6 +220,8 @@ public class ActivityTrigger extends AppCompatActivity implements RadioGroup.OnC
                 latitudeToEditUni.setText(latitudeTo);
                 longitudeToEditUni.setText(longitudeTo);
             }
+
+            updateRevertButtonVisibility();
 
             String message;
             if(getSelectedTriggerType() == TriggerType.Transition) {
@@ -244,6 +276,12 @@ public class ActivityTrigger extends AppCompatActivity implements RadioGroup.OnC
     }
 
     // data persistence
+
+    private void updateRevertButtonVisibility() {
+        boolean changed = isFormChanged();
+        revertPrefixLabel.setVisibility(changed ? View.VISIBLE : View.GONE);
+        revertLabel.setVisibility(changed ? View.VISIBLE : View.GONE);
+    }
 
     private boolean isFormChanged() {
         GeoTrigger currentTrigger = App.getPreferences().loadTrigger();

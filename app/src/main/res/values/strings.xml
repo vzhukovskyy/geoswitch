@@ -18,7 +18,7 @@
     <string name="activity_action_verifying_signin">Verifying sign-in...</string>
     <string name="activity_action_signin_failed">Sign-in failed. It will not be possible to append sign-in token.</string>
 
-    <string name="activity_gps_title">GeoSwitch/GPS Options</string>
+    <string name="activity_gps_title">GeoSwitch/GPS Activation</string>
     <string name="activity_gps_label">GPS sensor consumes much battery power. These options specify when GPS sensor is to be turned on for location tracking.</string>
     <string name="activity_gps_charger">Automatically turn on when connected to charger and turn off when disconnected from charger (recommended for use in car)</string>
     <string name="activity_gps_manual">Turn GPS on/off manually</string>
@@ -34,7 +34,7 @@
     <string name="activity_main_substatus_manual_inactive">Tap switch to activate</string>
     <string name="activity_main_gps_charging">GPS sensor is only turned on when the device is connected to charger</string>
     <string name="activity_main_gps_manual">GPS sensor activation is controlled manually</string>
-    <string name="activity_main_gps_button">GPS options</string>
+    <string name="activity_main_gps_button">GPS activation</string>
     <string name="activity_main_trigger_desc_enter_area" formatted="false">Triggers when entering %d meters radius circular area with center in (%s,%s)</string>
     <string name="activity_main_trigger_desc_exit_area" formatted="false">Triggers when exiting %d meters radius circular area with center in (%s,%s)</string>
     <string name="activity_main_trigger_desc_transition" formatted="false">Triggers when moving from %dm radius circular area with center in (%s,%s)  to %dm radius circular area with center in (%s,%s)</string>
@@ -96,5 +96,7 @@
     <string name="activity_trigger_area_updated">Trigger area updated.</string>
     <string name="activity_trigger_transition_updated">Trigger areas updated.</string>
     <string name="activity_main_please_wait">Generating KML file</string>
+    <string name="activity_trigger_revert1">"Values modified. You might wish to "</string>
+    <string name="activity_trigger_revert2"><u>revert</u></string>
 
 </resources>

@@ -55,26 +55,33 @@ public class ActionExecutor {
     }
 
     private void executePost() {
-        App.getGoogleApiClient().refreshToken(new AsyncResultCallback<Boolean>() {
-            @Override
-            public void onResult(Boolean success) {
-                if(success) {
-                    String token = null;
-                    if(appendToken) {
-                        token = App.getGoogleApiClient().getToken();
+        if(appendToken) {
+            App.getGoogleApiClient().refreshToken(new AsyncResultCallback<Boolean>() {
+                @Override
+                public void onResult(Boolean success) {
+                    if (success) {
+                        String token = App.getGoogleApiClient().getToken();
+
+                        HttpUtils.sendPostAsync(url, token, new AsyncResultCallback<PostResult>() {
+                            @Override
+                            public void onResult(PostResult result) {
+                                actionFinished(result);
+                            }
+                        });
+                    } else {
+                        refreshTokenFailed();
                     }
-                    HttpUtils.sendPostAsync(url, token, new AsyncResultCallback<PostResult>() {
-                        @Override
-                        public void onResult(PostResult result) {
-                            actionFinished(result);
-                        }
-                    });
                 }
-                else {
-                    refreshTokenFailed();
+            });
+        }
+        else {
+            HttpUtils.sendPostAsync(url, null, new AsyncResultCallback<PostResult>() {
+                @Override
+                public void onResult(PostResult result) {
+                    actionFinished(result);
                 }
-            }
-        });
+            });
+        }
 
     }
 

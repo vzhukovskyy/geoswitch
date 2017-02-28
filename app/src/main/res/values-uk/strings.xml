@@ -96,9 +96,6 @@
     <string name="activity_trigger_revert2"><u>повернути</u></string>
     <string name="activity_trigger_values_reverted">Значення повернені.</string>
 
-    <string name="service_action_failed_no_internet">Дія зазнала невдачу. Немає з\'єднання з інтернетом</string>
-    <string name="service_action_failed_refresh_token">Дія зазнала невдачу. Не вдалося встановити з\'єднання з сервером Google</string>
-    <string name="service_action_failed_with_error_code" formatted="false">Дія зазнала невдачу. Помилка HTTP %d</string>
     <string name="service_notification_title">GeoSwitch</string>
     <string name="service_action_started">Дія запущена.</string>
     <string name="service_action_succeeded_with_server_response"  formatted="false">Дія завершилась успішно. Відповідь сервера: %s</string>
@@ -107,5 +104,14 @@
     <string name="service_sticky_title">GeoSwitch: спостереження</string>
     <string name="service_trigger_fired">Спрацював геолокаційний тригер.</string>
     <string name="service_action_succeeded">Дія завершилась успішно.</string>
+    <string name="service_action_failed_no_internet">Дія завершилась невдало. Немає з\'єднання з інтернетом</string>
+    <string name="service_action_failed_refresh_token">Дія завершилась невдало. Не вдалося встановити з\'єднання з сервером Google</string>
+    <string name="service_action_failed_with_error_code" formatted="false">Дія завершилась невдало. Помилка HTTP %d</string>
+    <string name="service_action_failed_malformed_url">Дія завершилась невдало. Невірний формат URL.</string>
+    <string name="service_action_failed_to_open_connection">Дія завершилась невдало. Не вдалося встановити з\'єднання з сервером.</string>
+    <string name="service_action_failed_write_error">Дія завершилась невдало. Не вдалося відіслати дані до сервера.</string>
+    <string name="service_action_failed_read_error">Дія завершилась невдало. Не вдалося прочитати дані з сервера.</string>
+    <string name="service_action_failed_unknown_host">Дія завершилась невдало. Невідоме ім\'я сервера.</string>
+    <string name="service_action_failed_unsupported_protocol">Дія завершилась невдало. Протокол не підтримується.</string>
 
 </resources>

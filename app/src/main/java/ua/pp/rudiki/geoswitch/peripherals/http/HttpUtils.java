@@ -13,6 +13,13 @@ import ua.pp.rudiki.geoswitch.peripherals.AsyncResultCallback;
 public class HttpUtils {
     private final static String TAG = HttpUtils.class.getSimpleName();
 
+    public static final int CONNECTION_RESULT_MALFORMED_URL = -1;
+    public static final int CONNECTION_RESULT_UNSUPPORTED_PROTOCOL = -2;
+    public static final int CONNECTION_RESULT_FAILED_TO_OPEN_CONNECTION = -3;
+    public static final int CONNECTION_RESULT_UNKNOWN_HOST = -4;
+    public static final int CONNECTION_RESULT_WRITE_ERROR = -5;
+    public static final int CONNECTION_RESULT_READ_ERROR = -6;
+
     public static void sendGet(String url) {
         try {
             App.getLogger().debug(TAG, "Sending request to URL: " + url);

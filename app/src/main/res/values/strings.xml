@@ -106,5 +106,11 @@
     <string name="service_action_failed_with_error_code" formatted="false">Action failed. HTTP error code %d</string>
     <string name="service_action_succeeded">Action succeeded.</string>
     <string name="service_action_succeeded_with_server_response" formatted="false">Action succeeded. Server response: %s</string>
+    <string name="service_action_failed_malformed_url">Action failed. Malformed URL</string>
+    <string name="service_action_failed_unsupported_protocol">Action failed. Protocol not supported.</string>
+    <string name="service_action_failed_to_open_connection">Action failed. Could not connect to server.</string>
+    <string name="service_action_failed_unknown_host">Action failed. The host is unknown.</string>
+    <string name="service_action_failed_write_error">Action failed. Could not send to server.</string>
+    <string name="service_action_failed_read_error">Action failed. Could not read from server.</string>
 
 </resources>

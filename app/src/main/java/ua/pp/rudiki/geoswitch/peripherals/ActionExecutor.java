@@ -103,9 +103,13 @@ public class ActionExecutor {
     private void actionFinished(PostResult result) {
         App.getLogger().info(TAG, "Action finished with http code "+result.responseCode+". Response body: "+result.responseBody);
 
-        String notificationMessage, notificationFormat,
-                speechMessage, speechFormat;
-        if(result.responseCode == 200) {
+        String notificationMessage, notificationFormat, speechMessage, speechFormat;
+
+        if(!NetworkUtils.isConnectedToInternet()) {
+            notificationMessage = App.getAppContext().getString(R.string.service_action_failed_no_internet);
+            speechMessage = getStringInSpeechLocale(R.string.service_action_failed_no_internet);
+        }
+        else if(result.responseCode == 200) {
             if(StringUtils.isNullOrEmpty(result.responseBody)) {
                 notificationMessage = App.getAppContext().getString(R.string.service_action_succeeded);
                 speechMessage = getStringInSpeechLocale(R.string.service_action_succeeded);
@@ -115,7 +119,32 @@ public class ActionExecutor {
                 notificationMessage = new Formatter().format(notificationFormat, result.responseBody).toString();
                 speechMessage = new Formatter().format(speechFormat, result.responseBody).toString();
             }
-        } else {
+        }
+        else if(result.responseCode == HttpUtils.CONNECTION_RESULT_MALFORMED_URL ||
+                result.responseCode == HttpUtils.CONNECTION_RESULT_UNSUPPORTED_PROTOCOL ||
+                result.responseCode == HttpUtils.CONNECTION_RESULT_FAILED_TO_OPEN_CONNECTION ||
+                result.responseCode == HttpUtils.CONNECTION_RESULT_UNKNOWN_HOST ||
+                result.responseCode == HttpUtils.CONNECTION_RESULT_WRITE_ERROR ||
+                result.responseCode == HttpUtils.CONNECTION_RESULT_READ_ERROR)
+        {
+            int stringId = 0;
+            if(result.responseCode == HttpUtils.CONNECTION_RESULT_MALFORMED_URL)
+                stringId = R.string.service_action_failed_malformed_url;
+            else if(result.responseCode == HttpUtils.CONNECTION_RESULT_UNSUPPORTED_PROTOCOL)
+                stringId = R.string.service_action_failed_unsupported_protocol;
+            else if(result.responseCode == HttpUtils.CONNECTION_RESULT_FAILED_TO_OPEN_CONNECTION)
+                stringId = R.string.service_action_failed_to_open_connection;
+            else if(result.responseCode == HttpUtils.CONNECTION_RESULT_UNKNOWN_HOST)
+                stringId = R.string.service_action_failed_unknown_host;
+            else if(result.responseCode == HttpUtils.CONNECTION_RESULT_WRITE_ERROR)
+                stringId = R.string.service_action_failed_write_error;
+            else if(result.responseCode == HttpUtils.CONNECTION_RESULT_READ_ERROR)
+                stringId = R.string.service_action_failed_read_error;
+
+            notificationMessage = App.getAppContext().getString(stringId);
+            speechMessage = getStringInSpeechLocale(stringId);
+        }
+        else {
             notificationFormat = App.getAppContext().getString(R.string.service_action_failed_with_error_code);
             speechFormat = getStringInSpeechLocale(R.string.service_action_failed_with_error_code);
             notificationMessage = new Formatter().format(notificationFormat, result.responseCode).toString();

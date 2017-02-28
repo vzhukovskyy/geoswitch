@@ -4,14 +4,17 @@ import android.os.AsyncTask;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.net.UnknownHostException;
 
-import javax.net.ssl.HttpsURLConnection;
-
-import ua.pp.rudiki.geoswitch.App;
 import ua.pp.rudiki.geoswitch.peripherals.AsyncResultCallback;
 
 class PostJob extends AsyncTask<String, Void, String> {
@@ -38,45 +41,105 @@ class PostJob extends AsyncTask<String, Void, String> {
         int responseCode = 0;
         String responseBody = null;
 
+        URL urlObj;
         try {
-            URL obj = new URL(url);
-            HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
+            urlObj = new URL(url);
+        }
+        catch(MalformedURLException e) {
+            passResultToListener(HttpUtils.CONNECTION_RESULT_MALFORMED_URL);
+            return;
+        }
 
-            con.setRequestMethod("POST");
-            //        con.setRequestProperty("User-Agent", USER_AGENT);
-            //        con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
-
-            // Send post request
-            con.setDoOutput(true);
-            DataOutputStream wr = new DataOutputStream(con.getOutputStream());
-            wr.flush();
-            wr.close();
-
-            StringBuffer response = null;
-            InputStream inputStream = null;
-            try {
-                inputStream = con.getInputStream();
-            } catch (FileNotFoundException e1) {
+        HttpURLConnection httpUrlConnection;
+        try {
+            URLConnection urlConnection = urlObj.openConnection();
+            if(!(urlConnection instanceof HttpURLConnection)) {
+                passResultToListener(HttpUtils.CONNECTION_RESULT_UNSUPPORTED_PROTOCOL);
+                return;
             }
 
+            httpUrlConnection = (HttpURLConnection) urlConnection;
+        }
+        catch(IOException e) {
+            passResultToListener(HttpUtils.CONNECTION_RESULT_FAILED_TO_OPEN_CONNECTION);
+            return;
+        }
+
+        try {
+            httpUrlConnection.setRequestMethod("POST");
+            //        httpUrlConnection.setRequestProperty("User-Agent", USER_AGENT);
+            //        httpUrlConnection.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
+
+            // Send post request
+            httpUrlConnection.setDoOutput(true);
+        }
+        catch(ProtocolException e) {
+            // not possible
+        }
+
+        try {
+            OutputStream outputStream = httpUrlConnection.getOutputStream();
+            DataOutputStream wr = new DataOutputStream(outputStream);
+            wr.flush();
+            wr.close();
+        }
+        catch(UnknownHostException e) {
+            passResultToListener(HttpUtils.CONNECTION_RESULT_UNKNOWN_HOST);
+            return;
+        }
+        catch(IOException e) {
+            passResultToListener(HttpUtils.CONNECTION_RESULT_WRITE_ERROR);
+            return;
+        }
+
+        StringBuffer response = null;
+        InputStream inputStream = null;
+        try {
+            inputStream = httpUrlConnection.getInputStream();
+        }
+        catch(IOException e) {
+            passResultToListener(httpUrlConnection);
+            return;
+        }
+
+        try {
             if (inputStream != null) {
                 BufferedReader in = new BufferedReader(new InputStreamReader(inputStream));
                 String inputLine;
                 response = new StringBuffer();
 
-                while ((inputLine = in.readLine()) != null) {
+                while((inputLine = in.readLine()) != null) {
                     response.append(inputLine);
                 }
                 in.close();
             }
 
-            responseCode = con.getResponseCode();
-            responseBody = (response != null) ? response.toString() : "<null>";
-            App.getLogger().info(TAG, "Response code: " + responseCode + ", body: " + responseBody);
-        } catch (Exception ex) {
-            App.getLogger().exception(TAG, ex);
+            responseCode = httpUrlConnection.getResponseCode();
+            responseBody = (response != null) ? response.toString() : null;
+            passResultToListener(responseCode, responseBody);
+        }
+        catch (IOException e) {
+            passResultToListener(httpUrlConnection);
+        }
+    }
+
+    void passResultToListener(HttpURLConnection urlConnection) {
+        int responseCode;
+        try {
+            responseCode = urlConnection.getResponseCode();
+        }
+        catch(IOException e) {
+            responseCode = HttpUtils.CONNECTION_RESULT_READ_ERROR;
         }
 
+        passResultToListener(responseCode);
+    }
+
+    void passResultToListener(int responseCode) {
+        passResultToListener(responseCode, null);
+    }
+
+    void passResultToListener(int responseCode, String responseBody) {
         if(listener != null) {
             PostResult postResult = new PostResult();
             postResult.responseCode = responseCode;

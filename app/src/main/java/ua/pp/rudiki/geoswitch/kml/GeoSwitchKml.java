@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,7 @@ public class GeoSwitchKml implements Closeable {
 
     private final static String triggerPinStyle = "PinStyleTrigger";
     private final static String firePinStyle = "PinStyleFire";
+    private final static String pointPinStyle = "PointStyleTrigger";
 
     private DateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd' 'HH:mm:ss.SSS");
 
@@ -42,6 +44,11 @@ public class GeoSwitchKml implements Closeable {
         kml.addCircleStyle(areaToCircleStyle, Kml.KML_COLOR_CORAL);
         kml.addIconStyle(triggerPinStyle, Kml.URL_YELLOW_PIN);
         kml.addIconStyle(firePinStyle, Kml.URL_RED_PIN);
+        kml.addIconStyle(pointPinStyle, Kml.URL_BLUE_PIN);
+    }
+
+    public void addPoint(LatLng coordinates, Date date) {
+        kml.addPlacemark("", coordinates, simpleDateFormat.format(date), pointPinStyle);
     }
 
     public void addPath(List<LatLng> coordinates, Date begin, Date end) {

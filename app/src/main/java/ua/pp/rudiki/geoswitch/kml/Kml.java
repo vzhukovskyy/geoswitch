@@ -25,10 +25,10 @@ public class Kml {
 
     public final static String URL_YELLOW_PIN = "http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png";
     public final static String URL_RED_PIN = "http://maps.google.com/mapfiles/kml/pushpin/red-pushpin.png";
+    public final static String URL_BLUE_PIN = "http://maps.google.com/mapfiles/kml/pushpin/blue-pushpin.png";
 
     final static String TAG = Kml.class.getSimpleName();
 
-    private File file;
     private FileOutputStream stream;
     private OutputStreamWriter writer;
     private DateFormat isoDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
@@ -36,7 +36,6 @@ public class Kml {
     private Map<String, Integer> mapId = new TreeMap<>();
 
     public Kml(File file, String documentName) {
-        this.file = file;
         try {
             stream = new FileOutputStream(file);
             writer = new OutputStreamWriter(stream);

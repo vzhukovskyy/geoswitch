@@ -256,6 +256,7 @@ public class Log2Kml {
                 if(prevDate == null) {
                     startDate = pointData.date;
                     prevDate = pointData.date;
+                    coordinates.add(pointData.position);
                 }
                 else {
                     long delta = pointData.date.getTime() - prevDate.getTime();
@@ -263,7 +264,8 @@ public class Log2Kml {
                         coordinates.add(pointData.position);
                     }
                     else {
-                        kml.addPath(coordinates, startDate, prevDate);
+                        flushCoordinates(kml, coordinates, startDate, prevDate);
+
                         startDate = pointData.date;
                         coordinates.clear();
                         coordinates.add(pointData.position);
@@ -273,12 +275,35 @@ public class Log2Kml {
             }
 
             if(coordinates.size() > 0) {
-                kml.addPath(coordinates, startDate, prevDate);
+                flushCoordinates(kml, coordinates, startDate, prevDate);
             }
         }
         catch(Exception e) {
             App.getLogger().exception(TAG, e);
         }
+    }
+
+    private static void flushCoordinates(GeoSwitchKml kml, List<LatLng> coordinates, Date startDate, Date endDate) {
+        if(isSingularPath(coordinates)) {
+            kml.addPoint(coordinates.get(0), startDate);
+        } else {
+            kml.addPath(coordinates, startDate, endDate);
+        }
+    }
+
+    private static boolean isSingularPath(List<LatLng> coordinates) {
+        int size = coordinates.size();
+        if(size < 2)
+            return true;
+
+        LatLng firstFix = coordinates.get(0);
+        for(int i=1; i<coordinates.size(); i++) {
+            if(!firstFix.equals(coordinates.get(i))) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private static LatLng parseLatitudeLongitudeTuple(String s) {

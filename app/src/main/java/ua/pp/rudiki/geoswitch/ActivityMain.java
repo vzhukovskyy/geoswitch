@@ -1,6 +1,5 @@
 package ua.pp.rudiki.geoswitch;
 
-import android.app.FragmentManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -25,7 +24,6 @@ import java.util.Date;
 import java.util.Formatter;
 import java.util.Locale;
 
-import ua.pp.rudiki.geoswitch.dialogtask.ProgressDialogFragment;
 import ua.pp.rudiki.geoswitch.peripherals.AsyncResultCallback;
 import ua.pp.rudiki.geoswitch.peripherals.DialogUtils;
 import ua.pp.rudiki.geoswitch.service.GpsServiceActivationListener;
@@ -42,9 +40,6 @@ import ua.pp.rudiki.geoswitch.trigger.TriggerType;
 public class ActivityMain extends AppCompatActivity implements GpsServiceActivationListener
 {
     private final static String TAG = ActivityMain.class.getSimpleName();
-
-    private ProgressDialogFragment mTaskFragment;
-
 
     EditText gpsActivationEdit, triggerEdit, actionEdit;
     TextView statusLabel, substatusLabel;
@@ -157,7 +152,7 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
     }
 
     public void onExportKmlMenuItemSelected() {
-        new ProgressDialogFragment().execute(this);
+        new ExportKmlTask().execute(this);
 
     }
 

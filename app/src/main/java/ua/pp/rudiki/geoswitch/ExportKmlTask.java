@@ -1,4 +1,4 @@
-package ua.pp.rudiki.geoswitch.dialogtask;
+package ua.pp.rudiki.geoswitch;
 
 
 import android.app.Activity;
@@ -15,13 +15,11 @@ import android.os.Environment;
 
 import java.io.File;
 
-import ua.pp.rudiki.geoswitch.App;
-import ua.pp.rudiki.geoswitch.R;
 import ua.pp.rudiki.geoswitch.kml.Log2Kml;
 import ua.pp.rudiki.geoswitch.peripherals.DialogUtils;
 
-public class ProgressDialogFragment extends DialogFragment {
-    private static final String TAG = ProgressDialogFragment.class.getSimpleName();
+public class ExportKmlTask extends DialogFragment {
+    private static final String TAG = ExportKmlTask.class.getSimpleName();
     private static final String FRAGMENT_TAG = "EXPORT_KML";
 
     private Activity activity;
@@ -111,7 +109,7 @@ public class ProgressDialogFragment extends DialogFragment {
                 DialogUtils.displayErrorMessage(activity, getString(R.string.activity_main_googleearth_not_installed));
             }
 
-            ProgressDialogFragment.this.activity = null;
+            ExportKmlTask.this.activity = null;
         }
     }
 }

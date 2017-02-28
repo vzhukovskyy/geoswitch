@@ -1,19 +1,13 @@
 package ua.pp.rudiki.geoswitch;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.DialogFragment;
-import android.app.ProgressDialog;
+import android.app.FragmentManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.Location;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -25,16 +19,15 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Formatter;
 import java.util.Locale;
 
-import ua.pp.rudiki.geoswitch.kml.Log2Kml;
+import ua.pp.rudiki.geoswitch.dialogtask.ProgressDialogFragment;
 import ua.pp.rudiki.geoswitch.peripherals.AsyncResultCallback;
-import ua.pp.rudiki.geoswitch.peripherals.ScreenOrientationUtils;
+import ua.pp.rudiki.geoswitch.peripherals.DialogUtils;
 import ua.pp.rudiki.geoswitch.service.GpsServiceActivationListener;
 import ua.pp.rudiki.geoswitch.service.GeoSwitchGpsService;
 import ua.pp.rudiki.geoswitch.trigger.EnterAreaTrigger;
@@ -49,6 +42,9 @@ import ua.pp.rudiki.geoswitch.trigger.TriggerType;
 public class ActivityMain extends AppCompatActivity implements GpsServiceActivationListener
 {
     private final static String TAG = ActivityMain.class.getSimpleName();
+
+    private ProgressDialogFragment mTaskFragment;
+
 
     EditText gpsActivationEdit, triggerEdit, actionEdit;
     TextView statusLabel, substatusLabel;
@@ -161,41 +157,8 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
     }
 
     public void onExportKmlMenuItemSelected() {
+        new ProgressDialogFragment().execute(this);
 
-        new AsyncTask<Void, Void, Void>() {
-            private ProgressDialog progressDialog;
-            private File kmlFile;
-
-            @Override
-            public void onPreExecute() {
-                ScreenOrientationUtils.lockScreenOrientation(ActivityMain.this);
-
-                progressDialog = new ProgressDialog(ActivityMain.this);
-                progressDialog.setCanceledOnTouchOutside(false);
-                progressDialog.setMessage(getString(R.string.activity_main_generating_kml));
-                progressDialog.show();
-            }
-
-            @Override
-            protected Void doInBackground(Void... args) {
-                kmlFile = new File(Environment.getExternalStorageDirectory(), "geoswitch.kml");
-                final long timePeriod = App.getPreferences().getDefaultTimePeriodForKml();
-                Log2Kml.log2kml(timePeriod, kmlFile);
-
-                return null;
-            }
-
-            protected void onPostExecute(Void result) {
-                progressDialog.dismiss();
-                ScreenOrientationUtils.unlockScreenOrientation(ActivityMain.this);
-
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                Uri uri = Uri.parse("file://"+ kmlFile.getAbsolutePath());
-                intent.setDataAndType(uri, "application/vnd.google-earth.kml+xml");
-                startActivity(intent);
-            }
-
-        }.execute();
     }
 
     public void onGpsOptionsClick(View view) {
@@ -487,7 +450,10 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
                         public void run() {
                             loadTriggerToUi();
 
-                            displayWelcomeMessage(getString(R.string.activity_main_initial_config_done));
+                            DialogUtils.displayMessage(ActivityMain.this,
+                                    getString(R.string.activity_main_welcome_title),
+                                    getString(R.string.activity_main_initial_config_done),
+                                    getString(R.string.dialog_ok_button));
                         }
                     });
                 }
@@ -495,7 +461,11 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            displayWelcomeMessage(getString(R.string.activity_main_initial_config_failed));
+                            DialogUtils.displayMessage(ActivityMain.this,
+                                    getString(R.string.activity_main_welcome_title),
+                                    getString(R.string.activity_main_initial_config_failed),
+                                    getString(R.string.dialog_dismiss_button));
+
                         }
                     });
                 }
@@ -510,25 +480,4 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
         App.getPreferences().storeTrigger(trigger);
     }
 
-    private void displayWelcomeMessage(String message) {
-
-        ScreenOrientationUtils.lockScreenOrientation(this);
-
-        new AlertDialog.Builder(this)
-            .setTitle(getString(R.string.activity_main_welcome_title))
-            .setMessage(message)
-            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.cancel();
-                }
-            })
-            .setOnDismissListener(new DialogInterface.OnDismissListener() {
-                @Override
-                public void onDismiss(DialogInterface dialog) {
-                    ScreenOrientationUtils.unlockScreenOrientation(ActivityMain.this);
-                }
-            })
-            .create()
-            .show();
-    }
 }

@@ -4,6 +4,8 @@
 
     <string name="menu_open_log">Відкрити лог</string>
     <string name="menu_export_kml">Відкрити в Google Earth</string>
+    <string name="dialog_dismiss_button">Зрозуміло</string>
+    <string name="dialog_ok_button">Гаразд</string>
 
     <string name="activity_action_appendtoken">Приєднати Google sign-in токен до URL</string>
     <string name="activity_action_cancel_button">Відмінити</string>
@@ -52,8 +54,13 @@
     <string name="activity_main_action_updated">Дія оновлена.</string>
     <string name="activity_main_activation_mode_updated">Режим активізації оновлений.</string>
     <string name="activity_main_trigger_updated">Тригер оновлений.</string>
-    <string name="activity_main_trigger_updated_and_applied">Тригер оновлений. Його моніторинг розпочався.</string>
+    <string name="activity_main_trigger_updated_and_applied">Моніторинг оновленого тригера розпочато.</string>
     <string name="activity_main_generating_kml">Створюється KML файл</string>
+    <string name="activity_main_googleearth_not_installed">Неможливо запустили програму Google Earth, вона не встановлена.</string>
+    <string name="activity_main_initial_config_done">Ми створили демо тригер на основі поточного місцезнаходження. Запрошуємо переглянути його на карті (Налаштувати тригер->Вибрати на карті) та спробувати.</string>
+    <string name="activity_main_initial_config_failed">Ми не змогли визначити ваше місцезнаходження й тому не створили демо тригер. Створіть тригер самостійно!</string>
+    <string name="activity_main_welcome_title">Вітаємо</string>
+    <string name="dialog_error_title">Помилка</string>
 
     <string name="activity_map_area">Ділянка</string>
     <string name="activity_map_from">Звідки</string>
@@ -82,9 +89,12 @@
     <string name="activity_trigger_transition_radio">Переміщення</string>
     <string name="activity_trigger_type">Тип</string>
     <string name="activity_trigger_area_invalid">Виберіть ділянку для цього тригера</string>
-    <string name="activity_trigger_transition_invalid">Виберіть ділянки \"звідки\" та \"куди\" для цього тригера"</string>
+    <string name="activity_trigger_transition_invalid">Виберіть ділянки \"звідки\" та \"куди\""</string>
     <string name="activity_trigger_area_updated">Розташування ділянки оновлене.</string>
     <string name="activity_trigger_transition_updated">Розташування ділянок оновлене.</string>
+    <string name="activity_trigger_revert1">"Значення змінені. Проте їх можливо "</string>
+    <string name="activity_trigger_revert2"><u>повернути</u></string>
+    <string name="activity_trigger_values_reverted">Значення повернені.</string>
 
     <string name="service_action_failed_no_internet">Дія зазнала невдачу. Немає з\'єднання з інтернетом</string>
     <string name="service_action_failed_refresh_token">Дія зазнала невдачу. Не вдалося встановити з\'єднання з сервером Google</string>
@@ -97,11 +107,5 @@
     <string name="service_sticky_title">GeoSwitch: спостереження</string>
     <string name="service_trigger_fired">Спрацював геолокаційний тригер.</string>
     <string name="service_action_succeeded">Дія завершилась успішно.</string>
-    <string name="activity_main_initial_config_done">Початкові налаштування проведені.</string>
-    <string name="activity_trigger_revert1">\"Значення змінені. Можливо, ви їх хочете \"</string>
-    <string name="activity_trigger_revert2"><u>відмінити</u></string>
-    <string name="activity_main_initial_config_failed">Ми не змогли визначити ваше місцезнаходження й тому не створили демо тригер. Створіть тригер самостійно!</string>
-    <string name="activity_main_welcome_title">Ласкаво просимо</string>
-    <string name="activity_trigger_values_reverted">Значення повернено.</string>
 
 </resources>

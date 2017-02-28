@@ -3,6 +3,9 @@
 
     <string name="menu_open_log">Open log</string>
     <string name="menu_export_kml">View history in Google Earth</string>
+    <string name="dialog_dismiss_button">Dismiss</string>
+    <string name="dialog_ok_button">Close</string>
+    <string name="dialog_error_title">Error</string>
 
     <string name="activity_action_title">GeoSwitch/Action</string>
     <string name="activity_action_notification">Display notification</string>
@@ -56,6 +59,7 @@
     <string name="activity_main_initial_config_done">A demo trigger has been created based on your location info. You are encouraged to see it on the map (Configure trigger->Select on Map) and give it a try.</string>
     <string name="activity_main_initial_config_failed">We were unable to determine your current location and did not create a demo trigger. Please configure a trigger by yourself!</string>
     <string name="activity_main_welcome_title">Welcome</string>
+    <string name="activity_main_googleearth_not_installed">Cannot launch Google Earth, it is not installed.</string>
 
     <string name="activity_map_title">GeoSwitch/Map</string>
     <string name="activity_map_area">Area</string>

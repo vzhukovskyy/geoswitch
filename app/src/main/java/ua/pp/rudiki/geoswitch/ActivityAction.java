@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.app.Activity;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -92,7 +91,7 @@ public class ActivityAction extends AppCompatActivity {
         }
 
         if(signinNeeded()) {
-            signIn();
+            signIn(RequestCode.ACTIVITY_SIGNIN_ON_BACK);
             // don't close activity until signed in; it will be closed in sign-in callback
             return;
         }
@@ -111,6 +110,16 @@ public class ActivityAction extends AppCompatActivity {
     public void onLaunchActionClick(View view) {
         App.getLogger().info(TAG, "User launched action");
 
+        if(signinNeeded()) {
+            signIn(RequestCode.ACTIVITY_SIGNIN_ON_LAUNCH);
+            // action will be executed in sign-in callback
+            return;
+        }
+
+        executeAction();
+    }
+
+    private void executeAction() {
         new ActionExecutor(showNotificationCheckbox.isChecked(),
                 playSoundCheckbox.isChecked(),
                 speakOutCheckbox.isChecked(),
@@ -188,12 +197,12 @@ public class ActivityAction extends AppCompatActivity {
     }
 
     // Sign in
-    private void signIn() {
+    private void signIn(int requestCode) {
         String message = getString(R.string.activity_action_verifying_signin);
         signInToast = Toast.makeText(this, message, Toast.LENGTH_SHORT);
         signInToast.show();
 
-        App.getGoogleApiClient().startSigninForResult(this, RequestCode.ACTIVITY_SIGN_IN);
+        App.getGoogleApiClient().startSigninForResult(this, requestCode);
     }
 
     @Override
@@ -201,26 +210,33 @@ public class ActivityAction extends AppCompatActivity {
 
         // this thread is the UI thread
 
-        if (requestCode == RequestCode.ACTIVITY_SIGN_IN) {
+        if (requestCode == RequestCode.ACTIVITY_SIGNIN_ON_BACK ||
+            requestCode == RequestCode.ACTIVITY_SIGNIN_ON_LAUNCH)
+        {
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             if (result != null && result.isSuccess()) {
-                // useful for the first time sign-in but annoying for subsequent action edits
+                if(requestCode == RequestCode.ACTIVITY_SIGNIN_ON_BACK) {
+                    // useful for the first time sign-in but annoying for subsequent action edits
 //                GoogleSignInAccount account = result.getSignInAccount();
 //                String format = getString(R.string.activity_action_greetings);
 //                String message = String.format(format, account.getDisplayName());
 //                Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
 
-                signInToast.cancel();
+                    signInToast.cancel();
 
-                saveForm();
-                closeActivity(Activity.RESULT_OK);
+                    saveForm();
+                    closeActivity(Activity.RESULT_OK);
+                }
+                else if(requestCode == RequestCode.ACTIVITY_SIGNIN_ON_LAUNCH) {
+                    executeAction();
+                }
             } else {
                 String message = getString(R.string.activity_action_signin_failed);
                 Toast.makeText(this, message, Toast.LENGTH_LONG).show();
             }
-
-            App.getGoogleApiClient().detachGoogleApiClientFromActivity(this);
         }
+
+        App.getGoogleApiClient().detachGoogleApiClientFromActivity(this);
     }
 
 }

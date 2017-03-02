@@ -31,6 +31,7 @@ public class Log2Kml {
     private static final String TAG = Log2Kml.class.getSimpleName();
 
     private final static int COPY_BUFFER_SIZE = 4096;
+    private final static int JOIN_POINTS_INTO_PATH_DELAY = 3000;
 
     private static DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
@@ -260,7 +261,7 @@ public class Log2Kml {
                 }
                 else {
                     long delta = pointData.date.getTime() - prevDate.getTime();
-                    if(delta < 3000) {
+                    if(delta < JOIN_POINTS_INTO_PATH_DELAY) {
                         coordinates.add(pointData.position);
                     }
                     else {

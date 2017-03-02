@@ -19,6 +19,7 @@ import ua.pp.rudiki.geoswitch.App;
 
 public class Kml {
     public final static String KML_COLOR_RED = "FF0000FF"; // aabbggrr
+    public final static String KML_COLOR_GREEN = "FF00FF00";
     public final static String KML_COLOR_BLUE = "FFFF0000";
     public final static String KML_COLOR_YELLOW = "4F00FFFF";
     public final static String KML_COLOR_CORAL = "7F7F7FFF";
@@ -166,20 +167,26 @@ public class Kml {
             double dy = radius*Math.cos(alpha/180*Math.PI);
             double dx = radius*Math.sin(alpha/180*Math.PI);
 
-            final double earthRadius = 6371000;
-            final double earthCircumference = 2*Math.PI*earthRadius;
-            double сircumferenceAtLatitude = earthCircumference*Math.cos(center.latitude/180*Math.PI);
-            double metersPerLatitudeDegree = earthCircumference/360;
-            double metersPerLongitudeDegreeAtLatitude = сircumferenceAtLatitude/360;
-
-            double dlat = dy/metersPerLatitudeDegree;
-            double dlon = dx/metersPerLongitudeDegreeAtLatitude;
-
-            LatLng point = new LatLng(center.latitude+dlat, center.longitude+dlon);
+            LatLng point = shiftLatLngByMeters(center, dx, dy);
             coordinates.add(point);
         }
 
         return coordinates;
+    }
+
+    public static LatLng shiftLatLngByMeters(LatLng point, double dx, double dy) {
+        final double earthRadius = 6371000;
+
+        final double earthCircumference = 2*Math.PI*earthRadius;
+        double сircumferenceAtLatitude = earthCircumference*Math.cos(point.latitude/180*Math.PI);
+
+        double metersPerLatitudeDegree = earthCircumference/360;
+        double metersPerLongitudeDegreeAtLatitude = сircumferenceAtLatitude/360;
+
+        double dlat = dy/metersPerLatitudeDegree;
+        double dlon = dx/metersPerLongitudeDegreeAtLatitude;
+
+        return new LatLng(point.latitude+dlat, point.longitude+dlon);
     }
 
     private String newId(String prefix) {

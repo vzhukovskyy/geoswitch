@@ -39,7 +39,7 @@ public class GeoSwitchKml implements Closeable {
         kml = new Kml(file, "GeoSwitch");
         this.kmlFile = file;
 
-        kml.addLineStyle(pathStyle, Kml.KML_COLOR_BLUE, 5);
+        kml.addLineStyle(pathStyle, Kml.KML_COLOR_GREEN, 5);
         kml.addCircleStyle(areaCircleStyle, Kml.KML_COLOR_YELLOW);
         kml.addCircleStyle(areaToCircleStyle, Kml.KML_COLOR_CORAL);
         kml.addIconStyle(triggerPinStyle, Kml.URL_YELLOW_PIN);
@@ -47,8 +47,13 @@ public class GeoSwitchKml implements Closeable {
         kml.addIconStyle(pointPinStyle, Kml.URL_BLUE_PIN);
     }
 
-    public void addPoint(LatLng coordinates, Date date) {
-        kml.addPlacemark("", coordinates, simpleDateFormat.format(date), pointPinStyle);
+    public void addPoint(LatLng point, Date date) {
+        //kml.addPlacemark("", point, simpleDateFormat.format(date), pointPinStyle);
+        List<LatLng> coordinates = new ArrayList<LatLng>();
+        coordinates.add(point);
+        LatLng newPoint = Kml.shiftLatLngByMeters(point, 2, 2);
+        coordinates.add(newPoint);
+        addPath(coordinates, date, date);
     }
 
     public void addPath(List<LatLng> coordinates, Date begin, Date end) {

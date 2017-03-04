@@ -16,16 +16,20 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import ua.pp.rudiki.geoswitch.App;
+import ua.pp.rudiki.geoswitch.kml.log.AreaTriggerRecord;
+import ua.pp.rudiki.geoswitch.kml.log.PointRecord;
+import ua.pp.rudiki.geoswitch.kml.log.TransitionTriggerRecord;
+import ua.pp.rudiki.geoswitch.kml.log.TriggerRecord;
+import ua.pp.rudiki.geoswitch.kml.log.TriggerRecordFactory;
 import ua.pp.rudiki.geoswitch.peripherals.FileUtils;
-import ua.pp.rudiki.geoswitch.peripherals.HashUtils;
 
 public class Log2Kml {
     private static final String TAG = Log2Kml.class.getSimpleName();
@@ -40,7 +44,10 @@ public class Log2Kml {
         concatLogFiles(tempLogFile);
 
         LogParserResult parserResult = extractGeoDataFromLog(tempLogFile);
-        removeOutdatedFixes(parserResult, timePeriodMillis);
+        Date periodStartDate = getStartOfPeriod(parserResult, timePeriodMillis);
+        removeOutdatedFixes(parserResult, periodStartDate);
+        removeOutdatedTriggers(parserResult, periodStartDate);
+        removeOutdatedActions(parserResult, periodStartDate);
         removeDuplicateTriggers(parserResult);
         generateKml(parserResult, kmlFile);
 
@@ -50,79 +57,13 @@ public class Log2Kml {
     }
 
     private static class LogParserResult {
-        List<PointData> pointData = new ArrayList<>();
-        List<AreaTriggerData> areaTriggerData = new ArrayList<>();
-        List<TransitionTriggerData> transitionTriggerData = new ArrayList<>();
-        List<PointData> actionData = new ArrayList<>();
-    }
-
-    private static class PointData {
-        Date date;
-        LatLng position;
-    }
-
-    private static class AreaTriggerData {
-        Date date;
-        LatLng center;
-        double radius;
-
-        @Override
-        public boolean equals(Object object) {
-            if(this == object)
-                return true;
-            if(object == null)
-                return false;
-            if(!object.getClass().equals(this.getClass()))
-                return false;
-
-            AreaTriggerData areaTriggerData = (AreaTriggerData)object;
-            return this.radius == areaTriggerData.radius &&
-                   this.center.equals(areaTriggerData.center);
-        }
-
-        @Override
-        public int hashCode() {
-            return HashUtils.combineHashCode(center.hashCode(), radius);
-        }
-    }
-
-    private static class TransitionTriggerData {
-        Date date;
-        LatLng from;
-        LatLng to;
-        double radius;
-
-        @Override
-        public boolean equals(Object object) {
-            if(this == object)
-                return true;
-
-            if(object == null)
-                return false;
-
-            if(!object.getClass().equals(this.getClass()))
-                return false;
-
-            TransitionTriggerData transitionTriggerData = (TransitionTriggerData)object;
-            return this.radius == transitionTriggerData.radius &&
-                   this.from.equals(transitionTriggerData.from) &&
-                   this.to.equals(transitionTriggerData.to);
-        }
-
-        @Override
-        public int hashCode() {
-            int hash = HashUtils.combineHashCode(1, from.hashCode());
-            hash = HashUtils.combineHashCode(hash, to.hashCode());
-            hash = HashUtils.combineHashCode(hash, radius);
-            return hash;
-        }
-
+        List<PointRecord> pointRecords = new ArrayList<>();
+        List<TriggerRecord> triggerRecords = new ArrayList<>();
+        List<PointRecord> actionRecords = new ArrayList<>();
     }
 
     private static LogParserResult extractGeoDataFromLog(File logFile) {
         LogParserResult result = new LogParserResult();
-
-        Date startDate = null;
 
         try (
                 FileReader fileReader = new FileReader(logFile);
@@ -155,48 +96,47 @@ public class Log2Kml {
                         App.getLogger().exception(TAG, e);
                     }
 
-                    PointData pointData = new PointData();
-                    pointData.date = date;
-                    pointData.position = new LatLng(latitude, longitude);
+                    PointRecord pointRecord = new PointRecord();
+                    pointRecord.date = date;
+                    pointRecord.position = new LatLng(latitude, longitude);
 
-                    result.pointData.add(pointData);
+                    result.pointRecords.add(pointRecord);
                 }
                 else if(tag.equals("T")) {
                     String triggerType = parts[3];
+
+                    TriggerRecord triggerRecord = TriggerRecordFactory.createTriggerRecord(triggerType);
+                    triggerRecord.date = date;
 
                     if(triggerType.equals("Exit") || triggerType.equals("Enter")) {
                         LatLng ll = parseLatitudeLongitudeTuple(parts[4]);
                         double radius = parseRadius(parts[5]);
 
-                        AreaTriggerData areaTriggerData = new AreaTriggerData();
-                        areaTriggerData.date = date;
-                        areaTriggerData.center = ll;
-                        areaTriggerData.radius = radius;
-
-                        result.areaTriggerData.add(areaTriggerData);
+                        AreaTriggerRecord areaTriggerRecord = (AreaTriggerRecord)triggerRecord;
+                        areaTriggerRecord.center = ll;
+                        areaTriggerRecord.radius = radius;
                     }
                     else if(triggerType.equals("Transition")) {
                         LatLng centerFrom = parseLatitudeLongitudeTuple(parts[5]);
                         LatLng centerTo = parseLatitudeLongitudeTuple(parts[8]);
                         double radius = parseRadius(parts[6]);
 
-                        TransitionTriggerData transitionTriggerData = new TransitionTriggerData();
-                        transitionTriggerData.date = date;
-                        transitionTriggerData.from = centerFrom;
-                        transitionTriggerData.to = centerTo;
-                        transitionTriggerData.radius = radius;
-
-                        result.transitionTriggerData.add(transitionTriggerData);
+                        TransitionTriggerRecord transitionTriggerRecord = (TransitionTriggerRecord)triggerRecord;
+                        transitionTriggerRecord.from = centerFrom;
+                        transitionTriggerRecord.to = centerTo;
+                        transitionTriggerRecord.radius = radius;
                     }
+
+                    result.triggerRecords.add(triggerRecord);
                 }
                 else if (tag.equals("A")) {
                     LatLng ll = parseLatitudeLongitudeTuple(parts[6]);
 
-                    PointData pointData = new PointData();
-                    pointData.date = date;
-                    pointData.position = ll;
+                    PointRecord pointRecord = new PointRecord();
+                    pointRecord.date = date;
+                    pointRecord.position = ll;
 
-                    result.actionData.add(pointData);
+                    result.actionRecords.add(pointRecord);
                 }
             }
         }
@@ -208,70 +148,93 @@ public class Log2Kml {
         return result;
     }
 
-    // removes GPS fixes outside of time period [TimeOfLastFix-timePeriodMillis, TimeOfLastFix]
-    private static void removeOutdatedFixes(LogParserResult parserResult, long timePeriodMillis) {
+    // time period since the last GPS fix
+    private static Date getStartOfPeriod(LogParserResult logParserResult, long timePeriodMillis) {
         Date startDate;
-        if(timePeriodMillis > 0 && parserResult.pointData.size() > 0) {
-            Date dateOfLastFix = parserResult.pointData.get(parserResult.pointData.size()-1).date;
+        if(timePeriodMillis > 0 && logParserResult.pointRecords.size() > 0) {
+            Date dateOfLastFix = logParserResult.pointRecords.get(logParserResult.pointRecords.size()-1).date;
             startDate= new Date(dateOfLastFix.getTime() - timePeriodMillis);
         } else {
             startDate = new Date(0);
         }
 
-        for(Iterator<PointData> it = parserResult.pointData.iterator(); it.hasNext();) {
-            PointData pointData = it.next();
-            if(pointData.date.before(startDate)) {
+        return startDate;
+    }
+
+    // removes GPS fixes outside of time period [TimeOfLastFix-timePeriodMillis, TimeOfLastFix]
+    private static void removeOutdatedFixes(LogParserResult logParserResult, Date periodStartDate) {
+        for(Iterator<PointRecord> it = logParserResult.pointRecords.iterator(); it.hasNext();) {
+            PointRecord pointRecord = it.next();
+            if(pointRecord.date.before(periodStartDate)) {
+                it.remove();
+            }
+        }
+    }
+
+    private static void removeOutdatedTriggers(LogParserResult logParserResult, Date periodStartDate) {
+        for(Iterator<TriggerRecord> it = logParserResult.triggerRecords.iterator(); it.hasNext();) {
+            TriggerRecord triggerRecord = it.next();
+            if(triggerRecord.date.before(periodStartDate)) {
+                it.remove();
+            }
+        }
+    }
+
+    private static void removeOutdatedActions(LogParserResult logParserResult, Date periodStartDate) {
+        for(Iterator<PointRecord> it = logParserResult.actionRecords.iterator(); it.hasNext();) {
+            PointRecord actionRecord = it.next();
+            if(actionRecord.date.before(periodStartDate)) {
                 it.remove();
             }
         }
     }
 
     private static void removeDuplicateTriggers(LogParserResult logParserResult) {
-        Set<AreaTriggerData> areaTriggerDataSet = new HashSet<>(logParserResult.areaTriggerData);
-        logParserResult.areaTriggerData = new ArrayList<AreaTriggerData>(areaTriggerDataSet);
-
-        Set<TransitionTriggerData> transitionTriggerDataSet = new HashSet<>(logParserResult.transitionTriggerData);
-        logParserResult.transitionTriggerData = new ArrayList<TransitionTriggerData>(transitionTriggerDataSet);
+        Set<TriggerRecord> set = new LinkedHashSet<>(logParserResult.triggerRecords);
+        logParserResult.triggerRecords = new ArrayList<>(set);
     }
 
     private static void generateKml(LogParserResult logParserResult, File kmlFile) {
         try (
                 GeoSwitchKml kml = new GeoSwitchKml(kmlFile);
         ){
-            for(AreaTriggerData areaTriggerData: logParserResult.areaTriggerData) {
-                kml.addAreaTrigger(areaTriggerData.center, areaTriggerData.radius);
+            for(TriggerRecord triggerRecord : logParserResult.triggerRecords) {
+                if(triggerRecord instanceof AreaTriggerRecord) {
+                    AreaTriggerRecord areaTriggerRecord = (AreaTriggerRecord)triggerRecord;
+                    kml.addAreaTrigger(areaTriggerRecord.center, areaTriggerRecord.radius);
+                }
+                else if (triggerRecord instanceof TransitionTriggerRecord) {
+                    TransitionTriggerRecord transitionTriggerRecord = (TransitionTriggerRecord)triggerRecord;
+                    kml.addTransitionTrigger(transitionTriggerRecord.from, transitionTriggerRecord.to, transitionTriggerRecord.radius);
+                }
             }
 
-            for(TransitionTriggerData transitionTriggerData: logParserResult.transitionTriggerData) {
-                kml.addTransitionTrigger(transitionTriggerData.from, transitionTriggerData.to, transitionTriggerData.radius);
-            }
-
-            for(PointData pointData: logParserResult.actionData) {
-                kml.addActionFire(pointData.position, pointData.date);
+            for(PointRecord pointRecord : logParserResult.actionRecords) {
+                kml.addActionFire(pointRecord.position, pointRecord.date);
             }
 
 
             List<LatLng> coordinates = new ArrayList<>();
             Date startDate = null, prevDate = null;
-            for(PointData pointData: logParserResult.pointData) {
+            for(PointRecord pointRecord : logParserResult.pointRecords) {
                 if(prevDate == null) {
-                    startDate = pointData.date;
-                    prevDate = pointData.date;
-                    coordinates.add(pointData.position);
+                    startDate = pointRecord.date;
+                    prevDate = pointRecord.date;
+                    coordinates.add(pointRecord.position);
                 }
                 else {
-                    long delta = pointData.date.getTime() - prevDate.getTime();
+                    long delta = pointRecord.date.getTime() - prevDate.getTime();
                     if(delta < JOIN_POINTS_INTO_PATH_DELAY) {
-                        coordinates.add(pointData.position);
+                        coordinates.add(pointRecord.position);
                     }
                     else {
                         flushCoordinates(kml, coordinates, startDate, prevDate);
 
-                        startDate = pointData.date;
+                        startDate = pointRecord.date;
                         coordinates.clear();
-                        coordinates.add(pointData.position);
+                        coordinates.add(pointRecord.position);
                     }
-                    prevDate = pointData.date;
+                    prevDate = pointRecord.date;
                 }
             }
 

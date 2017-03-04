@@ -5,7 +5,7 @@ import com.google.android.gms.maps.model.LatLng;
 
 import java.util.Objects;
 
-import ua.pp.rudiki.geoswitch.peripherals.HashUtils;
+import ua.pp.rudiki.geoswitch.peripherals.HashBuilder;
 
 public class AreaTriggerRecord extends TriggerRecord {
     public LatLng center;
@@ -23,9 +23,10 @@ public class AreaTriggerRecord extends TriggerRecord {
 
     @Override
     public int hashCode() {
-        int hash = super.hashCode();
-        hash = HashUtils.combineHashCode(hash, center);
-        hash = HashUtils.combineHashCode(hash, radius);
-        return hash;
+        return new HashBuilder()
+                .combine(super.hashCode())
+                .combine(center)
+                .combine(radius)
+                .build();
     }
 }

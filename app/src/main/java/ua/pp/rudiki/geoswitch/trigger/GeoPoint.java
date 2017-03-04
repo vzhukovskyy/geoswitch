@@ -2,10 +2,7 @@ package ua.pp.rudiki.geoswitch.trigger;
 
 import android.location.Location;
 
-import ua.pp.rudiki.geoswitch.peripherals.HashUtils;
-
-import static java.lang.Math.pow;
-import static java.lang.Math.sqrt;
+import ua.pp.rudiki.geoswitch.peripherals.HashBuilder;
 
 public class GeoPoint {
     public double latitude = Double.NaN;
@@ -50,20 +47,21 @@ public class GeoPoint {
 
     @Override
     public int hashCode() {
-        int hash = HashUtils.combineHashCode(1, latitude);
-        hash = HashUtils.combineHashCode(hash, longitude);
-        return hash;
+        return new HashBuilder()
+                .combine(latitude)
+                .combine(longitude)
+                .build();
     }
 
     @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("(");
-        sb.append(latitude);
-        sb.append(",");
-        sb.append(longitude);
-        sb.append(")");
-        return sb.toString();
+    public String toString(){
+        return new StringBuilder()
+            .append("(")
+            .append(latitude)
+            .append(",")
+            .append(longitude)
+            .append(")")
+            .toString();
     }
 
 }

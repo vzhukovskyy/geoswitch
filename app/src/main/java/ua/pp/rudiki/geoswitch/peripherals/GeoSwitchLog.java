@@ -108,17 +108,18 @@ public class GeoSwitchLog {
             Date now = new Date();
             SimpleDateFormat dt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
-            StringBuilder sb = new StringBuilder();
-            sb.append(dt.format(now));
-            sb.append(" ");
-            sb.append(logLevel);
-            sb.append(" ");
-            sb.append(tag);
-            sb.append(" ");
-            sb.append(message);
-            sb.append("\n");
+            String s = new StringBuilder()
+                    .append(dt.format(now))
+                    .append(" ")
+                    .append(logLevel)
+                    .append(" ")
+                    .append(tag)
+                    .append(" ")
+                    .append(message)
+                    .append("\n")
+                    .toString();
 
-            fileStreamWriter.write(sb.toString());
+            fileStreamWriter.write(s);
             fileStreamWriter.flush();
         }
         catch(IOException e) {

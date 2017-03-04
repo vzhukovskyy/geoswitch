@@ -6,7 +6,7 @@ package ua.pp.rudiki.geoswitch.trigger;
 
 import java.util.Objects;
 
-import ua.pp.rudiki.geoswitch.peripherals.HashUtils;
+import ua.pp.rudiki.geoswitch.peripherals.HashBuilder;
 
 public class TransitionTrigger implements GeoTrigger {
     private AreaTrigger aTrigger;
@@ -79,19 +79,20 @@ public class TransitionTrigger implements GeoTrigger {
 
     @Override
     public int hashCode() {
-        int hash = HashUtils.combineHashCode(1, aTrigger);
-        hash = HashUtils.combineHashCode(hash, bTrigger);
-        return hash;
+        return new HashBuilder()
+                .combine(aTrigger)
+                .combine(bTrigger)
+                .build();
     }
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Transition from ");
-        sb.append(aTrigger.getArea().toString());
-        sb.append(" to ");
-        sb.append(bTrigger.getArea().toString());
-        return sb.toString();
+        return new StringBuilder()
+                .append("Transition from ")
+                .append(aTrigger.getArea().toString())
+                .append(" to ")
+                .append(bTrigger.getArea().toString())
+                .toString();
     }
 
 

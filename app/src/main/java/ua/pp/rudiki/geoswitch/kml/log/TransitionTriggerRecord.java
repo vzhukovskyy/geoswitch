@@ -3,10 +3,9 @@ package ua.pp.rudiki.geoswitch.kml.log;
 
 import com.google.android.gms.maps.model.LatLng;
 
-import java.util.Date;
 import java.util.Objects;
 
-import ua.pp.rudiki.geoswitch.peripherals.HashUtils;
+import ua.pp.rudiki.geoswitch.peripherals.HashBuilder;
 
 public class TransitionTriggerRecord  extends TriggerRecord {
     public LatLng from;
@@ -26,11 +25,12 @@ public class TransitionTriggerRecord  extends TriggerRecord {
 
     @Override
     public int hashCode() {
-        int hash = super.hashCode();
-        hash = HashUtils.combineHashCode(hash, from);
-        hash = HashUtils.combineHashCode(hash, to);
-        hash = HashUtils.combineHashCode(hash, radius);
-        return hash;
+        return new HashBuilder()
+            .combine(super.hashCode())
+            .combine(from)
+            .combine(to)
+            .combine(radius)
+            .build();
     }
 
 }

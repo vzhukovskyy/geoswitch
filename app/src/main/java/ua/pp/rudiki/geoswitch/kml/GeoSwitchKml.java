@@ -112,12 +112,12 @@ public class GeoSwitchKml implements Closeable {
     }
 
     private String formatCoordinates(LatLng ll) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("(");
-        sb.append(ll.longitude);
-        sb.append(",");
-        sb.append(ll.latitude);
-        sb.append(")");
-        return sb.toString();
+        return new StringBuilder()
+                .append("(")
+                .append(ll.longitude)
+                .append(",")
+                .append(ll.latitude)
+                .append(")")
+                .toString();
     }
 }

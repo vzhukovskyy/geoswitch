@@ -1,6 +1,6 @@
 package ua.pp.rudiki.geoswitch.trigger;
 
-import ua.pp.rudiki.geoswitch.peripherals.HashUtils;
+import ua.pp.rudiki.geoswitch.peripherals.HashBuilder;
 
 public class GeoArea {
     private GeoPoint center;
@@ -68,17 +68,18 @@ public class GeoArea {
 
     @Override
     public int hashCode() {
-        int hash = HashUtils.combineHashCode(1, center);
-        hash = HashUtils.combineHashCode(hash, radius);
-        return hash;
+        return new HashBuilder()
+                .combine(center)
+                .combine(radius)
+                .build();
     }
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(center.toString());
-        sb.append(" R=");
-        sb.append(radius);
-        return sb.toString();
+        return new StringBuilder()
+                .append(center.toString())
+                .append(" R=")
+                .append(radius)
+                .toString();
     }
 }

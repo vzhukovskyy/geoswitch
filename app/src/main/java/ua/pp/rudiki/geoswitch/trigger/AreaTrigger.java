@@ -2,8 +2,6 @@ package ua.pp.rudiki.geoswitch.trigger;
 
 import java.util.Objects;
 
-import ua.pp.rudiki.geoswitch.peripherals.HashUtils;
-
 // Base class for Enter Area and Exit Area triggers
 // Also used as is in Transition trigger
 

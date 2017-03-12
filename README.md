@@ -1,4 +1,7 @@
 # GeoSwitch
+
+![GeoSwitch Logo](https://github.com/vzhukovskyy/geoswitch/blob/master/app/src/main/res/mipmap-xxxhdpi/geoswitch_launcher.png "GeoSwitch")
+
 GeoSwitch is an Android geofencing app. Its main functionality is to execute HTTP POST request when geolocation trigger fires. 
 I use it to switch on my home IoT device when I approach to my house, hence the name - GeoSwitch.
 

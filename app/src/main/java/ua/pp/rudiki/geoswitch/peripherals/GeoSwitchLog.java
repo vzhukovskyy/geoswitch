@@ -3,6 +3,7 @@ package ua.pp.rudiki.geoswitch.peripherals;
 import android.location.Location;
 import android.media.MediaScannerConnection;
 import android.os.Environment;
+import android.telephony.CellLocation;
 import android.util.Log;
 
 import java.io.File;
@@ -26,6 +27,7 @@ public class GeoSwitchLog {
     private final static Character LOG_LEVEL_ERROR = 'E';
     private final static Character LOG_LEVEL_INFO = 'I';
     private final static Character LOG_LEVEL_LOCATION = 'L';
+    private final static Character LOG_LEVEL_CELL = 'C';
     private final static Character LOG_LEVEL_TRIGGER = 'T';
     private final static Character LOG_LEVEL_ACTION = 'A';
     private final static Character LOG_LEVEL_DEBUG = 'D';
@@ -53,6 +55,12 @@ public class GeoSwitchLog {
         String message = latitude + " " + longitude + " acc " + accuracy;
 
         doLog(LOG_LEVEL_LOCATION, "", message);
+    }
+
+    public void logCellId(int cellId) {
+        String message = "Connected to cell "+cellId;
+
+        doLog(LOG_LEVEL_CELL, "", message);
     }
 
     public void logTrigger(GeoTrigger trigger) {
@@ -168,4 +176,5 @@ public class GeoSwitchLog {
             openFile();
         }
     }
+
 }

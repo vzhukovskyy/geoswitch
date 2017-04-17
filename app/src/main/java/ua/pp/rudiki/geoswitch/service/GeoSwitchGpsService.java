@@ -10,6 +10,11 @@ import android.location.LocationProvider;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
+import android.telephony.CellLocation;
+import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyManager;
+import android.telephony.cdma.CdmaCellLocation;
+import android.telephony.gsm.GsmCellLocation;
 import android.util.Log;
 
 import java.text.DateFormat;
@@ -68,6 +73,7 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
         if(App.getGpsServiceActivator().isOn()) {
             requestLastLocation();
             registerLocationManagerListener();
+            registerCellListener();
             displayStickyNotification();
         }
     }
@@ -352,6 +358,41 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
             App.getLogger().info(TAG, "onStatusChanged(" + provider + ") " + statusString);
         }
     }
+
+    //********************************************************
+    //***************** Cell listener
+    //********************************************************
+
+    private void registerCellListener() {
+        TelephonyManager telephonyManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
+
+        CellLocation currentCellLocation = telephonyManager.getCellLocation();
+        onCellLocationChanged(currentCellLocation);
+
+        telephonyManager.listen(
+                new PhoneStateListener() {
+                    public void onCellLocationChanged(CellLocation location) {
+                        GeoSwitchGpsService.this.onCellLocationChanged(location);
+                    }
+                },
+                PhoneStateListener.LISTEN_CELL_LOCATION);
+
+    }
+
+    private void onCellLocationChanged(CellLocation cellLocation) {
+        App.getLogger().logCellId(getCellId(cellLocation));
+    }
+
+    private int getCellId(CellLocation cellLocation) {
+        if(cellLocation == null)
+            return 0;
+
+        if(cellLocation instanceof GsmCellLocation)
+            return ((GsmCellLocation)cellLocation).getCid();
+
+        return ((CdmaCellLocation)cellLocation).getBaseStationId();
+    }
+
 
 
 }

@@ -50,6 +50,7 @@ public class Kml {
     }
 
     public void finish() {
+        closeFolder();
         endDocument();
         endXml();
         closeStream();
@@ -219,6 +220,21 @@ public class Kml {
 
     private void endDocument() {
         writeLine("</Document>");
+    }
+
+    private boolean folderOpened = false;
+
+    public void openFolder(String name) {
+        writeLine("<Folder>");
+        writeLine("<name>"+name+"</name>");
+        folderOpened = true;
+    }
+
+    public void closeFolder() {
+        if(folderOpened) {
+            writeLine("</Folder>");
+            folderOpened = false;
+        }
     }
 
     private void write(String line) {

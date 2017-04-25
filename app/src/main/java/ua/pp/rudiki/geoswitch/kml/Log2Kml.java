@@ -36,16 +36,18 @@ public class Log2Kml {
 
     private final static int COPY_BUFFER_SIZE = 4096;
     private final static int JOIN_POINTS_INTO_PATH_DELAY = 3000;
+    private final static int FOLDER_DELAY = 5*60*1000;
 
-    private static DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+    private static DateFormat logDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+    private static DateFormat folderDateFormat = new SimpleDateFormat("MM/dd HH:mm");
 
-    public static void log2kml(long timePeriodMillis, File kmlFile) {
+    public static void log2kml(File kmlFile) {
         File tempLogFile = createTempFile();
         concatLogFiles(tempLogFile);
 
         LogParserResult parserResult = extractGeoDataFromLog(tempLogFile);
-        Date periodStartDate = getStartOfPeriod(parserResult, timePeriodMillis);
-        removeOutdatedFixes(parserResult, periodStartDate);
+        Date periodStartDate = getStartOfDay(parserResult);
+        //removeOutdatedFixes(parserResult, periodStartDate);
         removeOutdatedTriggers(parserResult, periodStartDate);
         removeOutdatedActions(parserResult, periodStartDate);
         removeDuplicateTriggers(parserResult);
@@ -69,6 +71,8 @@ public class Log2Kml {
                 FileReader fileReader = new FileReader(logFile);
                 BufferedReader br = new BufferedReader(fileReader);
         ){
+            int lastCellId = 0;
+
             String logLine;
             while((logLine = br.readLine()) != null) {
 
@@ -76,11 +80,10 @@ public class Log2Kml {
 
                 Date date;
                 try {
-                    DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
                     if(parts.length < 2)
                         continue;
 
-                    date = df.parse(parts[0] + " " + parts[1]);
+                    date = logDateFormat.parse(parts[0] + " " + parts[1]);
                 } catch (ParseException e) {
                     // it's OK, exception stack lines do not have date
                     continue;
@@ -99,6 +102,7 @@ public class Log2Kml {
                     PointRecord pointRecord = new PointRecord();
                     pointRecord.date = date;
                     pointRecord.position = new LatLng(latitude, longitude);
+                    pointRecord.cellId = lastCellId;
 
                     result.pointRecords.add(pointRecord);
                 }
@@ -138,6 +142,14 @@ public class Log2Kml {
 
                     result.actionRecords.add(pointRecord);
                 }
+                else if (tag.equals("C")) {
+                    try {
+                        lastCellId = Integer.parseInt(parts[6]);
+                    }
+                    catch (NumberFormatException e) {
+                        continue;
+                    }
+                }
             }
         }
         catch(Exception e) {
@@ -148,12 +160,29 @@ public class Log2Kml {
         return result;
     }
 
-    // time period since the last GPS fix
-    private static Date getStartOfPeriod(LogParserResult logParserResult, long timePeriodMillis) {
+//    private static Date getStartOfPeriod(LogParserResult logParserResult) {
+//        final long timePeriodMillis = App.getPreferences().getDefaultTimePeriodForKml();
+//
+//        Date startDate;
+//        if(timePeriodMillis > 0 && logParserResult.pointRecords.size() > 0) {
+//            Date dateOfLastFix = logParserResult.pointRecords.get(logParserResult.pointRecords.size()-1).date;
+//            startDate = new Date(dateOfLastFix.getTime() - timePeriodMillis);
+//        } else {
+//            startDate = new Date(0);
+//        }
+//
+//        return startDate;
+//    }
+
+
+    private static Date getStartOfDay(LogParserResult logParserResult) {
         Date startDate;
-        if(timePeriodMillis > 0 && logParserResult.pointRecords.size() > 0) {
+        if(logParserResult.pointRecords.size() > 0) {
             Date dateOfLastFix = logParserResult.pointRecords.get(logParserResult.pointRecords.size()-1).date;
-            startDate= new Date(dateOfLastFix.getTime() - timePeriodMillis);
+            startDate = new Date(dateOfLastFix.getTime());
+            startDate.setHours(0);
+            startDate.setMinutes(0);
+            startDate.setSeconds(0);
         } else {
             startDate = new Date(0);
         }
@@ -215,31 +244,40 @@ public class Log2Kml {
 
 
             List<LatLng> coordinates = new ArrayList<>();
-            Date startDate = null, prevDate = null;
+            Date startDate = null;
+            PointRecord prevPointRecord = null;
             for(PointRecord pointRecord : logParserResult.pointRecords) {
-                if(prevDate == null) {
+                if(prevPointRecord == null) {
                     startDate = pointRecord.date;
-                    prevDate = pointRecord.date;
+                    startFolder(kml, pointRecord);
+
                     coordinates.add(pointRecord.position);
                 }
                 else {
-                    long delta = pointRecord.date.getTime() - prevDate.getTime();
-                    if(delta < JOIN_POINTS_INTO_PATH_DELAY) {
-                        coordinates.add(pointRecord.position);
-                    }
-                    else {
-                        flushCoordinates(kml, coordinates, startDate, prevDate);
+                    long timeDelta = pointRecord.date.getTime() - prevPointRecord.date.getTime();
 
+                    boolean joinPointsIntoPathDelayExceeded = timeDelta > JOIN_POINTS_INTO_PATH_DELAY;
+                    boolean folderDelayExceeded = timeDelta > FOLDER_DELAY;
+                    boolean cellChanged = (pointRecord.cellId != prevPointRecord.cellId);
+
+                    if(folderDelayExceeded) {
+                        startFolder(kml, pointRecord);
+                    }
+
+                    if(joinPointsIntoPathDelayExceeded || cellChanged) {
+                        flushCoordinates(kml, coordinates, startDate, prevPointRecord.date, prevPointRecord.cellId);
                         startDate = pointRecord.date;
                         coordinates.clear();
-                        coordinates.add(pointRecord.position);
                     }
-                    prevDate = pointRecord.date;
+
+                    coordinates.add(pointRecord.position);
                 }
+
+                prevPointRecord = pointRecord;
             }
 
             if(coordinates.size() > 0) {
-                flushCoordinates(kml, coordinates, startDate, prevDate);
+                flushCoordinates(kml, coordinates, startDate, prevPointRecord.date, prevPointRecord.cellId);
             }
         }
         catch(Exception e) {
@@ -247,11 +285,15 @@ public class Log2Kml {
         }
     }
 
-    private static void flushCoordinates(GeoSwitchKml kml, List<LatLng> coordinates, Date startDate, Date endDate) {
+    private static void startFolder(GeoSwitchKml kml, PointRecord pointRecord) {
+        kml.startFolder("Path "+folderDateFormat.format(pointRecord.date));
+    }
+
+    private static void flushCoordinates(GeoSwitchKml kml, List<LatLng> coordinates, Date startDate, Date endDate, int cellId) {
         if(isSingularPath(coordinates)) {
-            kml.addPoint(coordinates.get(0), startDate);
+            kml.addPoint(coordinates.get(0), startDate, cellId);
         } else {
-            kml.addPath(coordinates, startDate, endDate);
+            kml.addPath(coordinates, startDate, endDate, cellId);
         }
     }
 

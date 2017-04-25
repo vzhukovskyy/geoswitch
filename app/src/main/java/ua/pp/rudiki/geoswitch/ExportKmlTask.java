@@ -78,8 +78,7 @@ public class ExportKmlTask extends DialogFragment {
             App.getLogger().info(TAG, "Generating KML file");
 
             kmlFile = new File(Environment.getExternalStorageDirectory(), "geoswitch.kml");
-            final long timePeriod = App.getPreferences().getDefaultTimePeriodForKml();
-            Log2Kml.log2kml(timePeriod, kmlFile);
+            Log2Kml.log2kml(kmlFile);
 
             App.getLogger().info(TAG, "KML file successfully generated");
 

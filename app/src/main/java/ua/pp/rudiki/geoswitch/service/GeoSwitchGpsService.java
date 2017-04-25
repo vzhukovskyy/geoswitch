@@ -10,6 +10,11 @@ import android.location.LocationProvider;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
+import android.telephony.CellInfo;
+import android.telephony.CellInfoCdma;
+import android.telephony.CellInfoGsm;
+import android.telephony.CellInfoLte;
+import android.telephony.CellInfoWcdma;
 import android.telephony.CellLocation;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
@@ -20,12 +25,14 @@ import android.util.Log;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 import ua.pp.rudiki.geoswitch.App;
 import ua.pp.rudiki.geoswitch.R;
 import ua.pp.rudiki.geoswitch.RequestCode;
 import ua.pp.rudiki.geoswitch.peripherals.ActionExecutor;
 import ua.pp.rudiki.geoswitch.peripherals.AsyncResultCallback;
+import ua.pp.rudiki.geoswitch.peripherals.NotificationUtils;
 import ua.pp.rudiki.geoswitch.trigger.GeoTrigger;
 
 public class GeoSwitchGpsService extends Service implements android.location.LocationListener
@@ -71,9 +78,11 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
         }
 
         if(App.getGpsServiceActivator().isOn()) {
+            // needed if app is started in switched on mode. Perhaps needs refactoring, i.e. send
+            // START_REASON_START_OR_STOP to OnStartCommand
             requestLastLocation();
-            registerLocationManagerListener();
             registerCellListener();
+            registerLocationManagerListener();
             displayStickyNotification();
         }
     }
@@ -147,9 +156,11 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
             if(activeMode) {
                 requestLastLocation();
                 registerLocationManagerListener();
+                registerCellListener();
                 displayStickyNotification();
             } else {
                 unregisterLocationManagerListener();
+                unregisterCellListener();
                 removeStickyNotification();
             }
 
@@ -363,24 +374,42 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
     //***************** Cell listener
     //********************************************************
 
+    private PhoneStateListener cellListener = new PhoneStateListener() {
+        public void onCellLocationChanged(CellLocation cellLocation) {
+            TelephonyManager telephonyManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
+            int connectedCellId = getCellId(cellLocation);
+
+            // for non-registered cells I get MAX_INT for all fields except Psc so ignore them yet
+//            String neighbours = new String();
+//            List<CellInfo> cells = telephonyManager.getAllCellInfo();
+//            for(CellInfo cell: cells) {
+//                //neighbours += getCellId(cell) + ",";
+//                neighbours += cell.toString() + ",";
+//            }
+
+            //App.getNotificationUtils().displayNotification("Connected to cell "+connectedCellId, true);
+            App.getLogger().logCellId(connectedCellId);
+        }
+
+        @Override
+        public void onDataConnectionStateChanged(int state, int networkType) {
+            App.getLogger().logNetworkType(networkType);
+        }
+    };
+
     private void registerCellListener() {
         TelephonyManager telephonyManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
 
-        CellLocation currentCellLocation = telephonyManager.getCellLocation();
-        onCellLocationChanged(currentCellLocation);
+//        CellLocation currentCellLocation = telephonyManager.getCellLocation();
+//        cellListener.onCellLocationChanged(currentCellLocation);
 
-        telephonyManager.listen(
-                new PhoneStateListener() {
-                    public void onCellLocationChanged(CellLocation location) {
-                        GeoSwitchGpsService.this.onCellLocationChanged(location);
-                    }
-                },
-                PhoneStateListener.LISTEN_CELL_LOCATION);
+        telephonyManager.listen(cellListener, PhoneStateListener.LISTEN_CELL_LOCATION  | PhoneStateListener.LISTEN_DATA_CONNECTION_STATE);
 
     }
 
-    private void onCellLocationChanged(CellLocation cellLocation) {
-        App.getLogger().logCellId(getCellId(cellLocation));
+    private void unregisterCellListener() {
+        TelephonyManager telephonyManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
+        telephonyManager.listen(cellListener, PhoneStateListener.LISTEN_NONE);
     }
 
     private int getCellId(CellLocation cellLocation) {
@@ -391,6 +420,22 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
             return ((GsmCellLocation)cellLocation).getCid();
 
         return ((CdmaCellLocation)cellLocation).getBaseStationId();
+    }
+
+    private int getCellId(CellInfo cellInfo) {
+        if(cellInfo == null)
+            return 0;
+
+        if(cellInfo instanceof CellInfoGsm)
+            return ((CellInfoGsm)cellInfo).getCellIdentity().getCid();
+
+        if(cellInfo instanceof CellInfoLte)
+            return ((CellInfoLte)cellInfo).getCellIdentity().getCi();
+
+        if(cellInfo instanceof CellInfoCdma)
+            return ((CellInfoCdma)cellInfo).getCellIdentity().getBasestationId();
+
+        return ((CellInfoWcdma)cellInfo).getCellIdentity().getCid();
     }
 
 

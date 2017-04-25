@@ -28,6 +28,7 @@ public class GeoSwitchLog {
     private final static Character LOG_LEVEL_INFO = 'I';
     private final static Character LOG_LEVEL_LOCATION = 'L';
     private final static Character LOG_LEVEL_CELL = 'C';
+    private final static Character LOG_LEVEL_NETWORK_TYPE = 'N';
     private final static Character LOG_LEVEL_TRIGGER = 'T';
     private final static Character LOG_LEVEL_ACTION = 'A';
     private final static Character LOG_LEVEL_DEBUG = 'D';
@@ -61,6 +62,13 @@ public class GeoSwitchLog {
         String message = "Connected to cell "+cellId;
 
         doLog(LOG_LEVEL_CELL, "", message);
+    }
+
+
+    public void logNetworkType(int networkType) {
+        String message = "Network type "+networkType;
+
+        doLog(LOG_LEVEL_NETWORK_TYPE, "", message);
     }
 
     public void logTrigger(GeoTrigger trigger) {

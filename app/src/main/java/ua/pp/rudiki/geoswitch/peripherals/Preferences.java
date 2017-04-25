@@ -204,6 +204,10 @@ public class Preferences {
         return 256*1024;
     }
 
+    public int getMaxLogFiles() {
+        return -1;
+    }
+
     public long getDefaultTimePeriodForKml() { return 3*60*60*1000;}
 
 }

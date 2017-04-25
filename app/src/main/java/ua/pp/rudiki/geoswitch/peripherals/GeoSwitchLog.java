@@ -1,28 +1,32 @@
 package ua.pp.rudiki.geoswitch.peripherals;
 
 import android.location.Location;
-import android.media.MediaScannerConnection;
 import android.os.Environment;
-import android.telephony.CellLocation;
 import android.util.Log;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.Deque;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Locale;
 
 import ua.pp.rudiki.geoswitch.App;
 import ua.pp.rudiki.geoswitch.trigger.GeoTrigger;
-import ua.pp.rudiki.geoswitch.trigger.TriggerType;
 
 public class GeoSwitchLog {
     private final static String TAG = GeoSwitchLog.class.getSimpleName();
 
-    private final static String LOG_FILENAME = "geoswitch-gps-log.txt";
-    private final static String ARCHIVE_FILENAME = "geoswitch-gps-log.01.txt";
+    private final static String LOGFILE_BASENAME = "geoswitch-gps-log";
+    private final static String LOGFILE_EXTENTION = "txt";
+    private final SimpleDateFormat LOGFILE_DATE_FORMAT = new SimpleDateFormat("yy-MM-dd HH-mm");
 
     private final static Character LOG_LEVEL_ERROR = 'E';
     private final static Character LOG_LEVEL_INFO = 'I';
@@ -33,8 +37,10 @@ public class GeoSwitchLog {
     private final static Character LOG_LEVEL_ACTION = 'A';
     private final static Character LOG_LEVEL_DEBUG = 'D';
 
+    private final SimpleDateFormat logDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+
     private File fileRoot;
-    private File file;
+    private Deque<File> logFiles = new LinkedList<File>();
     private FileOutputStream fileStream;
     private OutputStreamWriter fileStreamWriter;
 
@@ -43,9 +49,15 @@ public class GeoSwitchLog {
         //fileRoot = context.getFilesDir(); - this location is not accessible from another app like
         // text edit and sometimes not visible from computer over USB connection
 
-        openFile();
+        findLogFilesOnFileSystem();
 
-        Log.i(TAG, "Saving GPS data to file "+file.getAbsolutePath());
+        File file = youngestLogFile();
+        if(file == null) {
+            file = newLogFile();
+        }
+        openLogFile(file);
+
+        Log.i(TAG, "Saving GPS data to file " + currentLogFile().getAbsolutePath());
     }
 
     public void logLocation(Location location) {
@@ -59,14 +71,14 @@ public class GeoSwitchLog {
     }
 
     public void logCellId(int cellId) {
-        String message = "Connected to cell "+cellId;
+        String message = "Connected to cell " + cellId;
 
         doLog(LOG_LEVEL_CELL, "", message);
     }
 
 
     public void logNetworkType(int networkType) {
-        String message = "Network type "+networkType;
+        String message = "Network type " + networkType;
 
         doLog(LOG_LEVEL_NETWORK_TYPE, "", message);
     }
@@ -79,7 +91,7 @@ public class GeoSwitchLog {
     public void logTriggerFired(Location location) {
         String latitude = String.format(Locale.US, "%.8f", location.getLatitude());
         String longitude = String.format(Locale.US, "%.8f", location.getLongitude());
-        String message = "Trigger fired at ("+ latitude + "," + longitude + ")";
+        String message = "Trigger fired at (" + latitude + "," + longitude + ")";
 
         doLog(LOG_LEVEL_ACTION, "", message);
     }
@@ -104,14 +116,20 @@ public class GeoSwitchLog {
     }
 
     public String getAbsolutePath() {
-        return file.getAbsolutePath();
+        return currentLogFile().getAbsolutePath();
     }
 
     public File[] getLogFiles() {
-        File[] files = new File[2];
-        files[0] = new File(fileRoot, ARCHIVE_FILENAME);
-        files[1] = new File(fileRoot, LOG_FILENAME);
-        return files;
+        File[] array = new File[logFiles.size()];
+
+        // last-to-first order
+        Iterator<File> iter = logFiles.descendingIterator();
+        int index = 0;
+        while(iter.hasNext()) {
+            array[index] = iter.next();
+            index++;
+        }
+        return array;
     }
 
     // **************************** Private *****************************
@@ -122,10 +140,9 @@ public class GeoSwitchLog {
 
         try {
             Date now = new Date();
-            SimpleDateFormat dt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
             String s = new StringBuilder()
-                    .append(dt.format(now))
+                    .append(logDateFormat.format(now))
                     .append(" ")
                     .append(logLevel)
                     .append(" ")
@@ -137,18 +154,16 @@ public class GeoSwitchLog {
 
             fileStreamWriter.write(s);
             fileStreamWriter.flush();
-        }
-        catch(IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void openFile() {
-        file = new File(fileRoot, LOG_FILENAME);
+    private void openLogFile(File file) {
         try {
             fileStream = new FileOutputStream(file, true);
             fileStreamWriter = new OutputStreamWriter(fileStream, "UTF-8");
-        } catch(Exception e) {
+        } catch (Exception e) {
             Log.e(TAG, "failed to create log file");
             e.printStackTrace();
         }
@@ -156,33 +171,72 @@ public class GeoSwitchLog {
         FileUtils.makeVisibleViaUsb(file);
     }
 
+    private File currentLogFile() {
+        return logFiles.size() > 0 ? logFiles.peekFirst() : null;
+    }
+
+    private File youngestLogFile() {
+        return currentLogFile();
+    }
+
+    private void findLogFilesOnFileSystem() {
+        File[] files = fileRoot.listFiles(new FileFilter() {
+            public boolean accept(File pathname) {
+                return pathname.getName().startsWith(LOGFILE_BASENAME) &&
+                        pathname.getName().endsWith(LOGFILE_EXTENTION);
+            }
+        });
+
+        Arrays.sort(files, new Comparator<File>() {
+            @Override
+            public int compare(File o1, File o2) {
+                return (int) (o2.lastModified() - o1.lastModified());
+            }
+        });
+
+        for(File f: files)
+            logFiles.addLast(f);
+    }
+
+    private File newLogFile() {
+        String date = LOGFILE_DATE_FORMAT.format(new Date());
+        String filename = LOGFILE_BASENAME + "." + date + "." + LOGFILE_EXTENTION;
+        File file = new File(fileRoot, filename);
+
+        logFiles.addFirst(file);
+
+        return file;
+    }
 
     private void rotateFileIfNeeded() {
-        if(file.length() > App.getPreferences().getMaxLogFileSize()) {
+        if (currentLogFile().length() > App.getPreferences().getMaxLogFileSize()) {
             try {
                 fileStreamWriter.close();
                 fileStream.close();
-            }
-            catch(IOException e) {
+            } catch (IOException e) {
                 Log.e(TAG, "exception when closing log file");
             }
 
-            File archiveFile = new File(fileRoot, ARCHIVE_FILENAME);
+            FileUtils.makeVisibleViaUsb(currentLogFile());
 
-            boolean success = archiveFile.delete();
-            Log.i(TAG, "log file "+ARCHIVE_FILENAME+(success ? " successfully deleted" : " was not deleted"));
+            File file = newLogFile();
+            openLogFile(file);
 
-            success = file.renameTo(archiveFile);
-            if(success) {
-                Log.i(TAG, "log file successfully renamed to "+ARCHIVE_FILENAME);
-            } else {
-                Log.i(TAG, "log file was not renamed");
-            }
-
-            FileUtils.makeVisibleViaUsb(file);
-
-            openFile();
+            deleteOldestLogFilesIfNeeded();
         }
     }
 
+    private void deleteOldestLogFilesIfNeeded() {
+        int maxLogFiles = App.getPreferences().getMaxLogFiles();
+        if(maxLogFiles < 0)
+            return; // not limited
+
+        int filesToDelete = logFiles.size() - maxLogFiles;
+        while (filesToDelete > 0) {
+            File fileToDelete = logFiles.removeLast();
+            boolean success = fileToDelete.delete();
+            filesToDelete--;
+            Log.i(TAG, "log file " + fileToDelete.getName() + (success ? " successfully deleted" : " was not deleted"));
+        }
+    }
 }

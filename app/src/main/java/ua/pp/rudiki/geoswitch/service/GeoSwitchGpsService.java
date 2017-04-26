@@ -10,11 +10,6 @@ import android.location.LocationProvider;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
-import android.telephony.CellInfo;
-import android.telephony.CellInfoCdma;
-import android.telephony.CellInfoGsm;
-import android.telephony.CellInfoLte;
-import android.telephony.CellInfoWcdma;
 import android.telephony.CellLocation;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
@@ -25,14 +20,13 @@ import android.util.Log;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 
 import ua.pp.rudiki.geoswitch.App;
 import ua.pp.rudiki.geoswitch.R;
 import ua.pp.rudiki.geoswitch.RequestCode;
 import ua.pp.rudiki.geoswitch.peripherals.ActionExecutor;
 import ua.pp.rudiki.geoswitch.peripherals.AsyncResultCallback;
-import ua.pp.rudiki.geoswitch.peripherals.NotificationUtils;
+import ua.pp.rudiki.geoswitch.peripherals.NetworkUtils;
 import ua.pp.rudiki.geoswitch.trigger.GeoTrigger;
 
 public class GeoSwitchGpsService extends Service implements android.location.LocationListener
@@ -366,7 +360,8 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
                 default:
                     statusString = "unknown status "+status;
             }
-            App.getLogger().info(TAG, "onStatusChanged(" + provider + ") " + statusString);
+            // too much spam
+            //App.getLogger().info(TAG, "onStatusChanged(" + provider + ") " + statusString);
         }
     }
 
@@ -376,24 +371,24 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
 
     private PhoneStateListener cellListener = new PhoneStateListener() {
         public void onCellLocationChanged(CellLocation cellLocation) {
-            TelephonyManager telephonyManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
             int connectedCellId = getCellId(cellLocation);
 
-            // for non-registered cells I get MAX_INT for all fields except Psc so ignore them yet
-//            String neighbours = new String();
+            // getAllCellInfo does not return valid neighbour cell info for me
 //            List<CellInfo> cells = telephonyManager.getAllCellInfo();
-//            for(CellInfo cell: cells) {
-//                //neighbours += getCellId(cell) + ",";
-//                neighbours += cell.toString() + ",";
-//            }
 
             //App.getNotificationUtils().displayNotification("Connected to cell "+connectedCellId, true);
             App.getLogger().logCellId(connectedCellId);
         }
 
+        private String currentNetworkClass = "";
+
         @Override
         public void onDataConnectionStateChanged(int state, int networkType) {
-            App.getLogger().logNetworkType(networkType);
+            String networkClass = NetworkUtils.getNetworkClass(networkType);
+            if(!currentNetworkClass.equals(networkClass)) {
+                currentNetworkClass = networkClass;
+                App.getLogger().logNetworkClass(networkClass);
+            }
         }
     };
 
@@ -421,23 +416,5 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
 
         return ((CdmaCellLocation)cellLocation).getBaseStationId();
     }
-
-    private int getCellId(CellInfo cellInfo) {
-        if(cellInfo == null)
-            return 0;
-
-        if(cellInfo instanceof CellInfoGsm)
-            return ((CellInfoGsm)cellInfo).getCellIdentity().getCid();
-
-        if(cellInfo instanceof CellInfoLte)
-            return ((CellInfoLte)cellInfo).getCellIdentity().getCi();
-
-        if(cellInfo instanceof CellInfoCdma)
-            return ((CellInfoCdma)cellInfo).getCellIdentity().getBasestationId();
-
-        return ((CellInfoWcdma)cellInfo).getCellIdentity().getCid();
-    }
-
-
 
 }

@@ -32,7 +32,7 @@ public class GeoSwitchLog {
     private final static Character LOG_LEVEL_INFO = 'I';
     private final static Character LOG_LEVEL_LOCATION = 'L';
     private final static Character LOG_LEVEL_CELL = 'C';
-    private final static Character LOG_LEVEL_NETWORK_TYPE = 'N';
+    private final static Character LOG_LEVEL_NETWORK_CLASS = 'N';
     private final static Character LOG_LEVEL_TRIGGER = 'T';
     private final static Character LOG_LEVEL_ACTION = 'A';
     private final static Character LOG_LEVEL_DEBUG = 'D';
@@ -77,10 +77,10 @@ public class GeoSwitchLog {
     }
 
 
-    public void logNetworkType(int networkType) {
-        String message = "Network type " + networkType;
+    public void logNetworkClass(String networkClass) {
+        String message = "Network class " + networkClass;
 
-        doLog(LOG_LEVEL_NETWORK_TYPE, "", message);
+        doLog(LOG_LEVEL_NETWORK_CLASS, "", message);
     }
 
     public void logTrigger(GeoTrigger trigger) {

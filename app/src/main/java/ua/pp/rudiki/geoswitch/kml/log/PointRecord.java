@@ -8,4 +8,5 @@ public class PointRecord {
     public Date date;
     public LatLng position;
     public int cellId;
+    public String networkClass;
 }

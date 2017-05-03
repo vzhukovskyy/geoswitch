@@ -1,5 +1,6 @@
 package ua.pp.rudiki.geoswitch.kml;
 
+import android.location.Location;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -19,6 +20,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,13 +32,17 @@ import ua.pp.rudiki.geoswitch.kml.log.TransitionTriggerRecord;
 import ua.pp.rudiki.geoswitch.kml.log.TriggerRecord;
 import ua.pp.rudiki.geoswitch.kml.log.TriggerRecordFactory;
 import ua.pp.rudiki.geoswitch.peripherals.FileUtils;
+import ua.pp.rudiki.geoswitch.trigger.GeoArea;
+import ua.pp.rudiki.geoswitch.trigger.GeoPoint;
 
 public class Log2Kml {
     private static final String TAG = Log2Kml.class.getSimpleName();
 
     private final static int COPY_BUFFER_SIZE = 4096;
-    private final static int JOIN_POINTS_INTO_PATH_DELAY = 3000;
-    private final static int FOLDER_DELAY = 5*60*1000;
+    private final static int JOIN_POINTS_INTO_POLYLINE_DELAY = 3000;
+    private final static int JOIN_POINTS_INTO_POLYLINE_DELAY_CONDITIONAL = 60*1000;
+    private final static int JOIN_POINTS_INTO_POLYLINE_DISTANCE = 20;
+    private final static int JOIN_POLYLINES_INTO_PATH_DELAY = 5*60*1000;
 
     private static DateFormat logDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
     private static DateFormat folderDateFormat = new SimpleDateFormat("MM/dd HH:mm");
@@ -51,7 +57,9 @@ public class Log2Kml {
         removeOutdatedTriggers(parserResult, periodStartDate);
         removeOutdatedActions(parserResult, periodStartDate);
         removeDuplicateTriggers(parserResult);
-        generateKml(parserResult, kmlFile);
+
+        List<Path> paths = combinePointsIntoPaths(parserResult.pointRecords);
+        generateKml(parserResult, paths, kmlFile);
 
         tempLogFile.delete();
 
@@ -72,6 +80,7 @@ public class Log2Kml {
                 BufferedReader br = new BufferedReader(fileReader);
         ){
             int lastCellId = 0;
+            String lastNetworkClass = "";
 
             String logLine;
             while((logLine = br.readLine()) != null) {
@@ -103,6 +112,7 @@ public class Log2Kml {
                     pointRecord.date = date;
                     pointRecord.position = new LatLng(latitude, longitude);
                     pointRecord.cellId = lastCellId;
+                    pointRecord.networkClass = lastNetworkClass;
 
                     result.pointRecords.add(pointRecord);
                 }
@@ -149,6 +159,9 @@ public class Log2Kml {
                     catch (NumberFormatException e) {
                         continue;
                     }
+                }
+                else if (tag.equals("N")) {
+                    lastNetworkClass = parts[5];
                 }
             }
         }
@@ -223,7 +236,82 @@ public class Log2Kml {
         logParserResult.triggerRecords = new ArrayList<>(set);
     }
 
-    private static void generateKml(LogParserResult logParserResult, File kmlFile) {
+
+    private static class Polyline {
+        List<LatLng> points = new ArrayList<>();
+        Date startDate;
+        Date endDate;
+        int cellId;
+        String networkClass;
+        String tag;
+    }
+
+    private static class Path {
+        List<Polyline> polylines = new ArrayList<>();
+    }
+
+    private static List<Path> combinePointsIntoPaths(List<PointRecord> pointRecords) {
+        List<Path> paths = new ArrayList<>();
+        Path path = new Path();
+        Polyline polyline = new Polyline();
+
+        PointRecord prevPointRecord = null;
+        for(PointRecord pointRecord : pointRecords) {
+            if(prevPointRecord == null) {
+                polyline.startDate = pointRecord.date;
+                polyline.points.add(pointRecord.position);
+            }
+            else {
+                long timeDelta = pointRecord.date.getTime() - prevPointRecord.date.getTime();
+                double distance = distanceBetween(pointRecord.position, prevPointRecord.position);
+
+//                boolean joinPointsIntoPolyline = timeDelta <= JOIN_POINTS_INTO_POLYLINE_DELAY;
+                boolean joinPointsIntoPolyline = (timeDelta <= JOIN_POINTS_INTO_POLYLINE_DELAY) ||
+                        (timeDelta <= JOIN_POINTS_INTO_POLYLINE_DELAY_CONDITIONAL && distance <= JOIN_POINTS_INTO_POLYLINE_DISTANCE);
+                boolean joinPolylinesIntoPathDelayExceeded = timeDelta > JOIN_POLYLINES_INTO_PATH_DELAY;
+                boolean cellChanged = (pointRecord.cellId != prevPointRecord.cellId);
+                boolean networkClassChanged = !Objects.equals(pointRecord.networkClass, prevPointRecord.networkClass);
+
+                if(!joinPointsIntoPolyline || cellChanged || networkClassChanged) {
+                    polyline.endDate = prevPointRecord.date;
+                    polyline.cellId = prevPointRecord.cellId;
+                    polyline.networkClass = prevPointRecord.networkClass;
+                    path.polylines.add(polyline);
+
+                    polyline = new Polyline();
+                    polyline.startDate = pointRecord.date;
+                }
+
+                polyline.points.add(pointRecord.position);
+
+                if(joinPolylinesIntoPathDelayExceeded) {
+                    paths.add(path);
+                    path = new Path();
+                }
+            }
+
+            prevPointRecord = pointRecord;
+        }
+
+        if(polyline.points.size() > 0) {
+            polyline.endDate = prevPointRecord.date;
+            polyline.cellId = prevPointRecord.cellId;
+            polyline.networkClass = prevPointRecord.networkClass;
+            path.polylines.add(polyline);
+            paths.add(path);
+        }
+
+        return paths;
+    }
+
+    private static double distanceBetween(LatLng ll1, LatLng ll2) {
+        float[] results = new float[1];
+        Location.distanceBetween(ll1.latitude, ll1.longitude, ll2.latitude, ll2.longitude, results);
+        float distanceInMeters = results[0];
+        return distanceInMeters;
+    }
+
+    private static void generateKml(LogParserResult logParserResult, List<Path> paths, File kmlFile) {
         try (
                 GeoSwitchKml kml = new GeoSwitchKml(kmlFile);
         ){
@@ -242,42 +330,28 @@ public class Log2Kml {
                 kml.addActionFire(pointRecord.position, pointRecord.date);
             }
 
+            for(Path path: paths) {
+                String folderName;
+                if(isAtHome(path))
+                    folderName = "At Home";
+                else if(isPathFromHome(path))
+                    folderName = "Path From Home";
+                else if(isPathToHome(path))
+                    folderName = "Path To Home";
+                else
+                    folderName = "Other Path";
 
-            List<LatLng> coordinates = new ArrayList<>();
-            Date startDate = null;
-            PointRecord prevPointRecord = null;
-            for(PointRecord pointRecord : logParserResult.pointRecords) {
-                if(prevPointRecord == null) {
-                    startDate = pointRecord.date;
-                    startFolder(kml, pointRecord);
+                kml.openFolder(folderName+" "+folderDateFormat.format(path.polylines.get(0).startDate));
 
-                    coordinates.add(pointRecord.position);
-                }
-                else {
-                    long timeDelta = pointRecord.date.getTime() - prevPointRecord.date.getTime();
-
-                    boolean joinPointsIntoPathDelayExceeded = timeDelta > JOIN_POINTS_INTO_PATH_DELAY;
-                    boolean folderDelayExceeded = timeDelta > FOLDER_DELAY;
-                    boolean cellChanged = (pointRecord.cellId != prevPointRecord.cellId);
-
-                    if(folderDelayExceeded) {
-                        startFolder(kml, pointRecord);
+                for(Polyline polyline: path.polylines) {
+                    if(isSingularPath(polyline.points)) {
+                        kml.addPoint(polyline.points.get(0), polyline.startDate, polyline.cellId, polyline.networkClass);
+                    } else {
+                        kml.addPath(polyline.points, polyline.startDate, polyline.endDate, polyline.cellId, polyline.networkClass);
                     }
-
-                    if(joinPointsIntoPathDelayExceeded || cellChanged) {
-                        flushCoordinates(kml, coordinates, startDate, prevPointRecord.date, prevPointRecord.cellId);
-                        startDate = pointRecord.date;
-                        coordinates.clear();
-                    }
-
-                    coordinates.add(pointRecord.position);
                 }
 
-                prevPointRecord = pointRecord;
-            }
-
-            if(coordinates.size() > 0) {
-                flushCoordinates(kml, coordinates, startDate, prevPointRecord.date, prevPointRecord.cellId);
+                kml.closeFolder();
             }
         }
         catch(Exception e) {
@@ -285,16 +359,34 @@ public class Log2Kml {
         }
     }
 
-    private static void startFolder(GeoSwitchKml kml, PointRecord pointRecord) {
-        kml.startFolder("Path "+folderDateFormat.format(pointRecord.date));
+    private static boolean isAtHome(Path path) {
+        for(Polyline polyline: path.polylines)
+            for(LatLng ll: polyline.points)
+                if(!isInsideHomeArea(ll))
+                    return false;
+
+        return true;
     }
 
-    private static void flushCoordinates(GeoSwitchKml kml, List<LatLng> coordinates, Date startDate, Date endDate, int cellId) {
-        if(isSingularPath(coordinates)) {
-            kml.addPoint(coordinates.get(0), startDate, cellId);
-        } else {
-            kml.addPath(coordinates, startDate, endDate, cellId);
-        }
+    private static boolean isPathToHome(Path path) {
+        Polyline lastPolyline = path.polylines.get(path.polylines.size()-1);
+        LatLng lastFix = lastPolyline.points.get(lastPolyline.points.size()-1);
+
+        return isInsideHomeArea(lastFix);
+    }
+
+    private static boolean isPathFromHome(Path path) {
+        LatLng firstFix = path.polylines.get(0).points.get(0);
+
+        return isInsideHomeArea(firstFix);
+    }
+
+    private static boolean isInsideHomeArea(LatLng ll) {
+        GeoArea homeArea = App.getPreferences().loadHomeArea();
+        GeoPoint point = new GeoPoint(ll.latitude, ll.longitude);
+
+        boolean inside = (homeArea.getCenter().distanceTo(point) < homeArea.getRadius());
+        return inside;
     }
 
     private static boolean isSingularPath(List<LatLng> coordinates) {

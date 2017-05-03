@@ -10,7 +10,9 @@ import android.location.LocationProvider;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
+import android.telephony.CellInfo;
 import android.telephony.CellLocation;
+import android.telephony.NeighboringCellInfo;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.telephony.cdma.CdmaCellLocation;
@@ -20,6 +22,7 @@ import android.util.Log;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 import ua.pp.rudiki.geoswitch.App;
 import ua.pp.rudiki.geoswitch.R;
@@ -373,8 +376,9 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
         public void onCellLocationChanged(CellLocation cellLocation) {
             int connectedCellId = getCellId(cellLocation);
 
-            // getAllCellInfo does not return valid neighbour cell info for me
+            // getAllCellInfo and getNeighboringCellInfo does not return valid neighbour cell info for me
 //            List<CellInfo> cells = telephonyManager.getAllCellInfo();
+//            List<NeighboringCellInfo> cells = telephonyManager.getNeighboringCellInfo();
 
             //App.getNotificationUtils().displayNotification("Connected to cell "+connectedCellId, true);
             App.getLogger().logCellId(connectedCellId);

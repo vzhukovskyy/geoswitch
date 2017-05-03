@@ -23,6 +23,10 @@ public class Preferences {
     public final static String longitudeToKey = "longitudeTo";
     public final static String radiusKey = "radius";
 
+    public final static String homeLatitudeKey = "homeLatitude";
+    public final static String homeLongitudeKey = "homeLongitude";
+    public final static String homeRadiusKey = "homeRadius";
+
     public final static String showNotificationKey = "showNotification";
     public final static String playSoundKey = "playSound";
     public final static String speakOutKey = "speakOut";
@@ -209,5 +213,18 @@ public class Preferences {
     }
 
     public long getDefaultTimePeriodForKml() { return 3*60*60*1000;}
+
+    // no means to select home area in UI yet, need to put to preferences from code
+    public void storeHomeArea() {
+        SharedPreferences.Editor editor = sharedPrefs.edit();
+        editor.putString(homeLatitudeKey, String.valueOf(0 /*replace me*/));
+        editor.putString(homeLongitudeKey, String.valueOf(0 /*replace me*/));
+        editor.putString(homeRadiusKey, String.valueOf(50));
+        editor.commit();
+    }
+    public GeoArea loadHomeArea() {
+        //storeHomeArea();
+        return loadArea(homeLatitudeKey, homeLongitudeKey, homeRadiusKey);
+    }
 
 }

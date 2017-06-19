@@ -9,7 +9,7 @@ import android.os.BatteryManager;
 import ua.pp.rudiki.geoswitch.App;
 
 public class PowerReceiver extends BroadcastReceiver {
-    private final static String TAG = BroadcastReceiver.class.getSimpleName();
+    private final static String TAG = PowerReceiver.class.getSimpleName();
 
     @Override
     public void onReceive(Context context, Intent intent) {

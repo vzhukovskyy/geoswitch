@@ -62,7 +62,16 @@
                 <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED" />
             </intent-filter>
         </receiver>
-
+        <receiver android:name=".peripherals.WifiBroadcastReceiver" >
+            <intent-filter android:priority="100">
+                <action android:name="android.net.wifi.STATE_CHANGE" />
+                <action android:name="android.net.wifi.NETWORK_STATE_CHANGED_ACTION" />
+                <action android:name="android.net.wifi.SUPPLICANT_STATE_CHANGED_ACTION" />
+                <action android:name="android.net.wifi.SUPPLICANT_CONNECTION_CHANGE_ACTION" />
+                <action android:name="android.net.wifi.WIFI_STATE_CHANGED" />
+                <action android:name="android.net.wifi.WIFI_STATE_CHANGED_ACTION" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

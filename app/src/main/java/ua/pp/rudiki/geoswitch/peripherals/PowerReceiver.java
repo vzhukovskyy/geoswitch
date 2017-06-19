@@ -16,7 +16,8 @@ public class PowerReceiver extends BroadcastReceiver {
         String intentAction = intent.getAction();
 
         if(intentAction.equals(Intent.ACTION_POWER_CONNECTED)) {
-            App.getLogger().info(TAG, "Power Connected");
+            //int chargePlug = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1); - does not work
+            App.getLogger().info(TAG, "Power Connected via "+getChargingSource());
             App.getGpsServiceActivator().connectedToCharger();
         } else if(intentAction.equals(Intent.ACTION_POWER_DISCONNECTED)){
             App.getLogger().info(TAG, "Power Disconnected");
@@ -33,5 +34,23 @@ public class PowerReceiver extends BroadcastReceiver {
                 status == BatteryManager.BATTERY_STATUS_FULL;
 
         return isCharging;
+    }
+
+    private String getChargingSource() {
+        IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+        Intent batteryStatus = App.getAppContext().registerReceiver(null, ifilter);
+
+        int chargePlug = batteryStatus.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
+        String source = "";
+        if(chargePlug == BatteryManager.BATTERY_PLUGGED_USB)
+            source = "USB";
+        else if (chargePlug == BatteryManager.BATTERY_PLUGGED_AC)
+            source = "AC";
+        else if (chargePlug == BatteryManager.BATTERY_PLUGGED_WIRELESS)
+            source = "Wireless";
+        else
+            source = "Unknown";
+
+        return source;
     }
 }

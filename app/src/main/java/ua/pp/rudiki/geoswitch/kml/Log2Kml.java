@@ -79,7 +79,7 @@ public class Log2Kml {
                 FileReader fileReader = new FileReader(logFile);
                 BufferedReader br = new BufferedReader(fileReader);
         ){
-            int lastCellId = 0;
+            String lastCellId = null;
             String lastNetworkClass = "";
 
             String logLine;
@@ -153,12 +153,7 @@ public class Log2Kml {
                     result.actionRecords.add(pointRecord);
                 }
                 else if (tag.equals("C")) {
-                    try {
-                        lastCellId = Integer.parseInt(parts[6]);
-                    }
-                    catch (NumberFormatException e) {
-                        continue;
-                    }
+                    lastCellId = parts[6];
                 }
                 else if (tag.equals("N")) {
                     lastNetworkClass = parts[5];
@@ -241,7 +236,7 @@ public class Log2Kml {
         List<LatLng> points = new ArrayList<>();
         Date startDate;
         Date endDate;
-        int cellId;
+        String cellId;
         String networkClass;
         String tag;
     }
@@ -269,7 +264,7 @@ public class Log2Kml {
                 boolean joinPointsIntoPolyline = (timeDelta <= JOIN_POINTS_INTO_POLYLINE_DELAY) ||
                         (timeDelta <= JOIN_POINTS_INTO_POLYLINE_DELAY_CONDITIONAL && distance <= JOIN_POINTS_INTO_POLYLINE_DISTANCE);
                 boolean joinPolylinesIntoPathDelayExceeded = timeDelta > JOIN_POLYLINES_INTO_PATH_DELAY;
-                boolean cellChanged = (pointRecord.cellId != prevPointRecord.cellId);
+                boolean cellChanged = !Objects.equals(pointRecord.cellId, prevPointRecord.cellId);
                 boolean networkClassChanged = !Objects.equals(pointRecord.networkClass, prevPointRecord.networkClass);
 
                 if(!joinPointsIntoPolyline || cellChanged || networkClassChanged) {

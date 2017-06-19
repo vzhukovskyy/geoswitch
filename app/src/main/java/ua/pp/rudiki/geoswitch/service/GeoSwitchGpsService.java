@@ -374,14 +374,16 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
 
     private PhoneStateListener cellListener = new PhoneStateListener() {
         public void onCellLocationChanged(CellLocation cellLocation) {
-            int connectedCellId = getCellId(cellLocation);
+            String connectedCell = getCellId(cellLocation);
 
-            // getAllCellInfo and getNeighboringCellInfo does not return valid neighbour cell info for me
+            // getAllCellInfo and getNeighboringCellInfo does not return valid neighbour cell info for me:
+            // INT_MAX for all fields except active cell.
+//            TelephonyManager telephonyManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
 //            List<CellInfo> cells = telephonyManager.getAllCellInfo();
 //            List<NeighboringCellInfo> cells = telephonyManager.getNeighboringCellInfo();
 
             //App.getNotificationUtils().displayNotification("Connected to cell "+connectedCellId, true);
-            App.getLogger().logCellId(connectedCellId);
+            App.getLogger().logCellId(connectedCell);
         }
 
         private String currentNetworkClass = "";
@@ -411,14 +413,22 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
         telephonyManager.listen(cellListener, PhoneStateListener.LISTEN_NONE);
     }
 
-    private int getCellId(CellLocation cellLocation) {
+    private String getCellId(CellLocation cellLocation) {
         if(cellLocation == null)
-            return 0;
+            return "";
 
-        if(cellLocation instanceof GsmCellLocation)
-            return ((GsmCellLocation)cellLocation).getCid();
+        if(cellLocation instanceof GsmCellLocation) {
+            int cid = ((GsmCellLocation) cellLocation).getCid();
+            int lac = ((GsmCellLocation) cellLocation).getLac();
 
-        return ((CdmaCellLocation)cellLocation).getBaseStationId();
+            int cellId = cid & 0xffff;
+            int node = cid >> 16;
+
+            return String.valueOf(lac)+"-"+node+"-"+cellId;
+        }
+
+        return String.valueOf(((CdmaCellLocation)cellLocation).getBaseStationId());
     }
+
 
 }

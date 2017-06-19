@@ -70,7 +70,7 @@ public class GeoSwitchLog {
         doLog(LOG_LEVEL_LOCATION, "", message);
     }
 
-    public void logCellId(int cellId) {
+    public void logCellId(String cellId) {
         String message = "Connected to cell " + cellId;
 
         doLog(LOG_LEVEL_CELL, "", message);
@@ -109,6 +109,8 @@ public class GeoSwitchLog {
     }
 
     public void exception(String tag, Throwable exception) {
+        Log.e(tag, "", exception);
+
         String stackTrace = Log.getStackTraceString(exception);
         String text = exception.getMessage() + "\n" + stackTrace;
 

@@ -4,13 +4,14 @@ package ua.pp.rudiki.geoswitch.peripherals;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import ua.pp.rudiki.geoswitch.ActivityGpsOptions.GpsActivationType;
 import ua.pp.rudiki.geoswitch.trigger.AreaTrigger;
-import ua.pp.rudiki.geoswitch.trigger.ExitAreaTrigger;
-import ua.pp.rudiki.geoswitch.trigger.GeoTrigger;
-import ua.pp.rudiki.geoswitch.trigger.TransitionTrigger;
 import ua.pp.rudiki.geoswitch.trigger.EnterAreaTrigger;
+import ua.pp.rudiki.geoswitch.trigger.ExitAreaTrigger;
 import ua.pp.rudiki.geoswitch.trigger.GeoArea;
 import ua.pp.rudiki.geoswitch.trigger.GeoPoint;
+import ua.pp.rudiki.geoswitch.trigger.GeoTrigger;
+import ua.pp.rudiki.geoswitch.trigger.TransitionTrigger;
 import ua.pp.rudiki.geoswitch.trigger.TriggerType;
 
 public class Preferences {
@@ -34,7 +35,7 @@ public class Preferences {
     public final static String appendTokenKey = "appendToken";
     public final static String urlKey = "url";
 
-    public final static String activateOnChargerKey = "activateOnCharger";
+    public final static String gpsActivationKey = "gpsActivation";
     public final static String gpsManuallyActivatedKey = "gpsManuallyActivated";
 
     private SharedPreferences sharedPrefs;
@@ -148,10 +149,10 @@ public class Preferences {
         editor.commit();
     }
 
-    public void storeActivationOptions(boolean activateOnCharger)
+    public void storeGpsActivationOption(GpsActivationType type)
     {
         SharedPreferences.Editor editor = sharedPrefs.edit();
-        editor.putBoolean(activateOnChargerKey, activateOnCharger);
+        editor.putString(gpsActivationKey, type.name());
         editor.commit();
     }
 
@@ -184,11 +185,13 @@ public class Preferences {
         return sharedPrefs.getString(urlKey, getDefaultUrl());
     }
 
-    public boolean getActivateOnCharger() {
-        return sharedPrefs.getBoolean(activateOnChargerKey, false);
+    public GpsActivationType getGpsActivationOption() {
+        String type = sharedPrefs.getString(gpsActivationKey, GpsActivationType.Manual.name());
+        return GpsActivationType.valueOf(type);
     }
 
     public boolean getGpsManuallyActivated() { return sharedPrefs.getBoolean(gpsManuallyActivatedKey, false); }
+
 
     // Default values
 

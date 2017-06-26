@@ -36,6 +36,8 @@ import ua.pp.rudiki.geoswitch.trigger.GeoTrigger;
 import ua.pp.rudiki.geoswitch.trigger.TransitionTrigger;
 import ua.pp.rudiki.geoswitch.trigger.TriggerType;
 
+import ua.pp.rudiki.geoswitch.ActivityGpsOptions.GpsActivationType;
+
 
 public class ActivityMain extends AppCompatActivity implements GpsServiceActivationListener
 {
@@ -230,7 +232,7 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
 
     private void updateStatusUi(Date gpsFixTime) {
         boolean active = App.getGpsServiceActivator().isOn();
-        boolean activateOnCharger = App.getPreferences().getActivateOnCharger();
+        GpsActivationType type = App.getPreferences().getGpsActivationOption();
 
         String status, substatus;
         if(active) {
@@ -242,25 +244,33 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
             }
         } else {
             status = getString(R.string.activity_main_status_inactive);
-            if(activateOnCharger) {
-                substatus = getString(R.string.activity_main_substatus_bycharger_inactive);
-            } else {
-                substatus = getString(R.string.activity_main_substatus_manual_inactive);
+            switch(type) {
+                case Charger:
+                    substatus = getString(R.string.activity_main_substatus_bycharger_inactive);
+                    break;
+                case Bluetooth:
+                    substatus = getString(R.string.activity_main_substatus_bybluetooth_inactive);
+                    break;
+                case Manual:
+                default:
+                    substatus = getString(R.string.activity_main_substatus_manual_inactive);
+                    break;
             }
         }
 
         statusLabel.setText(status);
         substatusLabel.setText(substatus);
 
-        gpsActivationSwitch.setVisibility(activateOnCharger ? View.GONE : View.VISIBLE);
+        boolean activateManually = App.getPreferences().getGpsActivationOption() == GpsActivationType.Manual;
+        gpsActivationSwitch.setVisibility(activateManually ? View.VISIBLE : View.GONE);
         gpsActivationSwitch.setChecked(active);
     }
 
     private void updateActivationModeUi() {
-        boolean activateOnCharger = App.getPreferences().getActivateOnCharger();
+        boolean activateManually = App.getPreferences().getGpsActivationOption() == GpsActivationType.Manual;
         boolean manuallyActivated = App.getPreferences().getGpsManuallyActivated();
 
-        gpsActivationSwitch.setVisibility(activateOnCharger ? View.GONE : View.VISIBLE);
+        gpsActivationSwitch.setVisibility(activateManually ? View.VISIBLE : View.GONE);
         gpsActivationSwitch.setChecked(manuallyActivated);
     }
 
@@ -347,13 +357,19 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
     }
 
     private void loadGpsActivationToUi() {
-        boolean activateOnCharger = App.getPreferences().getActivateOnCharger();
+        GpsActivationType activationType = App.getPreferences().getGpsActivationOption();
 
         String desc;
-        if (activateOnCharger) {
-            desc = getString(R.string.activity_main_gps_charging);
-        } else {
-            desc = getString(R.string.activity_main_gps_manual);
+        switch(activationType) {
+            case Charger:
+                desc = getString(R.string.activity_main_gps_charging);
+                break;
+            case Bluetooth:
+                desc = getString(R.string.activity_main_gps_bluetooth);
+                break;
+            case Manual:
+            default:
+                desc = getString(R.string.activity_main_gps_manual);
         }
 
         gpsActivationEdit.setText(desc);

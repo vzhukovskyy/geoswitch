@@ -22,7 +22,7 @@ public class WifiBroadcastReceiver extends BroadcastReceiver {
             // Broadcast intent action indicating that Wi-Fi has been enabled, disabled, enabling, disabling, or unknown.
 
             int currentWifiState = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, WifiManager.WIFI_STATE_UNKNOWN);
-            int previousWifiState = intent.getIntExtra(WifiManager.EXTRA_PREVIOUS_WIFI_STATE, WifiManager.WIFI_STATE_UNKNOWN);
+            //int previousWifiState = intent.getIntExtra(WifiManager.EXTRA_PREVIOUS_WIFI_STATE, WifiManager.WIFI_STATE_UNKNOWN);
 
             App.getLogger().logWifi(TAG, "WIFI_STATE_CHANGED_ACTION state: "+wifiStateToString(currentWifiState));
         }

@@ -23,7 +23,9 @@
 
     <string name="activity_gps_title">GeoSwitch/GPS Activation</string>
     <string name="activity_gps_label">GPS sensor consumes much battery power. These options specify when GPS sensor is to be turned on for location tracking.</string>
-    <string name="activity_gps_charger">Automatically turn on when connected to charger and turn off when disconnected from charger (recommended for use in car)</string>
+    <string name="activity_gps_charger">Automatically turn on when connected to charger and turn off when disconnected (recommended for use in car)</string>
+    <string name="activity_gps_bluetooth">Automatically turn on when connected to a hands-free bluetooth device and turn off when disconnected</string>string>
+
     <string name="activity_gps_manual">Turn GPS on/off manually</string>
     <string name="activity_gps_ok">OK</string>
     <string name="activity_gps_cancel">Cancel</string>
@@ -32,11 +34,13 @@
     <string name="activity_main_status_active">Status: monitoring location</string>
     <string name="activity_main_status_inactive">Status: inactive</string>
     <string name="activity_main_substatus_waiting_gps">Waiting for GPS fix</string>
-    <string name="activity_main_substatus_bycharger_inactive">Connect to charger to activate</string>
     <string name="activity_main_substatus_gps_time">"Last location info received at "</string>
     <string name="activity_main_substatus_manual_inactive">Tap switch to start monitoring location</string>
-    <string name="activity_main_gps_charging">GPS sensor is only turned on when the device is connected to charger</string>
+    <string name="activity_main_substatus_bycharger_inactive">Connect to charger to activate</string>
+    <string name="activity_main_substatus_bybluetooth_inactive">Connect to bluetooth hands-free to activate</string>
     <string name="activity_main_gps_manual">GPS sensor activation is controlled manually</string>
+    <string name="activity_main_gps_charging">GPS sensor is only turned on when the device is connected to charger</string>
+    <string name="activity_main_gps_bluetooth">GPS sensor is only turned on when the device is connected to a bluetooth hands-free device</string>
     <string name="activity_main_gps_button">GPS activation</string>
     <string name="activity_main_trigger_desc_enter_area" formatted="false">Triggers when entering %d meters radius circular area with center in (%s,%s)</string>
     <string name="activity_main_trigger_desc_exit_area" formatted="false">Triggers when exiting %d meters radius circular area with center in (%s,%s)</string>

@@ -13,48 +13,53 @@
         android:layout_height="wrap_content"/>
 
 
-<RelativeLayout
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    >
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingBottom="@dimen/activity_vertical_margin"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/textView"
-        android:layout_marginBottom="10dp"
-        android:text="@string/activity_gps_label" />
-
-    <RadioGroup
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/gpsOptionsRadioGroup"
-        android:layout_below="@+id/textView"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="6dp"
-        android:layout_marginBottom="6dp">
-
-        <RadioButton
+        <TextView
+            android:id="@+id/textView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/radioOnCharge"
-            android:layout_weight="1"
-            android:text="@string/activity_gps_charger" />
+            android:layout_marginBottom="10dp"
+            android:text="@string/activity_gps_label" />
 
-        <RadioButton
+        <RadioGroup
+            android:id="@+id/gpsOptionsRadioGroup"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/radioManual"
-            android:layout_below="@+id/gpsOptionsRadioGroup"
             android:layout_alignParentStart="true"
-            android:layout_weight="1"
-            android:layout_marginTop="6dp"
-            android:text="@string/activity_gps_manual" />
-    </RadioGroup>
+            android:layout_below="@+id/textView"
+            android:layout_marginBottom="6dp"
+            android:layout_marginTop="6dp">
 
-</RelativeLayout>
+            <RadioButton
+                android:id="@+id/radioOnCharge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/activity_gps_charger" />
+
+            <RadioButton
+                android:id="@+id/radioOnBluetooth"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:layout_weight="1"
+                android:text="@string/activity_gps_bluetooth" />
+
+            <RadioButton
+                android:id="@+id/radioManual"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:layout_weight="1"
+                android:text="@string/activity_gps_manual" />
+        </RadioGroup>
+
+    </RelativeLayout>
 </LinearLayout>

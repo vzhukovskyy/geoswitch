@@ -161,16 +161,14 @@ public class GeoSwitchGpsService extends Service implements android.location.Loc
                 removeStickyNotification();
             }
 
+            Location lastLocationCopy = null;
             if(activeMode) {
-                Location lastLocationCopy;
                 synchronized (mutex) {
                     lastLocationCopy = lastLocation;
                 }
-
-                if (lastLocationCopy != null) {
-                    sendMessageToActivity(lastLocationCopy);
-                }
             }
+            // need to update activity status regardless the availability of location data
+            sendMessageToActivity(lastLocationCopy);
         }
 
         return START_STICKY;

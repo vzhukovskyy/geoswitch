@@ -34,6 +34,8 @@ public class GeoSwitchLog {
     private final static Character LOG_LEVEL_CELL = 'C';
     private final static Character LOG_LEVEL_NETWORK_CLASS = 'N';
     private final static Character LOG_LEVEL_WIFI = 'W';
+    private final static Character LOG_LEVEL_BLUETOOTH = 'B';
+    private final static Character LOG_LEVEL_POWER = 'P';
     private final static Character LOG_LEVEL_TRIGGER = 'T';
     private final static Character LOG_LEVEL_ACTION = 'A';
     private final static Character LOG_LEVEL_DEBUG = 'D';
@@ -61,8 +63,18 @@ public class GeoSwitchLog {
         Log.i(TAG, "Saving GPS data to file " + currentLogFile().getAbsolutePath());
     }
 
+    public void logPower(String tag, String message) {
+        doLog(LOG_LEVEL_POWER, "", message);
+        Log.e(tag, message);
+    }
+
     public void logWifi(String tag, String message) {
         doLog(LOG_LEVEL_WIFI, "", message);
+        Log.e(tag, message);
+    }
+
+    public void logBluetooth(String tag, String message) {
+        doLog(LOG_LEVEL_BLUETOOTH, "", message);
         Log.e(tag, message);
     }
 

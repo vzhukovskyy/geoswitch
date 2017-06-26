@@ -5,13 +5,12 @@ import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.View;
 import android.widget.RadioGroup;
 
 public class ActivityGpsOptions extends AppCompatActivity {
     private final static String TAG = ActivityGpsOptions.class.getSimpleName();
 
+    public enum GpsActivationType {Charger, Bluetooth, Manual};
     RadioGroup gpsOptionsRadioGroup;
 
     @Override
@@ -78,20 +77,46 @@ public class ActivityGpsOptions extends AppCompatActivity {
     // data persistence
 
     private boolean isFormChanged() {
-        return isOnChargeRadioSelected() != App.getPreferences().getActivateOnCharger();
+        GpsActivationType type = App.getPreferences().getGpsActivationOption();
+        int radioId = gpsActivationTypeToRadioId(type);
+        return gpsOptionsRadioGroup.getCheckedRadioButtonId() != radioId;
     }
 
     private void storeValues() {
-        App.getPreferences().storeActivationOptions(isOnChargeRadioSelected());
+        int radioId = gpsOptionsRadioGroup.getCheckedRadioButtonId();
+        GpsActivationType type = radioIdToGpsActivationType(radioId);
+        App.getPreferences().storeGpsActivationOption(type);
     }
 
     private void loadValuesToUi() {
-        boolean isOnCharge = App.getPreferences().getActivateOnCharger();
-        gpsOptionsRadioGroup.check(isOnCharge ? R.id.radioOnCharge : R.id.radioManual);
+        GpsActivationType type = App.getPreferences().getGpsActivationOption();
+        int checkedRadioId = gpsActivationTypeToRadioId(type);
+        gpsOptionsRadioGroup.check(checkedRadioId);
     }
 
-    // radio mapping
-    private boolean isOnChargeRadioSelected() {
-        return gpsOptionsRadioGroup.getCheckedRadioButtonId() == R.id.radioOnCharge;
+    private int gpsActivationTypeToRadioId(GpsActivationType type) {
+        switch(type) {
+            case Manual:
+                return R.id.radioManual;
+            case Charger:
+                return R.id.radioOnCharge;
+            case Bluetooth:
+                return R.id.radioOnBluetooth;
+            default:
+                return R.id.radioManual;
+        }
+    }
+
+    private GpsActivationType radioIdToGpsActivationType(int radioId) {
+        switch(radioId) {
+            case R.id.radioManual:
+                return GpsActivationType.Manual;
+            case R.id.radioOnCharge:
+                return GpsActivationType.Charger;
+            case R.id.radioOnBluetooth:
+                return GpsActivationType.Bluetooth;
+            default:
+                return GpsActivationType.Manual;
+        }
     }
 }

@@ -8,8 +8,8 @@ import android.os.BatteryManager;
 
 import ua.pp.rudiki.geoswitch.App;
 
-public class PowerReceiver extends BroadcastReceiver {
-    private final static String TAG = PowerReceiver.class.getSimpleName();
+public class PowerBroadcastReceiver extends BroadcastReceiver {
+    private final static String TAG = PowerBroadcastReceiver.class.getSimpleName();
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -17,10 +17,10 @@ public class PowerReceiver extends BroadcastReceiver {
 
         if(intentAction.equals(Intent.ACTION_POWER_CONNECTED)) {
             //int chargePlug = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1); - does not work
-            App.getLogger().info(TAG, "Power Connected via "+getChargingSource());
+            App.getLogger().logPower(TAG, "Power Connected via "+getChargingSource());
             App.getGpsServiceActivator().connectedToCharger();
         } else if(intentAction.equals(Intent.ACTION_POWER_DISCONNECTED)){
-            App.getLogger().info(TAG, "Power Disconnected");
+            App.getLogger().logPower(TAG, "Power Disconnected");
             App.getGpsServiceActivator().disconnectedFromCharger();
         }
     }
@@ -40,6 +40,9 @@ public class PowerReceiver extends BroadcastReceiver {
         IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
         Intent batteryStatus = App.getAppContext().registerReceiver(null, ifilter);
 
+        // accordingly to my experiments difference between USB and AC is in charging power:
+        // 2A is treated as AC, 500mA is treated as USB. Complete correspondence to
+        // "Charging" and "Charging slowly via USB" notifications.
         int chargePlug = batteryStatus.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
         String source = "";
         if(chargePlug == BatteryManager.BATTERY_PLUGGED_USB)

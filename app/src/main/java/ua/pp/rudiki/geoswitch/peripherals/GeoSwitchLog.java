@@ -209,7 +209,7 @@ public class GeoSwitchLog {
         Arrays.sort(files, new Comparator<File>() {
             @Override
             public int compare(File o1, File o2) {
-                return (int) (o2.lastModified() - o1.lastModified());
+                return Long.compare(o2.lastModified(), o1.lastModified());
             }
         });
 

@@ -80,6 +80,13 @@
                 <action android:name="android.bluetooth.device.action.ACL_DISCONNECTED"/>
             </intent-filter>
         </receiver>
+        <receiver
+            android:name=".peripherals.CarModeReceiver">
+            <intent-filter>
+                <action android:name="android.app.action.ENTER_CAR_MODE" />
+                <action android:name="android.app.action.EXIT_CAR_MODE" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

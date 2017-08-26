@@ -35,6 +35,7 @@ public class GeoSwitchLog {
     private final static Character LOG_LEVEL_NETWORK_CLASS = 'N';
     private final static Character LOG_LEVEL_WIFI = 'W';
     private final static Character LOG_LEVEL_BLUETOOTH = 'B';
+    private final static Character LOG_LEVEL_UI_MODE = 'U';
     private final static Character LOG_LEVEL_POWER = 'P';
     private final static Character LOG_LEVEL_TRIGGER = 'T';
     private final static Character LOG_LEVEL_ACTION = 'A';
@@ -75,6 +76,11 @@ public class GeoSwitchLog {
 
     public void logBluetooth(String tag, String message) {
         doLog(LOG_LEVEL_BLUETOOTH, "", message);
+        Log.e(tag, message);
+    }
+
+    public void logUiMode(String tag, String message) {
+        doLog(LOG_LEVEL_UI_MODE, "", message);
         Log.e(tag, message);
     }
 

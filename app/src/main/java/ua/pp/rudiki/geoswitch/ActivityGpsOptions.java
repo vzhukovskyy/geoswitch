@@ -10,7 +10,7 @@ import android.widget.RadioGroup;
 public class ActivityGpsOptions extends AppCompatActivity {
     private final static String TAG = ActivityGpsOptions.class.getSimpleName();
 
-    public enum GpsActivationType {Charger, Bluetooth, Manual};
+    public enum GpsActivationType {Charger, Bluetooth, Manual, CarMode};
     RadioGroup gpsOptionsRadioGroup;
 
     @Override
@@ -102,6 +102,8 @@ public class ActivityGpsOptions extends AppCompatActivity {
                 return R.id.radioOnCharge;
             case Bluetooth:
                 return R.id.radioOnBluetooth;
+            case CarMode:
+                return R.id.radioInCarMode;
             default:
                 return R.id.radioManual;
         }
@@ -115,6 +117,8 @@ public class ActivityGpsOptions extends AppCompatActivity {
                 return GpsActivationType.Charger;
             case R.id.radioOnBluetooth:
                 return GpsActivationType.Bluetooth;
+            case R.id.radioInCarMode:
+                return GpsActivationType.CarMode;
             default:
                 return GpsActivationType.Manual;
         }

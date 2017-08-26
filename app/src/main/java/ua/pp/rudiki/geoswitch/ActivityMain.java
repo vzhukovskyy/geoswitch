@@ -251,6 +251,9 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
                 case Bluetooth:
                     substatus = getString(R.string.activity_main_substatus_bybluetooth_inactive);
                     break;
+                case CarMode:
+                    substatus = getString(R.string.activity_main_substatus_incarmode_inactive);
+                    break;
                 case Manual:
                 default:
                     substatus = getString(R.string.activity_main_substatus_manual_inactive);
@@ -366,6 +369,9 @@ public class ActivityMain extends AppCompatActivity implements GpsServiceActivat
                 break;
             case Bluetooth:
                 desc = getString(R.string.activity_main_gps_bluetooth);
+                break;
+            case CarMode:
+                desc = getString(R.string.activity_main_gps_carmode);
                 break;
             case Manual:
             default:
